@@ -1,0 +1,14 @@
+{
+  "typeId": "conveyor.belt",
+  "category": "Transport",
+  "displayName": "Esteira reta",
+  "behavior": "conveyor",
+  "visualScene": "res://assets/devices/conveyor.belt.tscn",
+  "ports": [],
+  "paramDefs": [
+    { "name": "length", "type": "float", "default": 3.0, "min": 0.5, "max": 20 },
+    { "name": "width", "type": "float", "default": 0.5, "min": 0.2, "max": 2 },
+    { "name": "speed", "type": "float", "default": 0.5, "min": 0, "max": 5 },
+    { "name": "reversed", "type": "bool", "default": false }
+  ]
+}

@@ -62,19 +62,26 @@ status muito diferentes; duas classes pequenas > uma classe com dois modos).
 
 ## R4 — Estratégia de testes em dois níveis
 
-**Decisão:** (a) **xUnit** para tudo que é puro .NET: Anvil, lógica de Core
-sem física (IoTable, StateHasher, migrações, máquina de modos), Bellows
-(driver contra master NModbus em loopback na mesma máquina) e
-**NetArchTest.Rules** para as regras de camada. (b) **GdUnit4 (C#)** rodando
-via `godot --headless` para comportamento físico dos dispositivos e o teste de
-determinismo E2E (10.000 ticks, hash).
+**Decisão (revisada na implementação):** (a) **xUnit** para tudo que é puro
+.NET: Anvil, lógica de Core sem física (IoTable, StateHasher, migrações,
+máquina de modos), Bellows (driver contra master NModbus em loopback na mesma
+máquina) e **NetArchTest.Rules** para as regras de camada. (b) **Runner
+headless próprio** (`src/Forja.Studio/Headless/`): cenários C# executados por
+`godot --headless --path . -- --forja-tests`, um `Tick()` por physics frame
+com Jolt real, exit code 0/1 para o CI. Aceleração de relógio SEM alterar o
+timestep: o Godot passa `(1/physics_ticks) × time_scale` ao servidor de
+física, então `PhysicsTicksPerSecond=1200 × TimeScale=20` mantém dt = 1/60
+exato (Artigo I.1) rodando ~20× mais rápido que tempo real.
 
 **Justificativa:** satisfaz o Artigo V (sem GPU, sem PLC) e o CI da
-constitution (`godot --headless` + testes .NET). GdUnit4 é o framework de
-teste C# maduro para Godot 4 com runner headless e relatório JUnit para CI.
+constitution (`godot --headless` + testes .NET). GdUnit4 foi descartado na
+implementação: o formato cenário-sobre-SimulationLoop precisa de controle fino
+do relógio e do ciclo Edit→Run→Edit que um runner próprio de ~150 linhas dá
+sem dependência externa nem instalação de addon.
 
 **Alternativas:** gdUnit3/WAT (Godot 3, obsoletos); só xUnit com física
-mockada (não prova RF-04); runner custom (custo alto, reinventa GdUnit4).
+mockada (não prova RF-04); GdUnit4 (rejeitado acima — addon pesado para o
+que o projeto precisa; a decisão original o previa).
 
 ## R5 — Hash de estado determinístico
 

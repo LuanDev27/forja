@@ -1,0 +1,15 @@
+{
+  "typeId": "chute",
+  "category": "Passive",
+  "displayName": "Calha",
+  "behavior": "static-body",
+  "visualScene": "res://assets/devices/chute.tscn",
+  "ports": [],
+  "paramDefs": [
+    { "name": "sizeX", "type": "float", "default": 0.6, "min": 0.1, "max": 5 },
+    { "name": "sizeY", "type": "float", "default": 0.1, "min": 0.02, "max": 1 },
+    { "name": "sizeZ", "type": "float", "default": 1.4, "min": 0.1, "max": 10 },
+    { "name": "tilt", "type": "float", "default": 20.0, "min": -60, "max": 60 },
+    { "name": "friction", "type": "float", "default": 0.2, "min": 0, "max": 2 }
+  ]
+}

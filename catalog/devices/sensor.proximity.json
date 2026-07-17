@@ -1,0 +1,14 @@
+{
+  "typeId": "sensor.proximity",
+  "category": "Sensor",
+  "displayName": "Sensor de proximidade",
+  "behavior": "proximity-sensor",
+  "visualScene": "res://assets/devices/sensor.proximity.tscn",
+  "ports": [
+    { "portName": "detect", "direction": "In" }
+  ],
+  "paramDefs": [
+    { "name": "range", "type": "float", "default": 0.3, "min": 0.05, "max": 2 },
+    { "name": "mode", "type": "enum", "default": "capacitive", "values": ["capacitive", "inductive"] }
+  ]
+}

@@ -31,11 +31,11 @@ incremento ponta a ponta demonstrável, com critério de aceite verificável.
 
 **Purpose**: projeto Godot + solution em camadas + CI. Constitution: Artigos I.1, II, V.3.
 
-- [ ] T001 Criar projeto Godot 4.4 .NET na raiz: `project.godot` (Jolt Physics, `physics_ticks_per_second=60`, forward_plus), `.godot-version` pinando a versão exata, `.gitignore` (`.godot/`, `build/`, `.claude/*.local.json` — nunca `.claude/` inteira)
-- [ ] T002 Criar `Forja.sln` com grafo de camadas: `src/Forja.Anvil/Forja.Anvil.csproj` (net8.0, zero refs), `src/Forja.Core/Forja.Core.csproj` (ref Anvil), `src/Forja.Bellows/Forja.Bellows.csproj` (ref Anvil+Core, NuGet NModbus), `src/Forja.Studio/Forja.Studio.csproj` (csproj do jogo Godot, ref todos) e projetos de teste `tests/Forja.{Anvil,Core,Bellows,Architecture}.Tests/*.csproj` (xUnit)
-- [ ] T003 [P] Configurar `.editorconfig` + analyzers .NET (regra bloqueando `catch` vazio — Artigo VII.3; TreatWarningsAsErrors nas camadas 1–3)
-- [ ] T004 [P] Testes de arquitetura em `tests/Forja.Architecture.Tests/LayerRulesTests.cs` (NetArchTest): Anvil sem refs; Core não usa `Godot.Control`/`Godot.Input`/`CanvasItem`; Bellows não usa `Godot.*` de UI; violação = build vermelho (Artigo II)
-- [ ] T005 [P] CI GitHub Actions em `.github/workflows/ci.yml` (runner windows): `dotnet build` + `dotnet test` + download Godot headless + GdUnit4; build vermelho não mergeia (Artigo V.3)
+- [x] T001 Criar projeto Godot 4.4 .NET na raiz: `project.godot` (Jolt Physics, `physics_ticks_per_second=60`, forward_plus), `.godot-version` pinando a versão exata, `.gitignore` (`.godot/`, `build/`, `.claude/*.local.json` — nunca `.claude/` inteira)
+- [x] T002 Criar `Forja.sln` com grafo de camadas: `src/Forja.Anvil/Forja.Anvil.csproj` (net8.0, zero refs), `src/Forja.Core/Forja.Core.csproj` (ref Anvil), `src/Forja.Bellows/Forja.Bellows.csproj` (ref Anvil+Core, NuGet NModbus), `src/Forja.Studio/Forja.Studio.csproj` (csproj do jogo Godot, ref todos) e projetos de teste `tests/Forja.{Anvil,Core,Bellows,Architecture}.Tests/*.csproj` (xUnit)
+- [x] T003 [P] Configurar `.editorconfig` + analyzers .NET (regra bloqueando `catch` vazio — Artigo VII.3; TreatWarningsAsErrors nas camadas 1–3)
+- [x] T004 [P] Testes de arquitetura em `tests/Forja.Architecture.Tests/LayerRulesTests.cs` (NetArchTest): Anvil sem refs; Core não usa `Godot.Control`/`Godot.Input`/`CanvasItem`; Bellows não usa `Godot.*` de UI; violação = build vermelho (Artigo II)
+- [x] T005 [P] CI GitHub Actions em `.github/workflows/ci.yml` (runner windows): `dotnet build` + `dotnet test` + download Godot headless + GdUnit4; build vermelho não mergeia (Artigo V.3)
 
 **Checkpoint**: `dotnet test` verde, `godot --headless --import` roda, CI configurado.
 
@@ -47,17 +47,17 @@ incremento ponta a ponta demonstrável, com critério de aceite verificável.
 
 **⚠️ CRITICAL**: nenhuma user story antes de concluir esta fase.
 
-- [ ] T006 Contratos em `src/Forja.Anvil/Contracts/`: `IPlcDriver.cs`, `DriverState.cs`, `IoSnapshot.cs` (conforme contracts/iplcdriver.md), `IRandomSource.cs`, `ISimCommand.cs`, `Result.cs`
-- [ ] T007 [P] Tipos de cena em `src/Forja.Anvil/Scene/`: `SceneDocument.cs`, `DeviceInstance.cs`, `Pose.cs`, `IoTag.cs`, `IoAddress.cs` (+ `IoArea`, `IoDirection`), `ConnectionConfig.cs` (defaults do data-model §5)
-- [ ] T008 [P] Tipos de catálogo em `src/Forja.Anvil/Catalog/`: `DeviceTypeDef.cs`, `PortDef.cs`, `ParamDef.cs` + loader de `catalog/devices/*.json` com erro explícito para typeId duplicado
-- [ ] T009 `IoMapValidator` em `src/Forja.Anvil/Validation/` (regras V1–V3 do data-model §4, erro cita os dois DeviceId) + testes em `tests/Forja.Anvil.Tests/IoMapValidatorTests.cs`
-- [ ] T010 Serialização em `src/Forja.Core/Persistence/`: `SceneSerializer.cs` (System.Text.Json estrito, regras S1–S8 de contracts/forja-schema.md), `ISceneMigration.cs` + pipeline; testes round-trip `load(save(doc))==doc` e erros de versão em `tests/Forja.Core.Tests/SceneSerializerTests.cs`
-- [ ] T011 Loop e modos em `src/Forja.Core/Loop/`: `SimulationLoop.cs` (registro de entidades ordenado por EntityId — Artigo I.3), `SimMode.cs` + máquina de transições do data-model §8 (guardas, Step = exatamente 1 tick), fila de `ISimCommand`; `SeededRandom.cs` em `src/Forja.Core/State/`; testes da máquina de modos em `tests/Forja.Core.Tests/SimModeTests.cs`
-- [ ] T012 [P] `StateHasher.cs` (FNV-1a 64, quantização mm/mrad — research R5) em `src/Forja.Core/State/` + testes de sensibilidade/estabilidade em `tests/Forja.Core.Tests/StateHasherTests.cs`
-- [ ] T013 [P] `IoTable.cs` em `src/Forja.Core/Io/` (bitmaps inputs/outputs ordenados por endereço, máscara de override para "forçar", troca com `IPlcDriver` no fim/início do tick — contracts/modbus-mapping.md) + testes em `tests/Forja.Core.Tests/IoTableTests.cs`
-- [ ] T014 [P] `NullDriver.cs` em `src/Forja.Bellows/Null/` (regras C1–C5, nunca Faulted) + testes de contrato em `tests/Forja.Bellows.Tests/NullDriverTests.cs`
-- [ ] T015 Bootstrap Studio: `src/Forja.Studio/Main.tscn` + `Main.cs` ligando `_PhysicsProcess` → `SimulationLoop.Tick()` (única fonte de tick — Artigo I.1), carregamento de cena `.forja` por caminho; roda em `godot --headless`
-- [ ] T016 Instalar GdUnit4 em `addons/gdUnit4/`, criar `tests/Forja.Headless.Tests/` com smoke test (boot headless + carregar cena vazia) e plugar no CI
+- [x] T006 Contratos em `src/Forja.Anvil/Contracts/`: `IPlcDriver.cs`, `DriverState.cs`, `IoSnapshot.cs` (conforme contracts/iplcdriver.md), `IRandomSource.cs`, `ISimCommand.cs`, `Result.cs`
+- [x] T007 [P] Tipos de cena em `src/Forja.Anvil/Scene/`: `SceneDocument.cs`, `DeviceInstance.cs`, `Pose.cs`, `IoTag.cs`, `IoAddress.cs` (+ `IoArea`, `IoDirection`), `ConnectionConfig.cs` (defaults do data-model §5)
+- [x] T008 [P] Tipos de catálogo em `src/Forja.Anvil/Catalog/`: `DeviceTypeDef.cs`, `PortDef.cs`, `ParamDef.cs` + loader de `catalog/devices/*.json` com erro explícito para typeId duplicado
+- [x] T009 `IoMapValidator` em `src/Forja.Anvil/Validation/` (regras V1–V3 do data-model §4, erro cita os dois DeviceId) + testes em `tests/Forja.Anvil.Tests/IoMapValidatorTests.cs`
+- [x] T010 Serialização em `src/Forja.Core/Persistence/`: `SceneSerializer.cs` (System.Text.Json estrito, regras S1–S8 de contracts/forja-schema.md), `ISceneMigration.cs` + pipeline; testes round-trip `load(save(doc))==doc` e erros de versão em `tests/Forja.Core.Tests/SceneSerializerTests.cs`
+- [x] T011 Loop e modos em `src/Forja.Core/Loop/`: `SimulationLoop.cs` (registro de entidades ordenado por EntityId — Artigo I.3), `SimMode.cs` + máquina de transições do data-model §8 (guardas, Step = exatamente 1 tick), fila de `ISimCommand`; `SeededRandom.cs` em `src/Forja.Core/State/`; testes da máquina de modos em `tests/Forja.Core.Tests/SimModeTests.cs`
+- [x] T012 [P] `StateHasher.cs` (FNV-1a 64, quantização mm/mrad — research R5) em `src/Forja.Core/State/` + testes de sensibilidade/estabilidade em `tests/Forja.Core.Tests/StateHasherTests.cs`
+- [x] T013 [P] `IoTable.cs` em `src/Forja.Core/Io/` (bitmaps inputs/outputs ordenados por endereço, máscara de override para "forçar", troca com `IPlcDriver` no fim/início do tick — contracts/modbus-mapping.md) + testes em `tests/Forja.Core.Tests/IoTableTests.cs`
+- [x] T014 [P] `NullDriver.cs` em `src/Forja.Bellows/Null/` (regras C1–C5, nunca Faulted) + testes de contrato em `tests/Forja.Bellows.Tests/NullDriverTests.cs`
+- [x] T015 Bootstrap Studio: `src/Forja.Studio/Main.tscn` + `Main.cs` ligando `_PhysicsProcess` → `SimulationLoop.Tick()` (única fonte de tick — Artigo I.1), carregamento de cena `.forja` por caminho; roda em `godot --headless`
+- [x] T016 Instalar GdUnit4 em `addons/gdUnit4/`, criar `tests/Forja.Headless.Tests/` com smoke test (boot headless + carregar cena vazia) e plugar no CI
 
 **Checkpoint**: fundação pronta — contratos, schema, loop, I/O e ambos os runners de teste verdes.
 
@@ -73,18 +73,18 @@ primeiro, conforme pedido).
 
 ### Tests for User Story 1 (escrever primeiro, ver falhar)
 
-- [ ] T017 [P] [US1] Teste headless RF-04-a em `tests/Forja.Headless.Tests/ConveyorFlowTest.cs`: montar cena mínima (emissor→esteira→calha→sink) → 600 ticks → caixa transportada e removida no sink
-- [ ] T018 [P] [US1] `DeterminismTest.cs` em `tests/Forja.Headless.Tests/`: mesma cena + seed 42 + script de inputs, 10.000 ticks, 2 execuções → hashes idênticos; ao falhar, reporta primeiro tick divergente (Artigo I.4, RNF-03)
+- [x] T017 [P] [US1] Teste headless RF-04-a em `tests/Forja.Headless.Tests/ConveyorFlowTest.cs`: montar cena mínima (emissor→esteira→calha→sink) → 600 ticks → caixa transportada e removida no sink
+- [x] T018 [P] [US1] `DeterminismTest.cs` em `tests/Forja.Headless.Tests/`: mesma cena + seed 42 + script de inputs, 10.000 ticks, 2 execuções → hashes idênticos; ao falhar, reporta primeiro tick divergente (Artigo I.4, RNF-03)
 
 ### Implementation for User Story 1
 
-- [ ] T019 [P] [US1] Comportamentos em `src/Forja.Core/Devices/`: `StaticBody.cs` (piso/calha), `ConveyorBelt.cs` (velocidade constante, bidirecional — fricção por surface velocity Jolt), catálogo `catalog/devices/floor.json`, `chute.json`, `conveyor.belt.json`
-- [ ] T020 [P] [US1] `PartBody.cs` (caixa S/M/L, metal/plástico — massa e material físico) + `Emitter.cs` (intervalo fixo via tick count, qtd máx, usa `IRandomSource`) + `Sink.cs` em `src/Forja.Core/Devices/` + catálogos `part.box.json`, `emitter.json`, `sink.json`
-- [ ] T021 [US1] Integração física em `src/Forja.Core/Physics/PhysicsWorld.cs`: criação/destruição de corpos via PhysicsServer3D (headless-safe), kill-zone nos limites do mundo destruindo peça sem vazamento (RF-04)
-- [ ] T022 [US1] `DeviceFactory.cs` em `src/Forja.Core/Devices/` mapeando `DeviceTypeDef.behavior` → classe (data-driven, Artigo III.2); erro explícito para behavior desconhecido
+- [x] T019 [P] [US1] Comportamentos em `src/Forja.Core/Devices/`: `StaticBody.cs` (piso/calha), `ConveyorBelt.cs` (velocidade constante, bidirecional — fricção por surface velocity Jolt), catálogo `catalog/devices/floor.json`, `chute.json`, `conveyor.belt.json`
+- [x] T020 [P] [US1] `PartBody.cs` (caixa S/M/L, metal/plástico — massa e material físico) + `Emitter.cs` (intervalo fixo via tick count, qtd máx, usa `IRandomSource`) + `Sink.cs` em `src/Forja.Core/Devices/` + catálogos `part.box.json`, `emitter.json`, `sink.json`
+- [x] T021 [US1] Integração física em `src/Forja.Core/Physics/PhysicsWorld.cs`: criação/destruição de corpos via PhysicsServer3D (headless-safe), kill-zone nos limites do mundo destruindo peça sem vazamento (RF-04)
+- [x] T022 [US1] `DeviceFactory.cs` em `src/Forja.Core/Devices/` mapeando `DeviceTypeDef.behavior` → classe (data-driven, Artigo III.2); erro explícito para behavior desconhecido
 - [ ] T023 [US1] Visual em `src/Forja.Studio/Rendering/`: `DeviceView.cs` sincronizando nós Godot do estado do core (leitura apenas — Artigo II.2) + `assets/devices/{floor,chute,conveyor,box,emitter,sink}.tscn`
 - [ ] T024 [US1] Toolbar de modos em `src/Forja.Studio/UI/ModeToolbar.cs` (Edit/Run/Pause/Step chamando `ISimCommand`) + teste headless de transições em `tests/Forja.Headless.Tests/SimModeE2ETest.cs`: Pause→Run sem salto de física, Step avança exatamente 1 tick (RF-01)
-- [ ] T025 [US1] Mini-cena `demo/esteira-minima.forja` (emissor→esteira→calha→sink) validando carga por arquivo; T017/T018 ficam verdes
+- [x] T025 [US1] Mini-cena `demo/esteira-minima.forja` (emissor→esteira→calha→sink) validando carga por arquivo; T017/T018 ficam verdes
 
 **Checkpoint**: MVP — `godot --headless` prova RF-04-a + determinismo; app abre e roda a mini-cena visualmente.
 
@@ -167,12 +167,12 @@ com programa ladder incluído.
 
 ### Tests for User Story 5
 
-- [ ] T048 [P] [US5] Testes de contrato em `tests/Forja.Bellows.Tests/ModbusTcpDriverTests.cs` com master NModbus loopback: DI visível < 20 ms (RNF-02); escrita de coil chega no snapshot; desconexão do master → `Faulted` com motivo (regras C1–C4)
+- [x] T048 [P] [US5] Testes de contrato em `tests/Forja.Bellows.Tests/ModbusTcpDriverTests.cs` com master NModbus loopback: DI visível < 20 ms (RNF-02); escrita de coil chega no snapshot; desconexão do master → `Faulted` com motivo (regras C1–C4)
 
 ### Implementation for User Story 5
 
-- [ ] T049 [US5] `ModbusTcpServerDriver.cs` em `src/Forja.Bellows/Modbus/` — servidor Modbus TCP (NModbus, research R3): data-store espelhando IoTable, bind/porta da `ConnectionConfig`, thread de rede desacoplada do tick com handoff sem lock no caminho quente
-- [ ] T049b [US5] `ModbusTcpClientDriver.cs` em `src/Forja.Bellows/Modbus/` — cliente Modbus TCP (Forja master): conecta em `host:port`, FC15 para sensores, FC01 para atuadores, reconexão com backoff, queda ⇒ `Faulted`; testes contra servidor NModbus loopback em `tests/Forja.Bellows.Tests/ModbusTcpClientDriverTests.cs`
+- [x] T049 [US5] `ModbusTcpServerDriver.cs` em `src/Forja.Bellows/Modbus/` — servidor Modbus TCP (NModbus, research R3): data-store espelhando IoTable, bind/porta da `ConnectionConfig`, thread de rede desacoplada do tick com handoff sem lock no caminho quente
+- [x] T049b [US5] `ModbusTcpClientDriver.cs` em `src/Forja.Bellows/Modbus/` — cliente Modbus TCP (Forja master): conecta em `host:port`, FC15 para sensores, FC01 para atuadores, reconexão com backoff, queda ⇒ `Faulted`; testes contra servidor NModbus loopback em `tests/Forja.Bellows.Tests/ModbusTcpClientDriverTests.cs`
 - [ ] T050 [US5] Falha segura no core: `DriverState.Faulted` → Run→Pause + evento para UI; timeout `ConnectionConfig.TimeoutMs` aplicado no `Exchange` (Artigo VII) + teste headless em `tests/Forja.Headless.Tests/FailSafeTest.cs`
 - [ ] T051 [US5] UI de conexão em `src/Forja.Studio/UI/ConnectionPanel.cs`: driver (null/modbus-tcp), bind, porta, timeout; indicador Desconectado/Aguardando master/Conectado/Erro (RF-06)
 - [ ] T052 [US5] Cena demo `demo/separador-altura.forja` conforme contracts/modbus-mapping.md (emissor S/L → esteira → sensor de altura → pistão → 2 calhas → sinks) montada pelo editor
@@ -246,3 +246,25 @@ US5 (PLC real). Nenhuma fase entrega "camada horizontal" (Artigo VIII).
   RF-07→T030-T033 · RF-08→T035/T040/T047 · RF-09→T052-T054 ·
   RNF-01→T055 · RNF-02→T048 · RNF-03→T018 · RNF-04/05→T057 · RNF-06→T058 · RNF-07→T056
 - Commit após cada tarefa ou grupo lógico; parar em qualquer checkpoint para validar
+
+---
+
+## Notas de implementação (sessão 2, 2026-07-17)
+
+- **T016**: GdUnit4 substituído por runner headless próprio em
+  `src/Forja.Studio/Headless/` (`--forja-tests`, exit code p/ CI) — ver
+  research R4 revisado. O diretório `tests/Forja.Headless.Tests/` não existe;
+  os cenários vivem no assembly do Studio (o csproj raiz exclui `tests/**`).
+- **T017/T018**: implementados como cenários do runner (`ConveyorFlowScenario`,
+  `DeterminismScenario` — 2×10.000 ticks, hash idêntico tick a tick, com Jolt
+  real). Verdes em 2026-07-17.
+- **T020**: `PartBody` virou `PartKind`/`Part` dentro de `PartsManager`
+  (peça não é device de catálogo); `part.box.json` não se aplica.
+- **T021**: `GodotPhysicsWorld` usa `PhysicsServer3D` puro (RIDs, sem nós).
+  Descoberta importante: `Engine.TimeScale` ESCALA o dt passado ao servidor de
+  física — aceleração de testes exige compensar com `PhysicsTicksPerSecond`
+  (1200 ticks × TimeScale 20 ⇒ dt = 1/60 exato).
+- **T049/T049b**: servidor com watchdog de inatividade do master
+  (timeout ⇒ Faulted, atividade nova ⇒ Ready); cliente com reconexão em
+  backoff (500 ms→5 s). `DriverRegistry` resolve a chave da ConnectionConfig e
+  dimensiona buffers por `IoTable.OutputCount`.

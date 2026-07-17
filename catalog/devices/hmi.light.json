@@ -1,0 +1,11 @@
+{
+  "typeId": "hmi.light",
+  "category": "Hmi",
+  "displayName": "Luz indicadora",
+  "behavior": "indicator-light",
+  "visualScene": "res://assets/devices/hmi.light.tscn",
+  "ports": [
+    { "portName": "on", "direction": "Out" }
+  ],
+  "paramDefs": []
+}

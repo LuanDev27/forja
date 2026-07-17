@@ -1,0 +1,14 @@
+{
+  "typeId": "floor",
+  "category": "Passive",
+  "displayName": "Piso",
+  "behavior": "static-body",
+  "visualScene": "res://assets/devices/floor.tscn",
+  "ports": [],
+  "paramDefs": [
+    { "name": "sizeX", "type": "float", "default": 10.0, "min": 0.5, "max": 100 },
+    { "name": "sizeY", "type": "float", "default": 0.2, "min": 0.05, "max": 2 },
+    { "name": "sizeZ", "type": "float", "default": 10.0, "min": 0.5, "max": 100 },
+    { "name": "friction", "type": "float", "default": 0.6, "min": 0, "max": 2 }
+  ]
+}

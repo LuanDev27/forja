@@ -1,0 +1,13 @@
+{
+  "typeId": "sensor.photo",
+  "category": "Sensor",
+  "displayName": "Sensor fotoelétrico",
+  "behavior": "photo-sensor",
+  "visualScene": "res://assets/devices/sensor.photo.tscn",
+  "ports": [
+    { "portName": "detect", "direction": "In" }
+  ],
+  "paramDefs": [
+    { "name": "range", "type": "float", "default": 1.0, "min": 0.05, "max": 10 }
+  ]
+}

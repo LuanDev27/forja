@@ -1,0 +1,11 @@
+{
+  "typeId": "hmi.button",
+  "category": "Hmi",
+  "displayName": "Botão de comando",
+  "behavior": "push-button",
+  "visualScene": "res://assets/devices/hmi.button.tscn",
+  "ports": [
+    { "portName": "pressed", "direction": "In" }
+  ],
+  "paramDefs": []
+}

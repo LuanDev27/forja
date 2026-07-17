@@ -40,5 +40,5 @@ jobs:
         shell: pwsh
         run: |
           $godot = Get-ChildItem godot-bin -Recurse -Filter "*console.exe" | Select-Object -First 1 -ExpandProperty FullName
-          & $godot --headless --path . -- --run-headless-tests
+          & $godot --headless --path . -- --forja-tests
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

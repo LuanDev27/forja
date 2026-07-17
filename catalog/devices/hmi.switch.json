@@ -1,0 +1,11 @@
+{
+  "typeId": "hmi.switch",
+  "category": "Hmi",
+  "displayName": "Chave seletora",
+  "behavior": "selector-switch",
+  "visualScene": "res://assets/devices/hmi.switch.tscn",
+  "ports": [
+    { "portName": "on", "direction": "In" }
+  ],
+  "paramDefs": []
+}

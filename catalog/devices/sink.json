@@ -1,0 +1,13 @@
+{
+  "typeId": "sink",
+  "category": "SourceSink",
+  "displayName": "Removedor (sink)",
+  "behavior": "sink",
+  "visualScene": "res://assets/devices/sink.tscn",
+  "ports": [],
+  "paramDefs": [
+    { "name": "sizeX", "type": "float", "default": 0.6, "min": 0.1, "max": 5 },
+    { "name": "sizeY", "type": "float", "default": 0.6, "min": 0.1, "max": 5 },
+    { "name": "sizeZ", "type": "float", "default": 0.6, "min": 0.1, "max": 5 }
+  ]
+}

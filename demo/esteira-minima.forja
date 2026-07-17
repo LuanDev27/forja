@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "name": "Esteira mínima",
+  "seed": 42,
+  "devices": [
+    {
+      "id": 1,
+      "typeId": "emitter",
+      "transform": { "pos": [-1.4, 0.8, 0], "rotY": 0 },
+      "params": { "interval": 1.0, "maxParts": 2, "sizes": "S", "material": "plastic" }
+    },
+    {
+      "id": 2,
+      "typeId": "conveyor.belt",
+      "transform": { "pos": [0, 0.2, 0], "rotY": 0 },
+      "params": { "length": 3.0, "width": 0.5, "speed": 1.0 }
+    },
+    {
+      "id": 3,
+      "typeId": "chute",
+      "transform": { "pos": [2.16, -0.14, 0], "rotY": 90 },
+      "params": { "sizeX": 0.6, "sizeY": 0.1, "sizeZ": 1.4, "tilt": 20.0, "friction": 0.2 }
+    },
+    {
+      "id": 4,
+      "typeId": "sink",
+      "transform": { "pos": [3.3, -0.7, 0], "rotY": 0 },
+      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+    }
+  ],
+  "ioMap": [],
+  "connection": { "driver": "null" }
+}

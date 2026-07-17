@@ -1,0 +1,16 @@
+{
+  "typeId": "conveyor.belt.io",
+  "category": "Transport",
+  "displayName": "Esteira acionada (I/O)",
+  "behavior": "conveyor-io",
+  "visualScene": "res://assets/devices/conveyor.belt.tscn",
+  "ports": [
+    { "portName": "run", "direction": "Out" }
+  ],
+  "paramDefs": [
+    { "name": "length", "type": "float", "default": 3.0, "min": 0.5, "max": 20 },
+    { "name": "width", "type": "float", "default": 0.5, "min": 0.2, "max": 2 },
+    { "name": "speed", "type": "float", "default": 0.5, "min": 0, "max": 5 },
+    { "name": "reversed", "type": "bool", "default": false }
+  ]
+}

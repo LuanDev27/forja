@@ -1,0 +1,13 @@
+{
+  "typeId": "actuator.stopper",
+  "category": "Actuator",
+  "displayName": "Trava de esteira (stopper)",
+  "behavior": "stopper",
+  "visualScene": "res://assets/devices/actuator.stopper.tscn",
+  "ports": [
+    { "portName": "close", "direction": "Out" }
+  ],
+  "paramDefs": [
+    { "name": "width", "type": "float", "default": 0.5, "min": 0.1, "max": 2 }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "typeId": "rack.frame",
+  "category": "Passive",
+  "displayName": "Grade estrutural",
+  "behavior": "static-body",
+  "visualScene": "res://assets/devices/rack.frame.tscn",
+  "ports": [],
+  "paramDefs": [
+    { "name": "sizeX", "type": "float", "default": 1.0, "min": 0.1, "max": 10 },
+    { "name": "sizeY", "type": "float", "default": 1.0, "min": 0.1, "max": 10 },
+    { "name": "sizeZ", "type": "float", "default": 1.0, "min": 0.1, "max": 10 },
+    { "name": "friction", "type": "float", "default": 0.6, "min": 0, "max": 2 }
+  ]
+}
