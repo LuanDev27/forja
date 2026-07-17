@@ -102,6 +102,116 @@ public sealed class ConveyorFlowScenario : HeadlessScenario
 }
 
 /// <summary>
+/// T024 / RF-01: máquina de modos ponta a ponta com física real.
+/// Pause congela o tick; Step avança exatamente 1; Pause→Run retoma sem
+/// salto (Δticks == Δframes — nada "acumulado" durante a pausa).
+/// </summary>
+public sealed class SimModeE2EScenario : HeadlessScenario
+{
+    private enum Phase { WarmRun, PauseFreeze, StepOnce, StepFreeze, ResumeNoJump }
+
+    private Phase _phase = Phase.WarmRun;
+    private int _wait;
+    private ulong _tickAtPause;
+    private ulong _resumeBase;
+    private int _resumeFrames;
+    private long _safety;
+
+    public override void Begin() => StartRun(LoadDemoScene());
+
+    public override void Tick()
+    {
+        if (++_safety > 5000)
+        {
+            Fail($"timeout na fase {_phase} (tick={Loop.TickNumber}, modo={Loop.Mode}).");
+            return;
+        }
+
+        switch (_phase)
+        {
+            case Phase.WarmRun:
+                if (Loop.Mode == SimMode.Run && Loop.TickNumber >= 30)
+                {
+                    _tickAtPause = Loop.TickNumber;
+                    Loop.Enqueue(new SetModeCommand(SimMode.Pause));
+                    _wait = 30;
+                    _phase = Phase.PauseFreeze;
+                }
+                break;
+
+            case Phase.PauseFreeze:
+                if (--_wait > 0)
+                    return;
+                if (Loop.Mode != SimMode.Pause)
+                    Fail($"esperava Pause, está em {Loop.Mode}.");
+                else if (Loop.TickNumber != _tickAtPause)
+                    Fail($"Pause não congelou: tick {Loop.TickNumber} != {_tickAtPause}.");
+                else
+                {
+                    Loop.Enqueue(new SetModeCommand(SimMode.Step));
+                    _wait = 2;
+                    _phase = Phase.StepOnce;
+                }
+                break;
+
+            case Phase.StepOnce:
+                if (--_wait > 0)
+                    return;
+                if (Loop.Mode != SimMode.Pause)
+                    Fail($"após Step esperava voltar a Pause, está em {Loop.Mode}.");
+                else if (Loop.TickNumber != _tickAtPause + 1)
+                    Fail($"Step avançou {Loop.TickNumber - _tickAtPause} tick(s) — " +
+                         "esperava exatamente 1.");
+                else
+                {
+                    _wait = 20;
+                    _phase = Phase.StepFreeze;
+                }
+                break;
+
+            case Phase.StepFreeze:
+                if (--_wait > 0)
+                    return;
+                if (Loop.TickNumber != _tickAtPause + 1)
+                    Fail($"tick andou depois do Step: {Loop.TickNumber} != {_tickAtPause + 1}.");
+                else
+                {
+                    Loop.Enqueue(new SetModeCommand(SimMode.Run));
+                    _resumeFrames = -1; // 1º frame em Run define a base
+                    _phase = Phase.ResumeNoJump;
+                }
+                break;
+
+            case Phase.ResumeNoJump:
+                if (Loop.Mode != SimMode.Run)
+                    return; // comando ainda na fila
+                if (_resumeFrames < 0)
+                {
+                    _resumeBase = Loop.TickNumber;
+                    if (_resumeBase != _tickAtPause + 2)
+                    {
+                        Fail($"retomada saltou: 1º tick em Run foi {_resumeBase}, " +
+                             $"esperava {_tickAtPause + 2}.");
+                        return;
+                    }
+                    _resumeFrames = 0;
+                    return;
+                }
+                _resumeFrames++;
+                if (Loop.TickNumber != _resumeBase + (ulong)_resumeFrames)
+                {
+                    Fail($"Δticks != Δframes na retomada: tick {Loop.TickNumber}, " +
+                         $"esperado {_resumeBase + (ulong)_resumeFrames}.");
+                    return;
+                }
+                if (_resumeFrames >= 60)
+                    Pass();
+                break;
+        }
+    }
+}
+
+/// <summary>
 /// T018 / Artigo I.4 / RNF-03: mesma cena + seed, 10.000 ticks, duas
 /// execuções → hash idêntico tick a tick; divergência reporta o 1º tick.
 /// </summary>

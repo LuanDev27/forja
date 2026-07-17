@@ -8,6 +8,8 @@ using Forja.Core.Loop;
 using Forja.Core.Persistence;
 using Forja.Core.Physics;
 using Forja.Studio.Headless;
+using Forja.Studio.Rendering;
+using Forja.Studio.UI;
 using Godot;
 
 namespace Forja.Studio;
@@ -87,13 +89,19 @@ public partial class Main : Node3D
                 GD.PushError($"Validação de I/O: {error.Message}");
         };
 
+        // Camada visual sempre presente (também no headless — exercita o
+        // caminho de leitura sem custo de render); toolbar só interativo.
+        AddChild(new SceneView(this) { Name = "SceneView" });
+
         if (Array.IndexOf(args, "--forja-tests") >= 0)
         {
             AddChild(new HeadlessHost(this));
         }
-        else if (scenePath is not null)
+        else
         {
-            loop.Enqueue(new SetModeCommand(SimMode.Run));
+            AddChild(new ModeToolbar(this) { Name = "ModeToolbar" });
+            if (scenePath is not null)
+                loop.Enqueue(new SetModeCommand(SimMode.Run));
         }
 
         GD.Print($"Forja pronta — cena '{doc.Name}', {doc.Devices.Count} dispositivo(s), " +

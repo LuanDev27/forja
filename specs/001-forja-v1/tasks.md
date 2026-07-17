@@ -82,8 +82,8 @@ primeiro, conforme pedido).
 - [x] T020 [P] [US1] `PartBody.cs` (caixa S/M/L, metal/plástico — massa e material físico) + `Emitter.cs` (intervalo fixo via tick count, qtd máx, usa `IRandomSource`) + `Sink.cs` em `src/Forja.Core/Devices/` + catálogos `part.box.json`, `emitter.json`, `sink.json`
 - [x] T021 [US1] Integração física em `src/Forja.Core/Physics/PhysicsWorld.cs`: criação/destruição de corpos via PhysicsServer3D (headless-safe), kill-zone nos limites do mundo destruindo peça sem vazamento (RF-04)
 - [x] T022 [US1] `DeviceFactory.cs` em `src/Forja.Core/Devices/` mapeando `DeviceTypeDef.behavior` → classe (data-driven, Artigo III.2); erro explícito para behavior desconhecido
-- [ ] T023 [US1] Visual em `src/Forja.Studio/Rendering/`: `DeviceView.cs` sincronizando nós Godot do estado do core (leitura apenas — Artigo II.2) + `assets/devices/{floor,chute,conveyor,box,emitter,sink}.tscn`
-- [ ] T024 [US1] Toolbar de modos em `src/Forja.Studio/UI/ModeToolbar.cs` (Edit/Run/Pause/Step chamando `ISimCommand`) + teste headless de transições em `tests/Forja.Headless.Tests/SimModeE2ETest.cs`: Pause→Run sem salto de física, Step avança exatamente 1 tick (RF-01)
+- [x] T023 [US1] Visual em `src/Forja.Studio/Rendering/`: `DeviceView.cs` sincronizando nós Godot do estado do core (leitura apenas — Artigo II.2) + `assets/devices/{floor,chute,conveyor,box,emitter,sink}.tscn`
+- [x] T024 [US1] Toolbar de modos em `src/Forja.Studio/UI/ModeToolbar.cs` (Edit/Run/Pause/Step chamando `ISimCommand`) + teste headless de transições em `tests/Forja.Headless.Tests/SimModeE2ETest.cs`: Pause→Run sem salto de física, Step avança exatamente 1 tick (RF-01)
 - [x] T025 [US1] Mini-cena `demo/esteira-minima.forja` (emissor→esteira→calha→sink) validando carga por arquivo; T017/T018 ficam verdes
 
 **Checkpoint**: MVP — `godot --headless` prova RF-04-a + determinismo; app abre e roda a mini-cena visualmente.
