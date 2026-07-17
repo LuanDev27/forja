@@ -27,3 +27,6 @@ Thumbs.db
 .claude/settings.local.json
 .claude/*.local.json
 .claude/.credentials.json
+
+# Godot gera .uid para todo .cs; os de tests/ nao sao usados pelo engine
+tests/**/*.cs.uid

@@ -20,11 +20,15 @@ programa do PLC:
 
 | Operação Forja | Function code | Direção | Porta |
 |---|---|---|---|
-| `WriteMultipleCoils` no endereço da tag | FC15 | sensores → PLC | `In` |
-| `ReadCoils` no endereço da tag | FC01 | PLC → atuadores | `Out` |
+| `WriteMultipleCoils` em `inputBaseOffset + offset da tag` | FC15 | sensores → PLC | `In` |
+| `ReadCoils` em `0..N-1` (offset da tag) | FC01 | PLC → atuadores | `Out` |
+
+`connection.inputBaseOffset` (default 0) desloca a janela de escrita dos
+sensores para não colidir com as coils lidas pelos atuadores — ex.: com
+`inputBaseOffset: 100`, o sensor da tag coil 3 vira a coil remota 103.
 
 No modo cliente a validação V2 aceita porta `In` mapeada em `coil` (área
-remota); a UI exibe o endereço remoto cru (`PLC coil 12`).
+remota); a UI exibe o endereço remoto efetivo (`PLC coil 103`).
 
 Exibição na UI (decisão Q2): `%IX0.3 (DI 3)` · `%QX1.0 (Coil 8)`.
 Armazenamento canônico: `{ "area": "...", "offset": n }` cru.

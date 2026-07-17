@@ -114,6 +114,32 @@ public class ModbusTcpClientDriverTests : IDisposable
     }
 
     [Fact]
+    public void InputBaseOffset_SeparaJanelaDeEscritaDasCoilsDosAtuadores()
+    {
+        // Atuador da Forja: coil 1 do PLC ligada.
+        _slave.DataStore.CoilDiscretes.WritePoints(1, new[] { true });
+
+        using var driver = new ModbusTcpClientDriver(outputCount: 8);
+        driver.Start(Config() with { InputBaseOffset = 100 });
+        WaitReady(driver);
+
+        var outputs = driver.Exchange(new IoSnapshot(1, new[] { true, false, true }));
+
+        // FC15 foi para 100..102 — as coils baixas ficaram intactas.
+        bool[] high = _slave.DataStore.CoilDiscretes.ReadPoints(100, 3);
+        Assert.True(high[0]);
+        Assert.False(high[1]);
+        Assert.True(high[2]);
+
+        bool[] low = _slave.DataStore.CoilDiscretes.ReadPoints(0, 3);
+        Assert.False(low[0]);
+        Assert.True(low[1]); // atuador preservado e lido de volta
+        Assert.False(low[2]);
+        Assert.True(outputs.Valid);
+        Assert.True(outputs.Bits.Span[1]);
+    }
+
+    [Fact]
     public void StartStop_Idempotentes()
     {
         using var driver = new ModbusTcpClientDriver(outputCount: 4);

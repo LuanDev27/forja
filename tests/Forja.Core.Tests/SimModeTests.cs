@@ -147,6 +147,28 @@ public class SimModeTests
     }
 
     [Fact]
+    public void DriverRecuperadoDurantePause_NaoDerrubaProximoRun()
+    {
+        // Regressão: fault durante Pause + recuperação automática (master
+        // reconectou) não pode reter o motivo antigo e pausar o Run seguinte.
+        var (loop, _, driver) = Make();
+        Request(loop, SimMode.Run);
+        Request(loop, SimMode.Pause);
+
+        driver.RaiseFault("queda momentânea");
+        driver.RaiseRecovered();
+
+        string? fault = null;
+        loop.DriverFault += reason => fault = reason;
+
+        Request(loop, SimMode.Run);
+        loop.Tick();
+
+        Assert.Equal(SimMode.Run, loop.Mode);
+        Assert.Null(fault);
+    }
+
+    [Fact]
     public void ReplaceDocument_SoEmEdit()
     {
         var (loop, _, _) = Make();

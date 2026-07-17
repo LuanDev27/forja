@@ -29,10 +29,12 @@ public enum DriverState { Stopped, Starting, Ready, Faulted }
 // UI mapeia: Stopped=Desconectado · Starting=Aguardando master/Conectando
 //            Ready=Conectado · Faulted=Erro
 
+// As-built: a área é implícita pela direção da troca (inputs = DI,
+// outputs = coils); Valid=false marca snapshot obsoleto devolvido em falha (C1).
 public readonly record struct IoSnapshot(
     ulong TickNumber,
     ReadOnlyMemory<bool> Bits,      // ordenado por IoAddress.Offset
-    IoArea Area);
+    bool Valid = true);
 ```
 
 ## Regras de comportamento (testáveis)

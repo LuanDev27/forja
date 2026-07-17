@@ -8,9 +8,10 @@ namespace Forja.Bellows.Modbus;
 
 /// <summary>
 /// Cliente Modbus TCP (chave "modbus-tcp-client") — a Forja é o master.
-/// Sensores → FC15 (WriteMultipleCoils) nas coils do PLC; atuadores ←
-/// FC01 (ReadCoils). Os offsets locais são usados crus no PLC remoto — o
-/// usuário casa In/Out em faixas disjuntas (contracts/modbus-mapping.md).
+/// Sensores → FC15 (WriteMultipleCoils) nas coils do PLC a partir de
+/// ConnectionConfig.InputBaseOffset; atuadores ← FC01 (ReadCoils) em 0..N-1.
+/// Com InputBaseOffset > N as duas janelas nunca colidem
+/// (contracts/modbus-mapping.md).
 ///
 /// Conexão em background com backoff (500 ms → 5 s); queda no Exchange ⇒
 /// Faulted com motivo (C1/C2) e reconexão automática ⇒ Ready.
@@ -170,7 +171,7 @@ public sealed class ModbusTcpClientDriver : PlcDriverBase
                 if (_inputBuffer.Length != inputs.Bits.Length)
                     _inputBuffer = new bool[inputs.Bits.Length];
                 inputs.Bits.Span.CopyTo(_inputBuffer);
-                master.WriteMultipleCoils(_config.UnitId, 0, _inputBuffer);
+                master.WriteMultipleCoils(_config.UnitId, _config.InputBaseOffset, _inputBuffer);
             }
 
             if (_outputCount > 0)

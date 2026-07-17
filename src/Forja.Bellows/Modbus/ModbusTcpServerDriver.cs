@@ -45,6 +45,10 @@ public sealed class ModbusTcpServerDriver : PlcDriverBase
             if (State is DriverState.Starting or DriverState.Ready)
                 return;
 
+            // Start após Faulted: libera listener/network antigos antes de
+            // recriar (senão vaza socket e a porta fica presa).
+            CleanupNetwork();
+
             _timeoutMs = config.TimeoutMs;
             try
             {

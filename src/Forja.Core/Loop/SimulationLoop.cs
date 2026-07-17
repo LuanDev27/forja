@@ -228,6 +228,8 @@ public sealed class SimulationLoop : IDisposable
     {
         if (state == DriverState.Faulted)
             _driverFaultReason = reason ?? "falha no driver (sem motivo informado)";
+        else if (state == DriverState.Ready)
+            _driverFaultReason = null; // recuperou antes do fault ser consumido
     }
 
     private void TearDown()

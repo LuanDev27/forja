@@ -120,6 +120,12 @@ internal sealed class FakeDriver : IPlcDriver
         StateChanged?.Invoke(State, reason);
     }
 
+    public void RaiseRecovered()
+    {
+        State = DriverState.Ready;
+        StateChanged?.Invoke(State, null);
+    }
+
     public IoSnapshot Exchange(IoSnapshot inputs) => IoSnapshot.Empty(inputs.TickNumber);
 
     public void Dispose() => Stop();

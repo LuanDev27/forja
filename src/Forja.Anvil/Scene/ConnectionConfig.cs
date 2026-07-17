@@ -27,4 +27,11 @@ public sealed record ConnectionConfig
 
     /// <summary>Timeout de I/O em ms — sempre explícito (Artigo VII.2).</summary>
     public int TimeoutMs { get; init; } = 1000;
+
+    /// <summary>
+    /// Modo cliente: coil base do PLC onde os sensores são escritos (FC15).
+    /// A coil remota efetiva é InputBaseOffset + offset da tag — separa a
+    /// janela de escrita das coils lidas pelos atuadores (FC01 em 0..N-1).
+    /// </summary>
+    public ushort InputBaseOffset { get; init; }
 }

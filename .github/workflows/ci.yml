@@ -23,6 +23,11 @@ jobs:
       - name: Testes .NET (Anvil, Core, Bellows, Arquitetura)
         run: dotnet test Forja.sln -c Release --no-build --logger "trx;LogFileName=results.trx"
 
+      # O Godot não-exportado carrega o assembly de .godot/mono/temp/bin/Debug —
+      # o build Release acima não serve para o passo headless.
+      - name: Build Debug (assembly carregado pelo Godot headless)
+        run: dotnet build Forja.sln
+
       - name: Baixar Godot ${{ env.GODOT_VERSION }} (.NET)
         shell: pwsh
         run: |
