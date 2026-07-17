@@ -124,12 +124,12 @@ undo/redo ≥ 50, salvar/carregar round-trip.
 
 ### Tests for User Story 3
 
-- [ ] T034 [P] [US3] Testes de undo/redo em `tests/Forja.Core.Tests/EditorCommandTests.cs`: cada `IEditorCommand` Do/Undo restaura o `SceneDocument` exatamente; pilha de 100 níveis; comandos rejeitados fora do modo Edit
-- [ ] T035 [P] [US3] Teste round-trip de editor em `tests/Forja.Headless.Tests/EditorRoundTripTest.cs`: montar cena por comandos → salvar → carregar → igualdade estrutural (RF-08)
+- [x] T034 [P] [US3] Testes de undo/redo em `tests/Forja.Core.Tests/EditorCommandTests.cs`: cada `IEditorCommand` Do/Undo restaura o `SceneDocument` exatamente; pilha de 100 níveis; comandos rejeitados fora do modo Edit
+- [x] T035 [P] [US3] Teste round-trip de editor em `tests/Forja.Headless.Tests/EditorRoundTripTest.cs`: montar cena por comandos → salvar → carregar → igualdade estrutural (RF-08)
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] `IEditorCommand.cs` + `UndoRedoStack.cs` (100 níveis) em `src/Forja.Studio/Commands/` com comandos `PlaceDevice`, `MoveDevice`, `RotateDevice`, `DeleteSelection`, `DuplicateSelection`, `EditParam`, `ReassignAddress` — todos operando no `SceneDocument` (research R7)
+- [x] T036 [US3] `IEditorCommand.cs` + `UndoRedoStack.cs` (100 níveis) em `src/Forja.Studio/Commands/` com comandos `PlaceDevice`, `MoveDevice`, `RotateDevice`, `DeleteSelection`, `DuplicateSelection`, `EditParam`, `ReassignAddress` — todos operando no `SceneDocument` (research R7)
 - [ ] T037 [US3] Painel de catálogo em `src/Forja.Studio/Editor/CatalogPanel.cs` listando `catalog/devices/*.json` em runtime (Artigo III.2) com preview e colocação por clique
 - [ ] T038 [US3] Seleção e gizmos em `src/Forja.Studio/Editor/`: `SelectionManager.cs`, `MoveGizmo.cs`/`RotateGizmo.cs` com snap de grid (0,1 m) e angular (15°), câmera orbital
 - [ ] T039 [US3] Painel de parâmetros em `src/Forja.Studio/Editor/ParamsPanel.cs` gerado de `DeviceTypeDef.paramDefs` (data-driven, sem UI hardcoded por tipo)

@@ -3,6 +3,7 @@ using Forja.Anvil.Contracts;
 using Forja.Anvil.Scene;
 using Forja.Anvil.Validation;
 using Forja.Core.Devices;
+using Forja.Core.Editing;
 using Forja.Core.Io;
 using Forja.Core.Physics;
 using Forja.Core.State;
@@ -36,6 +37,7 @@ public sealed class SimulationLoop : IDisposable
     private bool _built;
     private bool _deactivatePhysicsNextFrame;
     private volatile string? _driverFaultReason;
+    private UndoRedoStack? _editor;
 
     public SceneDocument Document { get; private set; }
 
@@ -76,6 +78,40 @@ public sealed class SimulationLoop : IDisposable
         if (Mode != SimMode.Edit)
             return false;
         Document = document;
+        _editor = null; // documento novo zera o histórico de edição
+        return true;
+    }
+
+    // ---- Edição de cena (RF-02 / T036). Só vale em Edit; a física está
+    // desligada, então mutar o Document aqui não afeta determinismo. ----
+
+    public bool CanUndo => Mode == SimMode.Edit && _editor is { CanUndo: true };
+
+    public bool CanRedo => Mode == SimMode.Edit && _editor is { CanRedo: true };
+
+    /// <summary>Aplica um comando de editor. Rejeitado fora de Edit.</summary>
+    public bool ExecuteEdit(IEditorCommand command)
+    {
+        if (Mode != SimMode.Edit)
+            return false;
+        _editor ??= new UndoRedoStack(Document);
+        Document = _editor.Execute(command);
+        return true;
+    }
+
+    public bool Undo()
+    {
+        if (Mode != SimMode.Edit || _editor is not { CanUndo: true })
+            return false;
+        Document = _editor.Undo();
+        return true;
+    }
+
+    public bool Redo()
+    {
+        if (Mode != SimMode.Edit || _editor is not { CanRedo: true })
+            return false;
+        Document = _editor.Redo();
         return true;
     }
 
