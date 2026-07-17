@@ -5,6 +5,7 @@ using System.Text.Json;
 using Forja.Anvil;
 using Forja.Anvil.Contracts;
 using Forja.Anvil.Scene;
+using Forja.Core.Devices;
 
 namespace Forja.Studio.Headless;
 
@@ -208,6 +209,178 @@ public sealed class SimModeE2EScenario : HeadlessScenario
                     Pass();
                 break;
         }
+    }
+}
+
+/// <summary>
+/// T026 / RF-04-c / RF-07: sensor fotoelétrico + pistão operados só pela
+/// Tabela de I/O com driver nulo (sem PLC). Verifica que:
+///  (a) enquanto NÃO há peça no feixe, o DI do sensor fica 0;
+///  (b) quando a caixa entra no feixe, o DI vira 1 no MESMO tick (o sensor
+///      escreve o input dentro do próprio DoTick — sem atraso de 1 tick);
+///  (c) forçando a coil do pistão, ele estende e EMPURRA a caixa (+X) sem
+///      atravessá-la (contato sólido: a caixa avança junto, não fica para trás).
+/// </summary>
+public sealed class SensorActuatorScenario : HeadlessScenario
+{
+    private const ushort DetectDi = 0;
+    private const ushort ExtendCoil = 0;
+
+    private enum Phase { NoPart, Settle, Push, Done }
+
+    private Phase _phase = Phase.NoPart;
+    private int _wait;
+    private float _boxXAtPush;
+    private long _safety;
+
+    public override void Begin() => StartRun(BuildScene());
+
+    public override void Tick()
+    {
+        if (++_safety > 6000)
+        {
+            Fail($"timeout na fase {_phase} (tick={Loop.TickNumber}).");
+            return;
+        }
+
+        var parts = Loop.Parts;
+        if (parts is null || Loop.Io is null)
+            return;
+
+        bool detect = Detect();
+        Part? box = parts.Count > 0 ? First(parts) : null;
+
+        switch (_phase)
+        {
+            case Phase.NoPart:
+                // (a) sem nenhuma peça na cena o feixe não pode acusar detecção.
+                if (box is null)
+                {
+                    if (detect)
+                        Fail("DI acusou detecção sem nenhuma peça na cena.");
+                }
+                else
+                {
+                    _phase = Phase.Settle; // caixa emitida; deixa assentar no feixe
+                }
+                break;
+
+            case Phase.Settle:
+                if (box is null)
+                {
+                    Fail("caixa sumiu antes de assentar.");
+                    return;
+                }
+                if (BoxAtRest(box))
+                {
+                    // (b) caixa parada dentro do feixe → DI = 1 NESTE tick (o
+                    // sensor grava o input no próprio DoTick, sem atraso).
+                    if (!detect)
+                        Fail("caixa assentada no feixe mas DI == 0 no mesmo tick.");
+                    _boxXAtPush = box.Body.Pose.Pos.X;
+                    Loop.Enqueue(new ForceIoCommand(new IoAddress(IoArea.Coil, ExtendCoil), true));
+                    _wait = 60; // ~1 s: pistão percorre o curso e empurra
+                    _phase = Phase.Push;
+                }
+                break;
+
+            case Phase.Push:
+                if (box is null)
+                {
+                    Fail("caixa sumiu durante o empurrão (atravessou/caiu?).");
+                    return;
+                }
+                if (--_wait > 0)
+                    return;
+
+                // (c) contato sólido: a caixa avançou junto com a haste (+X).
+                float dx = box.Body.Pose.Pos.X - _boxXAtPush;
+                if (dx < 0.2f)
+                    Fail($"pistão não empurrou a caixa o bastante (Δx={dx:0.###} m).");
+                else
+                    _phase = Phase.Done;
+                break;
+
+            case Phase.Done:
+                Pass();
+                break;
+        }
+    }
+
+    private bool Detect()
+    {
+        foreach (var row in Loop.Io!.BuildView())
+        {
+            if (row.Address.Area == IoArea.DiscreteInput && row.Address.Offset == DetectDi)
+                return row.Value;
+        }
+        return false;
+    }
+
+    private static bool BoxAtRest(Part box) =>
+        box.Body.LinearVelocity.Length() < 0.05f && box.Body.Pose.Pos.Y < 0.2f;
+
+    private static Part First(PartsManager parts)
+    {
+        foreach (var part in parts.All)
+            return part;
+        throw new InvalidOperationException("sem peças.");
+    }
+
+    private static SceneDocument BuildScene()
+    {
+        static JsonElement N(double v) => JsonSerializer.SerializeToElement(v);
+        static JsonElement S(string v) => JsonSerializer.SerializeToElement(v);
+        static JsonElement I(int v) => JsonSerializer.SerializeToElement(v);
+
+        return new SceneDocument
+        {
+            SchemaVersion = SceneDocument.CurrentSchemaVersion,
+            Name = "sensor + pistao",
+            Seed = 7,
+            Devices = new()
+            {
+                new DeviceInstance
+                {
+                    Id = 1, TypeId = "floor",
+                    Transform = new Pose(new Vec3(0, -0.1f, 0), 0),
+                    Params = new() { ["sizeX"] = N(4), ["sizeY"] = N(0.2), ["sizeZ"] = N(2) },
+                },
+                new DeviceInstance
+                {
+                    Id = 2, TypeId = "emitter",
+                    Transform = new Pose(new Vec3(0, 0.5f, 0), 0),
+                    Params = new()
+                    {
+                        ["interval"] = N(0.1), ["maxParts"] = I(1),
+                        ["sizes"] = S("S"), ["material"] = S("plastic"),
+                    },
+                },
+                new DeviceInstance
+                {
+                    Id = 3, TypeId = "sensor.photo",
+                    Transform = new Pose(new Vec3(0, 0.15f, 0.6f), 90),
+                    Params = new() { ["range"] = N(1.2) },
+                },
+                new DeviceInstance
+                {
+                    Id = 4, TypeId = "actuator.piston",
+                    Transform = new Pose(new Vec3(-0.5f, 0.1f, 0), 0),
+                    Params = new()
+                    {
+                        ["stroke"] = N(0.6), ["speed"] = N(1.5),
+                        ["rodLength"] = N(0.3), ["rodWidth"] = N(0.3),
+                    },
+                },
+            },
+            IoMap = new()
+            {
+                new IoTag(3, "detect", new IoAddress(IoArea.DiscreteInput, DetectDi)),
+                new IoTag(4, "extend", new IoAddress(IoArea.Coil, ExtendCoil)),
+                new IoTag(4, "extended", new IoAddress(IoArea.DiscreteInput, 1)),
+            },
+            Connection = new ConnectionConfig { Driver = "null" },
+        };
     }
 }
 

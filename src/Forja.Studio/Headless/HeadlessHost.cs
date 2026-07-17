@@ -26,6 +26,7 @@ public partial class HeadlessHost : Node
             new SmokeBootScenario(),
             new ConveyorFlowScenario(),
             new SimModeE2EScenario(),
+            new SensorActuatorScenario(),
             new DeterminismScenario(),
         });
     }

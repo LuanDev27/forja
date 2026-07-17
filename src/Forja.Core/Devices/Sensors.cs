@@ -5,8 +5,11 @@ namespace Forja.Core.Devices;
 
 /// <summary>
 /// Sensor fotoelétrico de barreira (RF-03): feixe por raycast ao longo do
-/// eixo local +X. Detecta apenas peças — estrutura não interrompe.
-/// Também usado pelo sensor de altura/difuso (posicionado na altura desejada).
+/// eixo local +X. Semântica decidida no T026: é um feixe físico — o raycast
+/// para no PRIMEIRO corpo, e só marca detecção se esse corpo for uma peça
+/// (estrutura no caminho corta o feixe, como no mundo real). Por isso o
+/// sensor é posicionado de modo que só peças cruzem o feixe.
+/// Também usado como sensor de altura/difuso (posicionado na altura desejada).
 /// </summary>
 public sealed class PhotoSensor : DeviceBehavior
 {

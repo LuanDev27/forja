@@ -99,13 +99,13 @@ nulo — a planta funciona sem PLC (RF-07), com validação de endereço bloquea
 
 ### Tests for User Story 2
 
-- [ ] T026 [P] [US2] Teste headless em `tests/Forja.Headless.Tests/SensorActuatorTest.cs`: caixa interrompe feixe → DI 0 = 1 no mesmo tick; forçar coil do pistão → pistão estende e empurra caixa sem atravessar (RF-04-c)
+- [x] T026 [P] [US2] Teste headless em `tests/Forja.Headless.Tests/SensorActuatorTest.cs`: caixa interrompe feixe → DI 0 = 1 no mesmo tick; forçar coil do pistão → pistão estende e empurra caixa sem atravessar (RF-04-c)
 - [x] T027 [P] [US2] Teste de validação em `tests/Forja.Anvil.Tests/DuplicateAddressTests.cs`: dois devices no mesmo `(area,offset)` → Run bloqueado, erro cita ambos (RF-05, Artigo VI.3)
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] `PhotoSensor.cs` (raycast do feixe, alcance configurável) em `src/Forja.Core/Devices/` + `catalog/devices/sensor.photo.json`
-- [ ] T029 [P] [US2] `Piston.cs` (extend/retract cinemático com curso e velocidade, porta out `extend` + colisor que empurra) em `src/Forja.Core/Devices/` + `catalog/devices/actuator.piston.json`
+- [x] T028 [P] [US2] `PhotoSensor.cs` (raycast do feixe, alcance configurável) em `src/Forja.Core/Devices/` + `catalog/devices/sensor.photo.json`
+- [x] T029 [P] [US2] `Piston.cs` (extend/retract cinemático com curso e velocidade, porta out `extend` + colisor que empurra) em `src/Forja.Core/Devices/` + `catalog/devices/actuator.piston.json`
 - [x] T030 [US2] Ciclo completo de I/O no `SimulationLoop`: fim do tick sensores→IoTable→driver.Exchange; início do tick outputs→atuadores (contracts/modbus-mapping.md, sincronização determinística)
 - [ ] T031 [US2] Tabela de I/O em `src/Forja.Studio/UI/IoTablePanel.cs`: lista devices de I/O, endereço em notação dupla `%IX0.0 (DI 0)`, valor ao vivo, direção; reatribuir endereço (comando de edição); **forçar** bit com indicação visual (RF-05)
 - [ ] T032 [US2] Bloqueio Edit→Run com `IoMapValidator` + diálogo de erro apontando os dois dispositivos em `src/Forja.Studio/UI/ValidationDialog.cs`
