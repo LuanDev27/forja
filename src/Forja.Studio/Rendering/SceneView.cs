@@ -18,8 +18,11 @@ namespace Forja.Studio.Rendering;
 /// </summary>
 public partial class SceneView : Node3D
 {
-    private static readonly Color PlasticColor = new(0.90f, 0.45f, 0.10f); // laranja
-    private static readonly Color MetalColor = new(0.62f, 0.66f, 0.72f);   // aço
+    // Paleta única (mesmos valores dos .tscn em assets/devices — manter em
+    // sincronia): estrutura em cinzas frios, acentos dessaturados na mesma
+    // faixa de saturação/brilho para nada "gritar" na cena.
+    private static readonly Color PlasticColor = new(0.90f, 0.56f, 0.22f); // âmbar
+    private static readonly Color MetalColor = new(0.64f, 0.68f, 0.74f);   // aço
 
     private readonly Main _main;
     private readonly Dictionary<uint, Node3D> _partNodes = new();
@@ -102,16 +105,16 @@ public partial class SceneView : Node3D
     {
         (Vector3 size, Color color, float alpha) = type.Behavior switch
         {
-            "static-body" => (SizeParams(instance, type), new Color(0.55f, 0.56f, 0.58f), 1f),
+            "static-body" => (SizeParams(instance, type), new Color(0.60f, 0.61f, 0.64f), 1f),
             "conveyor" or "conveyor-io" => (
                 new Vector3(
                     GetFloat(instance, type, "length", 3f),
                     0.1f,
                     GetFloat(instance, type, "width", 0.5f)),
-                new Color(0.20f, 0.22f, 0.25f), 1f),
-            "emitter" => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.15f, 0.70f, 0.25f), 1f),
-            "sink" => (SizeParams(instance, type), new Color(0.80f, 0.15f, 0.15f), 0.35f),
-            _ => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.40f, 0.40f, 0.45f), 1f),
+                new Color(0.22f, 0.24f, 0.28f), 1f),
+            "emitter" => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.33f, 0.60f, 0.42f), 1f),
+            "sink" => (SizeParams(instance, type), new Color(0.75f, 0.32f, 0.30f), 0.40f),
+            _ => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.45f, 0.46f, 0.50f), 1f),
         };
 
         float tilt = type.Behavior == "static-body" ? GetFloat(instance, type, "tilt", 0f) : 0f;

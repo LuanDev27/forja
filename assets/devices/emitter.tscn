@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [sub_resource type="StandardMaterial3D" id="mat"]
-albedo_color = Color(0.15, 0.7, 0.25, 1)
+albedo_color = Color(0.33, 0.6, 0.42, 1)
 
 [sub_resource type="BoxMesh" id="box"]
 material = SubResource("mat")
