@@ -99,6 +99,27 @@ public partial class SceneView : Node3D
             foreach (uint id in gone)
                 _partNodes.Remove(id);
         }
+
+        UpdateIndicatorLights();
+    }
+
+    /// <summary>Acende as luzes indicadoras lendo IndicatorLight.On do core
+    /// (leitura apenas). Só o box procedural de fallback expõe o material.</summary>
+    private void UpdateIndicatorLights()
+    {
+        foreach (var device in _main.Loop.Devices)
+        {
+            if (device is not IndicatorLight light)
+                continue;
+            if (_devicesRoot.GetNodeOrNull($"dev-{light.Id}") is not MeshInstance3D mesh)
+                continue;
+            if (mesh.MaterialOverride is not StandardMaterial3D mat)
+                continue;
+
+            mat.EmissionEnabled = light.On;
+            mat.Emission = light.On ? new Color(0.95f, 0.85f, 0.25f) : Colors.Black;
+            mat.AlbedoColor = light.On ? new Color(0.85f, 0.78f, 0.25f) : new Color(0.30f, 0.30f, 0.20f);
+        }
     }
 
     private static Node3D CreateDeviceVisual(DeviceInstance instance, DeviceTypeDef type)
@@ -114,6 +135,9 @@ public partial class SceneView : Node3D
                 new Color(0.22f, 0.24f, 0.28f), 1f),
             "emitter" => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.33f, 0.60f, 0.42f), 1f),
             "sink" => (SizeParams(instance, type), new Color(0.75f, 0.32f, 0.30f), 0.40f),
+            "push-button" => (new Vector3(0.12f, 0.06f, 0.12f), new Color(0.70f, 0.28f, 0.24f), 1f),
+            "selector-switch" => (new Vector3(0.12f, 0.06f, 0.12f), new Color(0.45f, 0.46f, 0.52f), 1f),
+            "indicator-light" => (new Vector3(0.12f, 0.12f, 0.12f), new Color(0.30f, 0.30f, 0.20f), 1f),
             _ => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.45f, 0.46f, 0.50f), 1f),
         };
 

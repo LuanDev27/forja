@@ -107,9 +107,9 @@ nulo — a planta funciona sem PLC (RF-07), com validação de endereço bloquea
 - [x] T028 [P] [US2] `PhotoSensor.cs` (raycast do feixe, alcance configurável) em `src/Forja.Core/Devices/` + `catalog/devices/sensor.photo.json`
 - [x] T029 [P] [US2] `Piston.cs` (extend/retract cinemático com curso e velocidade, porta out `extend` + colisor que empurra) em `src/Forja.Core/Devices/` + `catalog/devices/actuator.piston.json`
 - [x] T030 [US2] Ciclo completo de I/O no `SimulationLoop`: fim do tick sensores→IoTable→driver.Exchange; início do tick outputs→atuadores (contracts/modbus-mapping.md, sincronização determinística)
-- [ ] T031 [US2] Tabela de I/O em `src/Forja.Studio/UI/IoTablePanel.cs`: lista devices de I/O, endereço em notação dupla `%IX0.0 (DI 0)`, valor ao vivo, direção; reatribuir endereço (comando de edição); **forçar** bit com indicação visual (RF-05)
-- [ ] T032 [US2] Bloqueio Edit→Run com `IoMapValidator` + diálogo de erro apontando os dois dispositivos em `src/Forja.Studio/UI/ValidationDialog.cs`
-- [ ] T033 [P] [US2] HMI em `src/Forja.Core/Devices/`: `PushButton.cs`, `SelectorSwitch.cs` (→ DI), `IndicatorLight.cs` (← coil) + catálogos + interação de clique em `src/Forja.Studio/UI/HmiInteraction.cs` + teste headless em `tests/Forja.Headless.Tests/HmiTest.cs`
+- [x] T031 [US2] Tabela de I/O em `src/Forja.Studio/UI/IoTablePanel.cs`: lista devices de I/O, endereço em notação dupla `%IX0.0 (DI 0)`, valor ao vivo, direção; reatribuir endereço (comando de edição); **forçar** bit com indicação visual (RF-05)
+- [x] T032 [US2] Bloqueio Edit→Run com `IoMapValidator` + diálogo de erro apontando os dois dispositivos em `src/Forja.Studio/UI/ValidationDialog.cs`
+- [x] T033 [P] [US2] HMI em `src/Forja.Core/Devices/`: `PushButton.cs`, `SelectorSwitch.cs` (→ DI), `IndicatorLight.cs` (← coil) + catálogos + interação de clique em `src/Forja.Studio/UI/HmiInteraction.cs` + teste headless em `tests/Forja.Headless.Tests/HmiTest.cs`
 
 **Checkpoint**: cena com sensor+pistão operável só pela Tabela de I/O, sem PLC (RF-07 aceite).
 

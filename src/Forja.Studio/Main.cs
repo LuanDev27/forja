@@ -30,6 +30,8 @@ public partial class Main : Node3D
     public SimulationLoop Loop => _loop
         ?? throw new InvalidOperationException("Main ainda não inicializou o SimulationLoop.");
 
+    public bool HasLoop => _loop is not null;
+
     public DeviceCatalog Catalog { get; private set; } = null!;
 
     public override void _Ready()
@@ -100,6 +102,9 @@ public partial class Main : Node3D
         else
         {
             AddChild(new ModeToolbar(this) { Name = "ModeToolbar" });
+            AddChild(new IoTablePanel(this) { Name = "IoTablePanel" });
+            AddChild(new ValidationDialog(this) { Name = "ValidationDialog" });
+            AddChild(new HmiInteraction(this) { Name = "HmiInteraction" });
             if (scenePath is not null)
                 loop.Enqueue(new SetModeCommand(SimMode.Run));
         }

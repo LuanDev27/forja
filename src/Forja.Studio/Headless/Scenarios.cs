@@ -385,6 +385,112 @@ public sealed class SensorActuatorScenario : HeadlessScenario
 }
 
 /// <summary>
+/// T033 / RF-03 (HMI): botão de comando e luz indicadora operados sem PLC.
+///  (a) HmiCommand no botão → o DI mapeado vira 1 no mesmo tick; soltar → 0.
+///  (b) forçar a coil da luz → IndicatorLight.On reflete o bit (a camada
+///      visual usa isso para acender).
+/// </summary>
+public sealed class HmiScenario : HeadlessScenario
+{
+    private const uint ButtonId = 1;
+    private const uint LightId = 2;
+    private const ushort PressedDi = 0;
+    private const ushort LightCoil = 0;
+
+    private enum Phase { Press, Release, LightOn, Done }
+
+    private Phase _phase = Phase.Press;
+    private int _wait;
+    private long _safety;
+
+    public override void Begin() => StartRun(BuildScene());
+
+    public override void Tick()
+    {
+        if (++_safety > 3000)
+        {
+            Fail($"timeout na fase {_phase}.");
+            return;
+        }
+        if (Loop.Io is null)
+            return;
+
+        switch (_phase)
+        {
+            case Phase.Press:
+                Loop.Enqueue(new HmiCommand(ButtonId, "pressed", true));
+                _wait = 2;
+                _phase = Phase.Release;
+                break;
+
+            case Phase.Release:
+                if (--_wait > 0)
+                    return;
+                if (!Di(PressedDi))
+                    Fail("botão pressionado mas DI == 0.");
+                Loop.Enqueue(new HmiCommand(ButtonId, "pressed", false));
+                _wait = 2;
+                _phase = Phase.LightOn;
+                break;
+
+            case Phase.LightOn:
+                if (--_wait > 0)
+                    return;
+                if (Di(PressedDi))
+                    Fail("botão solto mas DI continua 1.");
+                Loop.Enqueue(new ForceIoCommand(new IoAddress(IoArea.Coil, LightCoil), true));
+                _wait = 2;
+                _phase = Phase.Done;
+                break;
+
+            case Phase.Done:
+                if (!Light())
+                    Fail("coil forçada mas a luz indicadora não acendeu (On == false).");
+                else
+                    Pass();
+                break;
+        }
+    }
+
+    private bool Di(ushort offset)
+    {
+        foreach (var row in Loop.Io!.BuildView())
+        {
+            if (row.Address.Area == IoArea.DiscreteInput && row.Address.Offset == offset)
+                return row.Value;
+        }
+        return false;
+    }
+
+    private bool Light()
+    {
+        foreach (var device in Loop.Devices)
+        {
+            if (device.Id == LightId && device is IndicatorLight light)
+                return light.On;
+        }
+        return false;
+    }
+
+    private static SceneDocument BuildScene() => new()
+    {
+        SchemaVersion = SceneDocument.CurrentSchemaVersion,
+        Name = "hmi",
+        Devices = new()
+        {
+            new DeviceInstance { Id = ButtonId, TypeId = "hmi.button" },
+            new DeviceInstance { Id = LightId, TypeId = "hmi.light" },
+        },
+        IoMap = new()
+        {
+            new IoTag(ButtonId, "pressed", new IoAddress(IoArea.DiscreteInput, PressedDi)),
+            new IoTag(LightId, "on", new IoAddress(IoArea.Coil, LightCoil)),
+        },
+        Connection = new ConnectionConfig { Driver = "null" },
+    };
+}
+
+/// <summary>
 /// T018 / Artigo I.4 / RNF-03: mesma cena + seed, 10.000 ticks, duas
 /// execuções → hash idêntico tick a tick; divergência reporta o 1º tick.
 /// </summary>

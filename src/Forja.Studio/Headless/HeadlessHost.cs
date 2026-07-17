@@ -27,6 +27,7 @@ public partial class HeadlessHost : Node
             new ConveyorFlowScenario(),
             new SimModeE2EScenario(),
             new SensorActuatorScenario(),
+            new HmiScenario(),
             new DeterminismScenario(),
         });
     }
