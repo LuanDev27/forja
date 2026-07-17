@@ -99,9 +99,11 @@ public sealed class GodotPhysicsWorld : IPhysicsWorld, IDisposable
     /// <summary>Libera o shape de query (RIDs não são coletados pelo GC).</summary>
     public void Dispose() => PhysicsServer3D.FreeRid(_queryShape);
 
-    internal static Vector3 ToGodot(Vec3 v) => new(v.X, v.Y, v.Z);
+    public static Vector3 ToGodot(Vec3 v) => new(v.X, v.Y, v.Z);
 
-    internal static Transform3D ToTransform(Pose pose, float tiltXDeg)
+    /// <summary>Conversão canônica Pose(+tilt) → Transform3D — também usada
+    /// pela camada visual para desenhar exatamente o que a física vê.</summary>
+    public static Transform3D ToTransform(Pose pose, float tiltXDeg)
     {
         var basis = Basis.FromEuler(new Vector3(
             Mathf.DegToRad(tiltXDeg), Mathf.DegToRad(pose.RotY), 0f));
