@@ -1,0 +1,23 @@
+; Engine configuration file — Projeto Forja
+; Artigo I.1: tick fixo 60 Hz · Restrições fixadas: Jolt Physics
+
+config_version=5
+
+[application]
+
+config/name="Forja"
+run/main_scene="res://src/Forja.Studio/Main.tscn"
+config/features=PackedStringArray("4.4", "C#", "Forward Plus")
+
+[dotnet]
+
+project/assembly_name="Forja.Studio"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="forward_plus"

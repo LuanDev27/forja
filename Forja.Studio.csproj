@@ -1,0 +1,24 @@
+<Project Sdk="Godot.NET.Sdk/4.4.1">
+
+  <!-- Camada 4 — Presentation (projeto do jogo Godot; fica na raiz por
+       exigência do Godot). Compila apenas src/Forja.Studio; as demais
+       camadas entram por referência de projeto (Artigo II). -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Forja.Studio</RootNamespace>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="src\Forja.Anvil\**;src\Forja.Core\**;src\Forja.Bellows\**;tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="src\Forja.Anvil\Forja.Anvil.csproj" />
+    <ProjectReference Include="src\Forja.Core\Forja.Core.csproj" />
+    <ProjectReference Include="src\Forja.Bellows\Forja.Bellows.csproj" />
+  </ItemGroup>
+
+</Project>

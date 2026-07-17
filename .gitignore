@@ -1,0 +1,29 @@
+# Godot
+.godot/
+*.translation
+export_credentials.cfg
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+packages/
+TestResults/
+
+# Build/export
+build/
+*.zip
+
+# OS/editor
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+
+# Claude Code — só arquivos locais/credenciais; skills são versionadas
+.claude/settings.local.json
+.claude/*.local.json
+.claude/.credentials.json

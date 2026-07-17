@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Camada 2 — Simulation Core. Artigo II: vê apenas Anvil.
+       GodotSharp (NuGet) dá acesso a física/nós 3D headless-safe;
+       tipos de UI (Control/CanvasItem/Input) são proibidos — ver
+       tests/Forja.Architecture.Tests. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>Forja.Core</RootNamespace>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Forja.Anvil\Forja.Anvil.csproj" />
+    <PackageReference Include="GodotSharp" Version="4.4.1" />
+  </ItemGroup>
+
+</Project>
