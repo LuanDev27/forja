@@ -31,6 +31,15 @@ public class EditorCommandTests
         yield return new object[] { new DuplicateSelectionCommand(new uint[] { 1, 2 }, new Vec3(0, 0, 1)) };
         yield return new object[] { new EditParamCommand(1, "range", JsonSerializer.SerializeToElement(2.5)) };
         yield return new object[] { new ReassignAddressCommand(1, "detect", new IoAddress(IoArea.DiscreteInput, 7)) };
+        yield return new object[]
+        {
+            new SetConnectionCommand(new ConnectionConfig
+            {
+                Driver = ConnectionConfig.ModbusTcpServerKey,
+                Port = 5020,
+                TimeoutMs = 750,
+            }),
+        };
     }
 
     [Theory]

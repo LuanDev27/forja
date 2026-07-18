@@ -173,10 +173,10 @@ com programa ladder incluído.
 
 - [x] T049 [US5] `ModbusTcpServerDriver.cs` em `src/Forja.Bellows/Modbus/` — servidor Modbus TCP (NModbus, research R3): data-store espelhando IoTable, bind/porta da `ConnectionConfig`, thread de rede desacoplada do tick com handoff sem lock no caminho quente
 - [x] T049b [US5] `ModbusTcpClientDriver.cs` em `src/Forja.Bellows/Modbus/` — cliente Modbus TCP (Forja master): conecta em `host:port`, FC15 para sensores, FC01 para atuadores, reconexão com backoff, queda ⇒ `Faulted`; testes contra servidor NModbus loopback em `tests/Forja.Bellows.Tests/ModbusTcpClientDriverTests.cs`
-- [ ] T050 [US5] Falha segura no core: `DriverState.Faulted` → Run→Pause + evento para UI; timeout `ConnectionConfig.TimeoutMs` aplicado no `Exchange` (Artigo VII) + teste headless em `tests/Forja.Headless.Tests/FailSafeTest.cs`
-- [ ] T051 [US5] UI de conexão em `src/Forja.Studio/UI/ConnectionPanel.cs`: driver (null/modbus-tcp), bind, porta, timeout; indicador Desconectado/Aguardando master/Conectado/Erro (RF-06)
-- [ ] T052 [US5] Cena demo `demo/separador-altura.forja` conforme contracts/modbus-mapping.md (emissor S/L → esteira → sensor de altura → pistão → 2 calhas → sinks) montada pelo editor
-- [ ] T053 [P] [US5] Programa OpenPLC `demo/openplc/separador.st` usando os endereços do mapa de referência + instruções de configuração *Slave Devices* em `demo/openplc/README.md`
+- [x] T050 [US5] Falha segura no core: `DriverState.Faulted` → Run→Pause + evento para UI; timeout `ConnectionConfig.TimeoutMs` aplicado no `Exchange` (Artigo VII) + teste headless em `tests/Forja.Headless.Tests/FailSafeTest.cs`
+- [x] T051 [US5] UI de conexão em `src/Forja.Studio/UI/ConnectionPanel.cs`: driver (null/modbus-tcp), bind, porta, timeout; indicador Desconectado/Aguardando master/Conectado/Erro (RF-06)
+- [x] T052 [US5] Cena demo `demo/separador-altura.forja` conforme contracts/modbus-mapping.md (emissor S/L → esteira → sensor de altura → pistão → 2 calhas → sinks) montada pelo editor
+- [x] T053 [P] [US5] Programa OpenPLC `demo/openplc/separador.st` usando os endereços do mapa de referência + instruções de configuração *Slave Devices* em `demo/openplc/README.md`
 - [ ] T054 [US5] Validação manual V-E com OpenPLC real: sensor→pistão < 100 ms; queda do PLC pausa e sinaliza; registrar resultado em `specs/001-forja-v1/checklists/openplc-acceptance.md`
 
 **Checkpoint**: RF-06 e RF-09 aceitos — produto completo funcionalmente.
@@ -294,3 +294,15 @@ US5 (PLC real). Nenhuma fase entrega "camada horizontal" (Artigo VIII).
   contava o `actuator.pusher` separado do pistão); a matriz roda sobre o
   catálogo REAL do repositório e também valida que todo behavior resolve na
   `DeviceFactory`.
+- **T050**: o núcleo (Faulted→Pause + watchdog TimeoutMs no Exchange) já
+  existia desde T048/T049; o que entrou foi o teste ponta a ponta
+  `FailSafeScenario` no runner headless — driver Modbus REAL dentro do Godot
+  + master NModbus loopback: Starting→Ready, FC02 vê o botão, FC05 acende a
+  luz, master some → Pause + DriverFault.
+- **T052**: cena com sensor de altura ACIMA da linha do pistão (o PLC para a
+  esteira e desvia — sem timer de trajeto). Porta 5020 (não privilegiada no
+  Windows). `SeparadorDemoScenario` ensaia a demo sem PLC (o cenário força
+  as coils com a mesma lógica do .st) e valida a geometria das duas rotas.
+- **T051**: `SetConnectionCommand` novo em Core/Editing (conexão é dado da
+  cena; editar tem undo). Painel mostra o estado do driver sempre; edita só
+  em Edit.

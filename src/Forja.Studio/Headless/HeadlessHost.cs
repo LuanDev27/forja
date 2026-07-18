@@ -32,6 +32,8 @@ public partial class HeadlessHost : Node
             new SensorsScenario(),
             new ActuatorsScenario(),
             new PassivesScenario(),
+            new SeparadorDemoScenario(),
+            new FailSafeScenario(),
             new DeterminismScenario(),
         });
     }

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "name": "Separador por altura",
+  "seed": 42,
+  "devices": [
+    {
+      "id": 1,
+      "typeId": "emitter",
+      "transform": { "pos": [-1.6, 0.6, 0], "rotY": 0 },
+      "params": { "interval": 3.0, "maxParts": 0, "sizes": "S,L", "material": "plastic" }
+    },
+    {
+      "id": 2,
+      "typeId": "conveyor.belt.io",
+      "transform": { "pos": [0, 0.2, 0], "rotY": 0 },
+      "params": { "length": 4.0, "width": 0.5, "speed": 0.5 }
+    },
+    {
+      "id": 3,
+      "typeId": "sensor.height",
+      "transform": { "pos": [0.7, 1.05, 0], "rotY": 0 },
+      "params": { "range": 2.0, "threshold": 0.4 }
+    },
+    {
+      "id": 4,
+      "typeId": "actuator.piston",
+      "transform": { "pos": [0.7, 0.5, -0.55], "rotY": -90 },
+      "params": { "stroke": 0.7, "speed": 2.0, "rodLength": 0.3, "rodWidth": 0.4 }
+    },
+    {
+      "id": 5,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.8, 0.1, 1.2], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 6,
+      "typeId": "hmi.light",
+      "transform": { "pos": [-2.4, 0.1, 1.2], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 7,
+      "typeId": "chute",
+      "transform": { "pos": [0.7, -0.14, 1.0], "rotY": 0 },
+      "params": { "sizeX": 0.6, "sizeY": 0.1, "sizeZ": 1.4, "tilt": 20.0, "friction": 0.2 }
+    },
+    {
+      "id": 8,
+      "typeId": "sink",
+      "transform": { "pos": [0.7, -0.7, 2.15], "rotY": 0 },
+      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+    },
+    {
+      "id": 9,
+      "typeId": "chute",
+      "transform": { "pos": [2.66, -0.14, 0], "rotY": 90 },
+      "params": { "sizeX": 0.6, "sizeY": 0.1, "sizeZ": 1.4, "tilt": 20.0, "friction": 0.2 }
+    },
+    {
+      "id": 10,
+      "typeId": "sink",
+      "transform": { "pos": [3.8, -0.7, 0], "rotY": 0 },
+      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+    }
+  ],
+  "ioMap": [
+    { "deviceId": 2, "portName": "run", "address": { "area": "Coil", "offset": 0 } },
+    { "deviceId": 3, "portName": "detect", "address": { "area": "DiscreteInput", "offset": 0 } },
+    { "deviceId": 4, "portName": "extend", "address": { "area": "Coil", "offset": 1 } },
+    { "deviceId": 4, "portName": "extended", "address": { "area": "DiscreteInput", "offset": 1 } },
+    { "deviceId": 5, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 2 } },
+    { "deviceId": 6, "portName": "on", "address": { "area": "Coil", "offset": 2 } }
+  ],
+  "connection": {
+    "driver": "modbus-tcp-server",
+    "bindAddress": "0.0.0.0",
+    "port": 5020,
+    "unitId": 1,
+    "timeoutMs": 1000
+  }
+}

@@ -162,6 +162,20 @@ public sealed class EditParamCommand : IEditorCommand
     };
 }
 
+/// <summary>Troca a configuração de conexão com o PLC (RF-06, T051). A
+/// conexão é dado da cena (Artigo IV.2) — editar é comando como qualquer
+/// outro, com undo.</summary>
+public sealed class SetConnectionCommand : IEditorCommand
+{
+    private readonly ConnectionConfig _config;
+
+    public SetConnectionCommand(ConnectionConfig config) => _config = config;
+
+    public string Label => $"Conexão: driver '{_config.Driver}'";
+
+    public SceneDocument Apply(SceneDocument doc) => doc with { Connection = _config };
+}
+
 /// <summary>
 /// Reatribui o endereço de uma porta na Tabela de I/O (RF-05). Se a porta
 /// ainda não tinha tag, cria uma. (Conflitos de endereço são pegos depois

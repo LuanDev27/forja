@@ -117,6 +117,7 @@ public partial class Main : Node3D
             AddChild(new CatalogPanel(ctx) { Name = "CatalogPanel" });
             AddChild(new ParamsPanel(ctx) { Name = "ParamsPanel" });
             AddChild(new FileDialogs(ctx) { Name = "FileDialogs" });
+            AddChild(new ConnectionPanel(ctx) { Name = "ConnectionPanel" });
 
             if (scenePath is not null)
                 loop.Enqueue(new SetModeCommand(SimMode.Run));
