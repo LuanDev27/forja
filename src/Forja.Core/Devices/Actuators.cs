@@ -15,6 +15,10 @@ public sealed class Piston : DeviceBehavior
     private IPhysicsBody? _rod;
     private float _extension;
 
+    /// <summary>Avanço atual da haste em metros — a camada visual desenha a
+    /// haste onde a física a colocou (só leitura, Artigo II.2).</summary>
+    public float Extension => _extension;
+
     public override void Build(SimContext ctx)
     {
         _extension = 0f;
@@ -66,6 +70,12 @@ public sealed class Stopper : DeviceBehavior
 
     private IPhysicsBody? _gate;
     private float _raise; // 0 = aberto (embaixo), 1 = fechado (na posição)
+
+    /// <summary>Quanto a trava está levantada, 0..1 (só leitura para o visual).</summary>
+    public float Raise => _raise;
+
+    /// <summary>Curso vertical da trava, em metros (o visual desce o mesmo).</summary>
+    public static float Drop => DropDepth;
 
     public override void Build(SimContext ctx)
     {

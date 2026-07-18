@@ -31,6 +31,10 @@ public partial class SceneView : Node3D
     private readonly HashSet<uint> _partsSeen = new();
     private readonly HashSet<uint> _selected = new();
 
+    /// <summary>Caixa lógica de cada dispositivo (o visual não é mais uma
+    /// caixa escalada, então o pick precisa da medida guardada à parte).</summary>
+    private readonly Dictionary<uint, Vector3> _deviceBounds = new();
+
     private Node3D _devicesRoot = null!;
     private Node3D _partsRoot = null!;
     private StandardMaterial3D? _plasticMat;
@@ -55,6 +59,7 @@ public partial class SceneView : Node3D
     {
         foreach (var child in _devicesRoot.GetChildren())
             child.Free();
+        _deviceBounds.Clear();
 
         foreach (var instance in _main.Loop.Document.Devices)
         {
@@ -101,10 +106,13 @@ public partial class SceneView : Node3D
             if (child is not Node3D node || !TryParseId(node.Name, out uint nid))
                 continue;
 
+            if (!_deviceBounds.TryGetValue(nid, out var bounds))
+                continue;
+
             var inv = node.GlobalTransform.AffineInverse();
             var localOrigin = inv * rayOrigin;
             var localDir = inv.Basis * rayDir;
-            if (!RayUnitBox(localOrigin, localDir, out float t))
+            if (!RayBox(localOrigin, localDir, bounds * 0.5f, out float t))
                 continue;
 
             var worldHit = node.GlobalTransform * (localOrigin + localDir * t);
@@ -135,7 +143,6 @@ public partial class SceneView : Node3D
                 return;
 
             node.Transform = GodotPhysicsWorld.ToTransform(pose, TiltDeg(instance, type));
-            node.Scale = VisualParams(instance, type).Size;
             return;
         }
     }
@@ -147,21 +154,22 @@ public partial class SceneView : Node3D
         return s.StartsWith("dev-") && uint.TryParse(s.AsSpan(4), out id);
     }
 
-    private static bool RayUnitBox(Vector3 o, Vector3 d, out float t)
+    /// <summary>Raio contra caixa centrada na origem, em espaço local.</summary>
+    private static bool RayBox(Vector3 o, Vector3 d, Vector3 half, out float t)
     {
         t = 0f;
         float tmin = float.NegativeInfinity, tmax = float.PositiveInfinity;
         for (int i = 0; i < 3; i++)
         {
-            float oi = o[i], di = d[i];
+            float oi = o[i], di = d[i], h = MathF.Max(half[i], 1e-4f);
             if (MathF.Abs(di) < 1e-8f)
             {
-                if (oi < -0.5f || oi > 0.5f)
+                if (oi < -h || oi > h)
                     return false;
             }
             else
             {
-                float t1 = (-0.5f - oi) / di, t2 = (0.5f - oi) / di;
+                float t1 = (-h - oi) / di, t2 = (h - oi) / di;
                 if (t1 > t2)
                     (t1, t2) = (t2, t1);
                 tmin = MathF.Max(tmin, t1);
@@ -218,22 +226,40 @@ public partial class SceneView : Node3D
     }
 
     /// <summary>Acende as luzes indicadoras lendo IndicatorLight.On do core
-    /// (leitura apenas). Só o box procedural de fallback expõe o material.</summary>
+    /// (leitura apenas).</summary>
     private void UpdateIndicatorLights()
     {
         foreach (var device in _main.Loop.Devices)
         {
             if (device is not IndicatorLight light)
                 continue;
-            if (_devicesRoot.GetNodeOrNull($"dev-{light.Id}") is not MeshInstance3D mesh)
+            if (_devicesRoot.GetNodeOrNull($"dev-{light.Id}") is not Node3D node)
                 continue;
-            if (mesh.MaterialOverride is not StandardMaterial3D mat)
+            if (LampMaterial(node) is not { } mat)
                 continue;
 
             mat.EmissionEnabled = light.On;
             mat.Emission = light.On ? new Color(0.95f, 0.85f, 0.25f) : Colors.Black;
             mat.AlbedoColor = light.On ? new Color(0.85f, 0.78f, 0.25f) : new Color(0.30f, 0.30f, 0.20f);
         }
+    }
+
+    /// <summary>
+    /// Material da lâmpada do dispositivo. Tem de ser um material EXCLUSIVO
+    /// da instância: os materiais de paleta são compartilhados, e mexer neles
+    /// acenderia todas as luzes da cena de uma vez.
+    /// </summary>
+    private static StandardMaterial3D? LampMaterial(Node3D device)
+    {
+        var mesh = device.GetNodeOrNull<MeshInstance3D>(DeviceVisuals.LampNode)
+                   ?? device.GetNodeOrNull<MeshInstance3D>("body");
+        if (mesh is null)
+            return null;
+
+        if (mesh.MaterialOverride is StandardMaterial3D over)
+            return over;
+
+        return mesh.Mesh?.SurfaceGetMaterial(0) as StandardMaterial3D;
     }
 
     /// <summary>Tamanho/cor do visual por comportamento. Público porque o
@@ -262,22 +288,24 @@ public partial class SceneView : Node3D
     public static float TiltDeg(DeviceInstance instance, DeviceTypeDef type) =>
         type.Behavior == "static-body" ? GetFloat(instance, type, "tilt", 0f) : 0f;
 
-    private static Node3D CreateDeviceVisual(DeviceInstance instance, DeviceTypeDef type)
+    private Node3D CreateDeviceVisual(DeviceInstance instance, DeviceTypeDef type)
     {
         (Vector3 size, Color color, float alpha) = VisualParams(instance, type);
         float tilt = TiltDeg(instance, type);
 
-        var node = InstantiateVisual(type.VisualScene, color, alpha);
+        // O nó raiz NÃO é escalado: a geometria já nasce no tamanho certo
+        // (DeviceVisuals). Escalar o raiz de forma não-uniforme achataria
+        // roletes, hastes e qualquer detalhe redondo.
+        var node = DeviceVisuals.Build(instance, type, size, color, alpha);
         node.Name = $"dev-{instance.Id}";
         node.Transform = GodotPhysicsWorld.ToTransform(instance.Transform, tilt);
-        node.Scale = size;
+        _deviceBounds[instance.Id] = size;
 
-        // Contorno de seleção (oculto por padrão) — caixa levemente maior.
+        // Contorno de seleção (oculto por padrão) — caixa lógica um pouco maior.
         node.AddChild(new MeshInstance3D
         {
             Name = "outline",
-            Mesh = new BoxMesh(),
-            Scale = new Vector3(1.06f, 1.06f, 1.06f),
+            Mesh = new BoxMesh { Size = size * 1.06f },
             Visible = false,
             MaterialOverride = new StandardMaterial3D
             {

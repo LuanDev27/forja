@@ -15,6 +15,10 @@ public sealed class PhotoSensor : DeviceBehavior
 {
     private bool _detected;
 
+    /// <summary>Estado atual da detecção — a camada visual acende a lente
+    /// com isso (só leitura, Artigo II.2).</summary>
+    public bool Detected => _detected;
+
     public override void Tick(SimContext ctx)
     {
         var from = Instance.Transform.Pos;
@@ -40,6 +44,10 @@ public sealed class HeightSensor : DeviceBehavior
 {
     private bool _detected;
 
+    /// <summary>Estado atual da detecção — a camada visual acende a lente
+    /// com isso (só leitura, Artigo II.2).</summary>
+    public bool Detected => _detected;
+
     public override void Tick(SimContext ctx)
     {
         var from = Instance.Transform.Pos;
@@ -62,6 +70,10 @@ public sealed class HeightSensor : DeviceBehavior
 public sealed class ProximitySensor : DeviceBehavior
 {
     private bool _detected;
+
+    /// <summary>Estado atual da detecção — a camada visual acende a lente
+    /// com isso (só leitura, Artigo II.2).</summary>
+    public bool Detected => _detected;
 
     public override void Tick(SimContext ctx)
     {

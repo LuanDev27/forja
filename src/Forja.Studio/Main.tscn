@@ -1,6 +1,32 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://src/Forja.Studio/Main.cs" id="1_main"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.35, 0.42, 0.52, 1)
+sky_horizon_color = Color(0.66, 0.69, 0.72, 1)
+ground_bottom_color = Color(0.16, 0.17, 0.19, 1)
+ground_horizon_color = Color(0.4, 0.41, 0.43, 1)
+sun_angle_max = 12.0
+sun_curve = 0.15
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 0.9
+tonemap_mode = 3
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 0.5
+ssao_intensity = 1.6
+ssao_power = 2.0
+glow_enabled = true
+glow_intensity = 0.25
+glow_bloom = 0.05
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -9,7 +35,19 @@ script = ExtResource("1_main")
 transform = Transform3D(1, 0, 0, 0, 0.9397, 0.342, 0, -0.342, 0.9397, 0.8, 4, 9)
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.643, 0.766, 0, -0.766, 0.643, 0, 8, 4)
+transform = Transform3D(0.866, -0.383, 0.323, 0, 0.643, 0.766, -0.5, -0.663, 0.557, 0, 8, 4)
+light_energy = 1.15
 shadow_enabled = true
+shadow_bias = 0.03
+shadow_normal_bias = 1.5
+directional_shadow_mode = 2
+directional_shadow_max_distance = 60.0
+
+[node name="Fill" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866, -0.25, -0.433, 0, 0.866, -0.5, 0.5, -0.433, -0.75, 0, 6, -4)
+light_energy = 0.35
+light_specular = 0.0
+shadow_enabled = false
 
 [node name="Ambient" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
