@@ -7,36 +7,49 @@ implementação — ver [plan.md](./plan.md) e contratos.
 
 | Ferramenta | Versão | Nota |
 |---|---|---|
-| Godot .NET | 4.4.x (pinada em `.godot-version`) | editor + export templates Windows |
+| Godot .NET | 4.4.1 (pinada em `.godot-version`) | export templates só para empacotar |
 | .NET SDK | 8.0.x | `dotnet --version` |
-| OpenPLC Runtime | atual | só para a validação RF-06/RF-09 (opcional nas demais) |
+| OpenPLC Editor + Runtime | v4 | só para a validação RF-06/RF-09 (opcional nas demais) |
+
+> Se o .NET for user-local (`%LOCALAPPDATA%\Microsoft\dotnet`), **DOTNET_ROOT
+> precisa estar setado para o `dotnet` E para o `godot`** — sem isso o Godot
+> segfalha ao carregar o runtime.
 
 ## Build
 
 ```powershell
-dotnet build Forja.sln -c Debug          # compila as 4 camadas + testes
+dotnet build Forja.Studio.sln -c Debug   # compila as 4 camadas + testes
 # Primeira importação de assets (uma vez, ou após mudar assets):
-godot --headless --import
+godot --headless --path . --import
 ```
+
+> A solution se chama `Forja.Studio.sln` porque o GodotTools procura a
+> solution pelo `assembly_name` do `project.godot` na hora do export.
 
 ## Testes (Artigo V — sem GPU, sem PLC)
 
 ```powershell
 # 1. Testes .NET puros (Anvil, Core-lógica, Bellows, arquitetura)
-dotnet test Forja.sln
+dotnet test Forja.Studio.sln
 
-# 2. Testes headless de física/dispositivos/determinismo (GdUnit4)
-godot --headless --path . -s addons/gdUnit4/bin/GdUnit4CmdTool.gd -a tests/Forja.Headless.Tests
+# 2. Cenários com física real (runner próprio, decisão da sessão 1 — não GdUnit4)
+godot --headless --path . -- --forja-tests
 ```
 
-Padrão de teste de dispositivo (Artigo V.2): montar `SceneDocument` mínimo →
-`SimulationLoop.Run(nTicks)` → assert de estado. Nunca teste de UI.
+O runner roda os 15 cenários em sequência e sai com código 0/1 (pluga direto
+no CI). Leva ~2 min: os últimos três são as medições de startup/carga,
+performance com 200 peças e o soak de 30 min simulados.
+
+Padrão de teste de dispositivo (Artigo V.2): montar `SceneDocument` mínimo em
+código → deixar rodar N ticks → assert de estado (posição da peça, bit de I/O).
+Nunca teste de UI. Os cenários vivem em `src/Forja.Studio/Headless/` porque
+precisam do SceneTree do Godot; a lógica pura é testada em `tests/` com xUnit.
 
 ## Cenários de validação (mapeados aos aceites da spec)
 
 ### V-A — Determinismo (RNF-03, Artigo I.4)
-1. Rodar `DeterminismTest` (headless): carrega `demo/separador-altura.forja`,
-   seed 42, script de inputs fixo, 10.000 ticks, 2 execuções.
+1. Rodar `DeterminismScenario` (headless): mesma cena e semente, script de
+   inputs fixo, duas execuções comparadas pelo hash de estado.
 2. **Esperado:** hashes finais idênticos; divergência ⇒ falha com primeiro
    tick divergente.
 
@@ -60,15 +73,20 @@ Padrão de teste de dispositivo (Artigo V.2): montar `SceneDocument` mínimo →
 3. **Esperado:** Run bloqueado; erro aponta os **dois** dispositivos.
 
 ### V-E — OpenPLC ponta a ponta (RF-06, RF-09)
-1. Forja: cena demo, driver `modbus-tcp`, bind `0.0.0.0:502`, Run
+1. Forja: cena demo, driver `modbus-tcp-server`, bind `0.0.0.0:5020`, Run
    (status: *Aguardando master*).
-2. OpenPLC: carregar `demo/openplc/separador.st`; em *Slave Devices*,
-   adicionar a Forja (IP da máquina, porta 502) conforme
-   [contracts/modbus-mapping.md](./contracts/modbus-mapping.md); Start PLC.
+2. OpenPLC **v4**: programa ST + dispositivo remoto Modbus apontando para
+   `127.0.0.1:5020`, conforme o passo a passo de
+   [demo/openplc/README.md](../../demo/openplc/README.md) e os endereços de
+   [contracts/modbus-mapping.md](./contracts/modbus-mapping.md); ▶ Play.
 3. **Esperado:** status *Conectado*; sensor detecta caixa L ⇒ pistão avança em
    < 100 ms; caixas S seguem ao removedor.
 4. Parar o OpenPLC no meio do Run → **Esperado:** Forja pausa e sinaliza
    (Artigo VII.1). Religar → reconecta e retoma.
+
+> Porta 5020 (não a 502) para não exigir privilégio de administrador. No
+> OpenPLC v4 o I/O remoto mapeia a partir de `%IX0.0`/`%QX0.0` — o `%IX100.x`
+> era do v3. Resultado do aceite: [checklists/openplc-acceptance.md](./checklists/openplc-acceptance.md).
 
 ### V-F — Persistência round-trip (RF-08)
 1. Montar cena nova no editor (≥ 3 dispositivos + mapa de I/O), salvar,
@@ -84,9 +102,14 @@ Padrão de teste de dispositivo (Artigo V.2): montar `SceneDocument` mínimo →
 ## Export (RNF-06, decisão Q4)
 
 ```powershell
-godot --headless --export-release "Windows Desktop" build/Forja.exe
-Compress-Archive build/* Forja-v1-win-x64.zip
+pwsh build/package.ps1        # build Release + export + ZIP, num passo só
 ```
 
+Gera `build/Forja-v1-win-x64.zip` (~65 MB) com o executável, o runtime .NET
+embutido e — soltos ao lado do `.exe` — o catálogo e a demo. O catálogo fica
+fora do `.pck` de propósito: o loader é da camada 1 (System.IO puro), que não
+enxerga caminho dentro do pack.
+
 **Esperado:** ZIP roda em Windows 10 21H2+/11 x64 limpo, sem .NET instalado;
-abre em < 5 s (RNF-04).
+abre em < 5 s (RNF-04). Verificação possível sem máquina limpa: rodar o pacote
+com `DOTNET_ROOT` inválido e o `dotnet` fora do `PATH`.
