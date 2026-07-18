@@ -134,7 +134,7 @@ undo/redo ≥ 50, salvar/carregar round-trip.
 - [x] T038 [US3] Seleção e gizmos em `src/Forja.Studio/Editor/`: `SelectionManager.cs`, `MoveGizmo.cs`/`RotateGizmo.cs` com snap de grid (0,1 m) e angular (15°), câmera orbital
 - [x] T039 [US3] Painel de parâmetros em `src/Forja.Studio/Editor/ParamsPanel.cs` gerado de `DeviceTypeDef.paramDefs` (data-driven, sem UI hardcoded por tipo)
 - [x] T040 [US3] Salvar/Carregar em `src/Forja.Studio/UI/FileDialogs.cs` (`.forja`, erro de carga com caminho+motivo — Artigo VII.3) + cena nova
-- [ ] T041 [US3] Validação manual RF-02: montar a cena demo do zero só no editor, documentar em `specs/001-forja-v1/checklists/editor-acceptance.md`
+- [x] T041 [US3] Validação manual RF-02: montar a cena demo do zero só no editor, documentar em `specs/001-forja-v1/checklists/editor-acceptance.md`
 
 **Checkpoint**: usuário monta, salva e roda a própria planta sem tocar em JSON.
 

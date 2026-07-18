@@ -50,6 +50,9 @@ conferir `git diff project.godot` ao terminar e restaurar se preciso.
 
 ## Resultado
 
-- Data: ____
-- Veredicto: [ ] aprovado · [ ] reprovado (anotar problemas abaixo)
-- Observações:
+- Data: 2026-07-17
+- Veredicto: [x] aprovado · [ ] reprovado (anotar problemas abaixo)
+- Observações: aprovado pelo usuário na janela do Godot ("tá tudo funcionando").
+  Único problema encontrado durante o aceite — piso colocado depois engolia as
+  esteiras — corrigido no commit cd30da5 (`flushToGround` no catálogo: piso
+  assenta com o topo no nível do chão) e revalidado na mesma sessão.
