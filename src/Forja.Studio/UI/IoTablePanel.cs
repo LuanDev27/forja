@@ -30,13 +30,20 @@ public partial class IoTablePanel : CanvasLayer
 
     public override void _Ready()
     {
-        var margin = new MarginContainer();
-        margin.SetAnchorsPreset(Control.LayoutPreset.TopRight);
+        // Margem tela-cheia com Ignore (ver FileDialogs): âncora de canto pura
+        // posicionava o painel fora da borda direita da janela.
+        var margin = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.AddThemeConstantOverride("margin_top", 48);
         margin.AddThemeConstantOverride("margin_right", 8);
         AddChild(margin);
 
-        var panel = new PanelContainer { CustomMinimumSize = new Vector2(320, 0) };
+        var panel = new PanelContainer
+        {
+            CustomMinimumSize = new Vector2(320, 0),
+            SizeFlagsHorizontal = Control.SizeFlags.ShrinkEnd,
+            SizeFlagsVertical = Control.SizeFlags.ShrinkBegin,
+        };
         margin.AddChild(panel);
 
         var outer = new VBoxContainer();

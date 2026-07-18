@@ -33,13 +33,20 @@ public partial class FileDialogs : CanvasLayer
 
     public override void _Ready()
     {
-        var margin = new MarginContainer();
-        margin.SetAnchorsPreset(Control.LayoutPreset.TopLeft);
+        // Margem tela-cheia com Ignore: âncora de canto pura deixaria o rect
+        // do contêiner sobre outros painéis roubando cliques (hit-test pega
+        // o contêiner, não o botão embaixo); o painel encolhe para o canto.
+        var margin = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.AddThemeConstantOverride("margin_top", 48);
         margin.AddThemeConstantOverride("margin_left", 8);
         AddChild(margin);
 
-        var panel = new PanelContainer();
+        var panel = new PanelContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin,
+            SizeFlagsVertical = Control.SizeFlags.ShrinkBegin,
+        };
         margin.AddChild(panel);
 
         var row = new HBoxContainer();

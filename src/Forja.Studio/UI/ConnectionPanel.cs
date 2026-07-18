@@ -43,12 +43,19 @@ public partial class ConnectionPanel : CanvasLayer
 
     public override void _Ready()
     {
-        var margin = new MarginContainer();
-        margin.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
+        // Margem tela-cheia com Ignore (ver FileDialogs): âncora de canto pura
+        // posicionava o painel abaixo da borda inferior da janela.
+        var margin = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.AddThemeConstantOverride("margin_bottom", 8);
         AddChild(margin);
 
-        var panel = new PanelContainer { CustomMinimumSize = new Vector2(280, 0) };
+        var panel = new PanelContainer
+        {
+            CustomMinimumSize = new Vector2(280, 0),
+            SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter,
+            SizeFlagsVertical = Control.SizeFlags.ShrinkEnd,
+        };
         margin.AddChild(panel);
 
         var box = new VBoxContainer();

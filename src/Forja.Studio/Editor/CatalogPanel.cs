@@ -23,13 +23,20 @@ public partial class CatalogPanel : CanvasLayer
 
     public override void _Ready()
     {
-        var margin = new MarginContainer();
-        margin.SetAnchorsPreset(Control.LayoutPreset.TopLeft);
+        // Margem tela-cheia com Ignore (ver FileDialogs): o rect do contêiner
+        // de canto roubava cliques do 3D na região do painel mesmo fora dele.
+        var margin = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.AddThemeConstantOverride("margin_top", 88);
         margin.AddThemeConstantOverride("margin_left", 8);
         AddChild(margin);
 
-        var panel = new PanelContainer { CustomMinimumSize = new Vector2(250, 0) };
+        var panel = new PanelContainer
+        {
+            CustomMinimumSize = new Vector2(250, 0),
+            SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin,
+            SizeFlagsVertical = Control.SizeFlags.ShrinkBegin,
+        };
         margin.AddChild(panel);
 
         var box = new VBoxContainer();

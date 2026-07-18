@@ -24,13 +24,20 @@ public partial class HmiInteraction : CanvasLayer
 
     public override void _Ready()
     {
-        var margin = new MarginContainer();
-        margin.SetAnchorsPreset(Control.LayoutPreset.BottomLeft);
+        // Margem tela-cheia com Ignore (ver FileDialogs): âncora de canto pura
+        // posicionava o painel na borda crescendo para FORA da janela.
+        var margin = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.AddThemeConstantOverride("margin_left", 8);
         margin.AddThemeConstantOverride("margin_bottom", 8);
         AddChild(margin);
 
-        var panel = new PanelContainer { CustomMinimumSize = new Vector2(240, 0) };
+        var panel = new PanelContainer
+        {
+            CustomMinimumSize = new Vector2(240, 0),
+            SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin,
+            SizeFlagsVertical = Control.SizeFlags.ShrinkEnd,
+        };
         margin.AddChild(panel);
 
         var outer = new VBoxContainer();
