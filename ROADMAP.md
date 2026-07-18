@@ -21,9 +21,11 @@ ponta**, nunca uma camada horizontal. Nenhuma fase é "estudar X" — toda fase
 termina em artefato que alguém pode abrir, rodar ou ler.
 
 O detalhe diminui com a distância de propósito. As fases 0–3 estão descritas em
-nível de tarefa; da 4 em diante, em nível de intenção. Planejar o módulo 9 hoje
-seria ficção — aquele plano será escrito quando os módulos 1–8 tiverem ensinado
-o que eu ainda não sei.
+nível de tarefa, a 4 em nível de intenção, e depois dela o roadmap
+deliberadamente para de planejar — pelos motivos em
+[Depois da Fase 4](#depois-da-fase-4--ponto-de-decisão-não-fase-5). Planejar
+hoje o último módulo da cadeia seria ficção: aquele plano só pode ser escrito
+depois que os primeiros ensinarem o que ainda não sei.
 
 ## Estado atual
 
@@ -34,6 +36,10 @@ validada ponta a ponta contra OpenPLC v4.
 
 O ativo mais subaproveitado do projeto hoje: a Forja é uma **bancada de CLP
 funcionando**, e existe exatamente um programa de CLP escrito para ela.
+
+**Próximo passo:** Fase 0 (publicar o repositório). Depois, a Fase 1 entra pelo
+fluxo normal do projeto — `/speckit-specify` para virar `specs/002-…`, como foi
+feito na v1.
 
 ---
 
@@ -165,17 +171,40 @@ precisa ter.
 
 ---
 
-## Fase 5 em diante — horizonte
+## Depois da Fase 4 — ponto de decisão, não "Fase 5"
 
-Descrito em intenção, não em tarefa. Vai mudar, e tudo bem.
+Aqui o roadmap **para de planejar, de propósito.**
 
-| Fase | Intenção | Principal aprendizado esperado |
+A cadeia original — SCADA → Industrial API → Gateway → IIoT → MES → Digital
+Twin → Visão Computacional → SaaS — é uma escada de sofisticação de software, e
+ela **se afasta do objetivo conforme sobe**. Levada até o fim, produz um dev
+full-stack com uma história de automação no passado. O valor para vaga de
+automação está concentrado nas fases 0–4, e a coisa de maior peso — programar
+CLP — nem sequer estava na cadeia original.
+
+Então a cadeia vale como **bússola, não como contrato**. Fases 0–4 são o
+compromisso. O que vem depois é menu, escolhido pelo que servir na hora:
+
+| Módulo | O que de fato entrega | Dito com honestidade |
 |---|---|---|
-| **5** Industrial API + histórico | ASP.NET Core + PostgreSQL guardando série temporal da planta | REST, modelagem, consulta temporal |
-| **6** IIoT / MES | ordem de produção, OEE, apontamento sobre os dados da Forja | levar dado de chão de fábrica a indicador de gestão |
-| **7** Digital Twin | reusar Godot para espelhar estado real em 3D | reaproveitamento de competência já construída |
-| **8** Visão computacional | OpenCV + ONNX Runtime inspecionando peças | modelo com licença permissiva (YOLOX/RT-DETR) por hábito |
-| **9** SaaS | empacotar como produto multi-tenant | fecha o ciclo de "chão de fábrica a produto" |
+| Industrial API + histórico | REST, modelagem, série temporal | mais perto de backend genérico do que de automação |
+| MES / OEE | dado de chão de fábrica virando indicador de gestão | forte se a vaga for de integração/MES; é nicho |
+| Digital Twin | reusa Godot para espelhar planta real | alto impacto visual em entrevista, baixo custo marginal |
+| Visão computacional | OpenCV + ONNX inspecionando peças | é quase um projeto novo; só se virar interesse real |
+| SaaS | empacotar como produto | fecha a narrativa, e é o mais distante do objetivo |
+
+**Regra de entrada:** módulo novo só começa com a fase anterior **fechada e
+demonstrável**. Nove começos valem menos que dois módulos terminados —
+terminar é a habilidade sendo treinada aqui.
+
+### O melhor desfecho é este roadmap ser interrompido
+
+Se você for contratado durante a Fase 1 ou 2, o roadmap **terminou e deu
+certo** — não foi abandonado. A partir daí quem te faz crescer é trabalho real,
+com prazo, revisão de código e sistema de outra pessoa; a Forja vira projeto
+paralelo ou portfólio congelado, e as duas coisas estão bem.
+
+Isso fica escrito para não confundir sucesso com desistência quando acontecer.
 
 ---
 
