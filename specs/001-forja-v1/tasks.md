@@ -185,12 +185,12 @@ com programa ladder incluído.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T055 Performance RNF-01: cena de estresse com 200 peças, sleep de rigidbody parado, perf test headless medindo tempo de tick < 16,6 ms em `tests/Forja.Headless.Tests/PerfTest.cs`
-- [ ] T056 [P] Estabilidade RNF-07 (proxy automatizado): soak de 30 min headless com emissor contínuo + kill-zone, memória final ≤ 105% da inicial em `tests/Forja.Headless.Tests/SoakTest.cs`; soak manual de 8 h antes do release
-- [ ] T057 [P] Medir RNF-04/RNF-05 (startup < 5 s; cena 100 devices < 2 s) e otimizar carga (catálogo lazy, `.tscn` precarregados)
-- [ ] T058 Export ZIP portátil (research R8): `export_presets.cfg` Windows x64 self-contained + script `build/package.ps1` gerando `Forja-v1-win-x64.zip`; testar em máquina limpa sem .NET (RNF-06)
-- [ ] T059 [P] `README.md` do repo (visão, build, screenshot da demo) + revisar `specs/001-forja-v1/quickstart.md` contra o produto final
-- [ ] T060 Rodar quickstart V-A…V-G completo e registrar em `specs/001-forja-v1/checklists/release-v1.md`
+- [x] T055 Performance RNF-01: cena de estresse com 200 peças, sleep de rigidbody parado, perf test headless medindo tempo de tick < 16,6 ms em `tests/Forja.Headless.Tests/PerfTest.cs`
+- [x] T056 [P] Estabilidade RNF-07 (proxy automatizado): soak de 30 min headless com emissor contínuo + kill-zone, memória final ≤ 105% da inicial em `tests/Forja.Headless.Tests/SoakTest.cs`; soak manual de 8 h antes do release
+- [x] T057 [P] Medir RNF-04/RNF-05 (startup < 5 s; cena 100 devices < 2 s) e otimizar carga (catálogo lazy, `.tscn` precarregados)
+- [x] T058 Export ZIP portátil (research R8): `export_presets.cfg` Windows x64 self-contained + script `build/package.ps1` gerando `Forja-v1-win-x64.zip`; testar em máquina limpa sem .NET (RNF-06)
+- [x] T059 [P] `README.md` do repo (visão, build, screenshot da demo) + revisar `specs/001-forja-v1/quickstart.md` contra o produto final
+- [x] T060 Rodar quickstart V-A…V-G completo e registrar em `specs/001-forja-v1/checklists/release-v1.md`
 
 ---
 

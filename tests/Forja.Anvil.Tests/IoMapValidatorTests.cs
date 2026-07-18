@@ -69,6 +69,26 @@ public class IoMapValidatorTests
         Assert.Contains(errors, e => e.Code == "analog-not-supported");
     }
 
+    /// <summary>
+    /// Aceite V-D do quickstart (RF-05, Artigo VI.3): dois dispositivos no
+    /// mesmo endereço barram o Run, e a mensagem precisa citar OS DOIS — de
+    /// nada adianta apontar só um deles para quem vai corrigir o mapa.
+    /// </summary>
+    [Fact]
+    public void EnderecoDuplicado_ErroCitaOsDoisDispositivos()
+    {
+        var doc = Doc(
+            new() { TestCatalog.Sensor(1), TestCatalog.Sensor(2) },
+            new() { TestCatalog.Di(1, 4), TestCatalog.Di(2, 4) });
+
+        var errors = IoMapValidator.Validate(doc, TestCatalog.Build());
+
+        var error = Assert.Single(errors, e => e.Code == "duplicate-address");
+        Assert.Contains(1u, error.DeviceIds);
+        Assert.Contains(2u, error.DeviceIds);
+        Assert.Contains("%IX0.4", error.Message);
+    }
+
     [Fact]
     public void TagOrfa_Erro()
     {
