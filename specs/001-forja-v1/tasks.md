@@ -177,7 +177,7 @@ com programa ladder incluído.
 - [x] T051 [US5] UI de conexão em `src/Forja.Studio/UI/ConnectionPanel.cs`: driver (null/modbus-tcp), bind, porta, timeout; indicador Desconectado/Aguardando master/Conectado/Erro (RF-06)
 - [x] T052 [US5] Cena demo `demo/separador-altura.forja` conforme contracts/modbus-mapping.md (emissor S/L → esteira → sensor de altura → pistão → 2 calhas → sinks) montada pelo editor
 - [x] T053 [P] [US5] Programa OpenPLC `demo/openplc/separador.st` usando os endereços do mapa de referência + instruções de configuração *Slave Devices* em `demo/openplc/README.md`
-- [ ] T054 [US5] Validação manual V-E com OpenPLC real: sensor→pistão < 100 ms; queda do PLC pausa e sinaliza; registrar resultado em `specs/001-forja-v1/checklists/openplc-acceptance.md`
+- [x] T054 [US5] Validação manual V-E com OpenPLC real: sensor→pistão < 100 ms; queda do PLC pausa e sinaliza; registrar resultado em `specs/001-forja-v1/checklists/openplc-acceptance.md`
 
 **Checkpoint**: RF-06 e RF-09 aceitos — produto completo funcionalmente.
 

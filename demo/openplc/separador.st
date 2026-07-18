@@ -8,25 +8,26 @@
       (desvia a peça para a calha lateral), espera o fim de curso, recolhe
       e religa a esteira. Peças baixas seguem direto até o fim da esteira.
 
-  Endereços (contracts/modbus-mapping.md — a Forja é o *Slave Device*;
-  o OpenPLC mapeia I/O remoto a partir de %IX100.0 / %QX100.0):
+  Endereços (contracts/modbus-mapping.md — a Forja é o dispositivo remoto;
+  o OpenPLC v4 mapeia I/O remoto a partir de %IX0.0 / %QX0.0, conforme a
+  coluna Address do IO Tag Mapping; o v3 antigo usava %IX100.0):
 
-    Forja DI 0  -> %IX100.0  sensor de altura (detect)
-    Forja DI 1  -> %IX100.1  fim de curso do pistão (extended)
-    Forja DI 2  -> %IX100.2  botão Start (pressed)
-    Forja coil 0 -> %QX100.0 esteira principal (run)
-    Forja coil 1 -> %QX100.1 pistão desviador (extend)
-    Forja coil 2 -> %QX100.2 luz indicadora (on)
+    Forja DI 0  -> %IX0.0  sensor de altura (detect)
+    Forja DI 1  -> %IX0.1  fim de curso do pistão (extended)
+    Forja DI 2  -> %IX0.2  botão Start (pressed)
+    Forja coil 0 -> %QX0.0 esteira principal (run)
+    Forja coil 1 -> %QX0.1 pistão desviador (extend)
+    Forja coil 2 -> %QX0.2 luz indicadora (on)
 *)
 
 PROGRAM separador
   VAR
-    height_detect   AT %IX100.0 : BOOL;
-    piston_extended AT %IX100.1 : BOOL;
-    start_button    AT %IX100.2 : BOOL;
-    belt_run        AT %QX100.0 : BOOL;
-    piston_extend   AT %QX100.1 : BOOL;
-    run_light       AT %QX100.2 : BOOL;
+    height_detect   AT %IX0.0 : BOOL;
+    piston_extended AT %IX0.1 : BOOL;
+    start_button    AT %IX0.2 : BOOL;
+    belt_run        AT %QX0.0 : BOOL;
+    piston_extend   AT %QX0.1 : BOOL;
+    run_light       AT %QX0.2 : BOOL;
 
     running : BOOL := FALSE;   (* planta ligada (Start alterna) *)
     pushing : BOOL := FALSE;   (* ciclo de desvio em andamento *)

@@ -30,17 +30,22 @@ OpenPLC Runtime ──FC02 lê sensores / FC15 escreve atuadores──▶ Forja:
 
    | Nome | Classe | Tipo | Location |
    |---|---|---|---|
-   | `height_detect` | Local | BOOL | `%IX100.0` |
-   | `piston_extended` | Local | BOOL | `%IX100.1` |
-   | `start_button` | Local | BOOL | `%IX100.2` |
-   | `belt_run` | Local | BOOL | `%QX100.0` |
-   | `piston_extend` | Local | BOOL | `%QX100.1` |
-   | `run_light` | Local | BOOL | `%QX100.2` |
+   | `height_detect` | Local | BOOL | `%IX0.0` |
+   | `piston_extended` | Local | BOOL | `%IX0.1` |
+   | `start_button` | Local | BOOL | `%IX0.2` |
+   | `belt_run` | Local | BOOL | `%QX0.0` |
+   | `piston_extend` | Local | BOOL | `%QX0.1` |
+   | `run_light` | Local | BOOL | `%QX0.2` |
    | `running` | Local | BOOL | — |
    | `pushing` | Local | BOOL | — |
    | `trig_start` | Local | R_TRIG | — |
    | `trig_tall` | Local | R_TRIG | — |
    | `retract_tmr` | Local | TON | — |
+
+   > **Atenção aos endereços:** o v3 mapeava I/O remoto a partir de
+   > `%IX100.0`; o **v4 mapeia a partir de `%IX0.0`/`%QX0.0`** (o endereço
+   > real aparece na coluna *Address* do IO Tag Mapping do passo 3 — use o
+   > que o Editor mostrar lá).
 
 3. No corpo do programa, cole a lógica (é o miolo de `separador.st`, que
    fica de referência ao lado deste README):
@@ -76,46 +81,53 @@ OpenPLC Runtime ──FC02 lê sensores / FC15 escreve atuadores──▶ Forja:
 
 ## 3. Cadastrar a Forja como dispositivo remoto (Modbus master)
 
-Na árvore do projeto, adicione um **dispositivo remoto** (Remote Device /
-Modbus TCP) — o Editor gera a configuração do master e a envia junto com o
-programa:
+No botão **➕** no topo da barra lateral do projeto, escolha **Remote
+Device** → nome `forja`, protocolo **Modbus** → **Create**. Na tela do
+dispositivo:
 
-- **Nome**: `Forja`
-- **Protocolo**: Modbus TCP · **Host**: `127.0.0.1` · **Porta**: `5020`
-- **Slave/Unit ID**: `1` · **Timeout**: `1000 ms`
-- **Pontos de I/O** (poll de `50 ms` para reação < 100 ms):
+- **Transport**: `TCP/IP` · **IP Address**: `127.0.0.1` · **Port**: `5020`
+- **Timeout (ms)**: `1000` · **Slave ID**: `1`
 
-  | Operação | FC | Offset | Qtde | IEC |
-  |---|---|---|---|---|
-  | Ler Discrete Inputs | 2 | 0 | 3 | `%IX100.0` |
-  | Escrever Coils | 15 | 0 | 3 | `%QX100.0` |
+Em **IO Tag Mapping**, clique **+** e crie os dois grupos (poll de `50 ms`
+para reação < 100 ms):
 
-Correspondência com a cena (contracts/modbus-mapping.md):
+| Name | Function Code | Cycle Time | Offset | Length |
+|---|---|---|---|---|
+| `sensores` | Read Discrete Inputs (FC 2) | 50 ms | 0 | 3 |
+| `atuadores` | Write Multiple Coils (FC 15) | 50 ms | 0 | 3 |
+
+Correspondência com a cena (contracts/modbus-mapping.md; endereços IEC
+conforme a coluna *Address* do IO Tag Mapping):
 
 | Forja | Endereço Forja | Variável no PLC |
 |---|---|---|
-| sensor de altura (detect) | DI 0 | `%IX100.0` |
-| fim de curso do pistão (extended) | DI 1 | `%IX100.1` |
-| botão Start (pressed) | DI 2 | `%IX100.2` |
-| esteira principal (run) | coil 0 | `%QX100.0` |
-| pistão desviador (extend) | coil 1 | `%QX100.1` |
-| luz indicadora (on) | coil 2 | `%QX100.2` |
+| sensor de altura (detect) | DI 0 | `%IX0.0` |
+| fim de curso do pistão (extended) | DI 1 | `%IX0.1` |
+| botão Start (pressed) | DI 2 | `%IX0.2` |
+| esteira principal (run) | coil 0 | `%QX0.0` |
+| pistão desviador (extend) | coil 1 | `%QX0.1` |
+| luz indicadora (on) | coil 2 | `%QX0.2` |
 
 ## 4. Enviar ao Runtime e rodar
 
 1. **Forja primeiro**: rode o projeto no Godot, **Abrir…** →
    `demo/separador-altura.forja` → **Rodar**. O painel "Conexão PLC" mostra
    **Aguardando master…** (a Forja escuta na 5020).
-2. No Editor: **conectar ao Runtime** local (ele encontra o runtime da
-   própria máquina; na primeira vez crie o usuário/senha pedidos), depois
-   **Compilar/Transferir** o programa e **Start PLC**.
-3. Na Forja o estado muda para **Conectado**. No painel **HMI**, pressione o
-   **Botão de comando** (Start):
+2. No Editor, aba **Configuration** (Device → Configuration): IP
+   `localhost` → **Connect** (na primeira vez crie o usuário/senha
+   pedidos; o status vira `● Connected | PLC: EMPTY`).
+3. Salve o projeto (**Ctrl+S**) e aperte o **▶ Play** na barra lateral —
+   ele faz tudo: gera o ST, envia `program.zip` ao Runtime, acompanha a
+   compilação e dá o Start no PLC. **O progresso aparece no painel
+   Console** (baixo): `Program uploaded successfully` → `Compilation
+   completed successfully` → `PLC started.`
+4. Na Forja o estado muda para **Conectado**. No painel **HMI** (canto
+   inferior esquerdo), pressione **Botão de comando #5** (Start):
    - a luz indicadora acende e a esteira liga;
    - peças baixas (S) seguem até o fim da esteira e caem na calha da direita;
    - peças altas (L) param sob o sensor, o pistão as desvia para a calha
      lateral e a esteira religa sozinha.
-4. Start de novo desliga a planta.
+5. Start de novo desliga a planta.
 
 ## Falha segura (Artigo VII)
 
@@ -128,6 +140,8 @@ Religando o PLC, basta **Rodar** de novo na Forja.
 | Sintoma | Causa provável |
 |---|---|
 | `localhost:8080` não abre | Normal no v4 — não existe interface web; use o Editor |
+| ▶ Play "não faz nada" | Veja o painel **Console** (o erro aparece lá); salve o projeto antes (Ctrl+S) |
+| Programa roda mas nada responde | Locations das variáveis não batem com a coluna *Address* do IO Tag Mapping (v4 = `%IX0.x`, não `%IX100.x`) |
 | Editor não encontra o Runtime | Janela "Start OpenPLC Runtime" fechada — abra pelo menu Iniciar |
 | Estado fica em "Aguardando master…" | PLC sem *Start*, dispositivo remoto com host/porta errados, ou pontos de I/O não cadastrados |
 | "Erro" ao dar Rodar na Forja | Porta 5020 ocupada — troque a porta no painel Conexão PLC (e no dispositivo remoto do Editor) |
