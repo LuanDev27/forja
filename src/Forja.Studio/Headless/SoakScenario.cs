@@ -71,17 +71,24 @@ public sealed class SoakScenario : HeadlessScenario
         long managed = SampleManaged();
         long native = (long)OS.GetStaticMemoryUsage();
         double managedRatio = (double)managed / _managedBase;
-        double nativeRatio = (double)native / _nativeBase;
+
+        // A engine só contabiliza memória nativa em build de debug; no
+        // exportado (release) vem 0. Sem isso a razão viraria NaN e o gate
+        // passaria calado — melhor dizer que a medida não existe aqui.
+        bool nativeTracked = _nativeBase > 0;
+        double nativeRatio = nativeTracked ? (double)native / _nativeBase : 0.0;
+        string nativeText = nativeTracked
+            ? $"nativa {_nativeBase / 1024} KiB → {native / 1024} KiB ({nativeRatio:P1})"
+            : "nativa não instrumentada neste build (só em debug)";
 
         GD.Print($"   {SoakTicks / 3600} min simulados · " +
                  $"gerenciada {_managedBase / 1024} KiB → {managed / 1024} KiB ({managedRatio:P1}) · " +
-                 $"nativa {_nativeBase / 1024} KiB → {native / 1024} KiB ({nativeRatio:P1}) · " +
-                 $"peças vivas {alive} (pico {_peakAlive})");
+                 $"{nativeText} · peças vivas {alive} (pico {_peakAlive})");
 
         if (managedRatio > MemoryBudget)
             Fail($"memória gerenciada cresceu para {managedRatio:P1} da linha de base " +
                  $"(limite {MemoryBudget:P0}) — vazamento de objeto.");
-        else if (nativeRatio > MemoryBudget)
+        else if (nativeTracked && nativeRatio > MemoryBudget)
             Fail($"memória nativa cresceu para {nativeRatio:P1} da linha de base " +
                  $"(limite {MemoryBudget:P0}) — RID de física vazando.");
         else if (alive > MaxAlive)

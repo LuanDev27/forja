@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Forja.Anvil.Catalog;
 using Forja.Anvil.Contracts;
 using Forja.Anvil.Scene;
@@ -44,11 +45,11 @@ public partial class Main : Node3D
     {
         string[] args = OS.GetCmdlineUserArgs();
 
-        string catalogDir = ProjectSettings.GlobalizePath("res://catalog/devices");
+        string catalogDir = ResolveCatalogDir();
         var catalogResult = DeviceCatalog.LoadFromDirectory(catalogDir);
         if (!catalogResult.Ok)
         {
-            GD.PushError($"Falha ao carregar catálogo: {catalogResult.Error}");
+            GD.PushError($"Falha ao carregar catálogo de '{catalogDir}': {catalogResult.Error}");
             GetTree().Quit(1);
             return;
         }
@@ -139,6 +140,24 @@ public partial class Main : Node3D
     {
         _loop?.Dispose();
         _physics?.Dispose();
+    }
+
+    /// <summary>
+    /// Onde estão os JSON do catálogo. O loader é da camada 1 (System.IO
+    /// puro, sem Godot — Artigo II), então precisa de um caminho de disco
+    /// DE VERDADE: rodando do projeto isso é `res://`, mas no build exportado
+    /// `res://` mora dentro do `.pck` e não existe no sistema de arquivos.
+    /// Lá o catálogo viaja solto ao lado do executável (e o usuário pode
+    /// inspecionar/estender os tipos — cena é dado, catálogo também).
+    /// </summary>
+    private static string ResolveCatalogDir()
+    {
+        string fromProject = ProjectSettings.GlobalizePath("res://catalog/devices");
+        if (Directory.Exists(fromProject))
+            return fromProject;
+
+        string exeDir = Path.GetDirectoryName(OS.GetExecutablePath()) ?? ".";
+        return Path.Combine(exeDir, "catalog", "devices");
     }
 
     private static string? ArgValue(string[] args, string name)

@@ -11,8 +11,9 @@ obj/
 packages/
 TestResults/
 
-# Build/export
-build/
+# Build/export: saídas fora, script de empacotamento dentro
+build/*
+!build/package.ps1
 *.zip
 
 # OS/editor
