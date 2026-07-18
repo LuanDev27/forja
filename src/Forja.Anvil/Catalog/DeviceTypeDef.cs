@@ -52,6 +52,11 @@ public sealed record DeviceTypeDef
     /// <summary>Cena visual (.tscn) usada só pela camada 4.</summary>
     public string VisualScene { get; init; } = "";
 
+    /// <summary>Colocação no editor: true = assenta com o TOPO no nível do
+    /// chão (pisos/lajes — não engolem o que está sobre elas); false =
+    /// assenta com a base no chão.</summary>
+    public bool FlushToGround { get; init; }
+
     /// <summary>Chave do comportamento registrado na DeviceFactory do core.</summary>
     public required string Behavior { get; init; }
 }

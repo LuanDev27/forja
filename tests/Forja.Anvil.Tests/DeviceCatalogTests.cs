@@ -72,6 +72,42 @@ public class DeviceCatalogTests
     }
 
     [Fact]
+    public void FlushToGround_CarregaDoJsonEDefaultFalse()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), "forja-catalog-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            File.WriteAllText(Path.Combine(dir, "piso.json"), """
+                {
+                  "typeId": "floor",
+                  "category": "Passive",
+                  "displayName": "Piso",
+                  "behavior": "static-body",
+                  "flushToGround": true
+                }
+                """);
+            File.WriteAllText(Path.Combine(dir, "rack.json"), """
+                {
+                  "typeId": "rack.frame",
+                  "category": "Passive",
+                  "displayName": "Grade",
+                  "behavior": "static-body"
+                }
+                """);
+
+            var result = DeviceCatalog.LoadFromDirectory(dir);
+            Assert.True(result.Ok, result.Error);
+            Assert.True(result.Value!.Get("floor").FlushToGround);
+            Assert.False(result.Value!.Get("rack.frame").FlushToGround);
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
     public void LoadFromDirectory_CarregaJsonEDetectaDuplicado()
     {
         string dir = Path.Combine(Path.GetTempPath(), "forja-catalog-" + Guid.NewGuid().ToString("N"));

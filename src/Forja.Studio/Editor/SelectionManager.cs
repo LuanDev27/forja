@@ -228,9 +228,8 @@ public partial class SelectionManager : Node3D
             return;
         }
 
-        // Assenta no chão: centro a meia-altura do visual.
-        float halfHeight = GhostSize(typeId, type).Y / 2f;
-        var pos = new Vec3(Snap(ground.X), halfHeight, Snap(ground.Z));
+        float centerY = PlacementCenterY(type, GhostSize(typeId, type));
+        var pos = new Vec3(Snap(ground.X), centerY, Snap(ground.Z));
 
         if (_ctx.Execute(new PlaceDeviceCommand(typeId, new Pose(pos, 0f))))
         {
@@ -277,9 +276,14 @@ public partial class SelectionManager : Node3D
         }
 
         var size = GhostSize(typeId, type);
-        _ghost.Position = new Vector3(Snap(ground.X), size.Y / 2f, Snap(ground.Z));
+        _ghost.Position = new Vector3(Snap(ground.X), PlacementCenterY(type, size), Snap(ground.Z));
         _ghost.Scale = size;
     }
+
+    /// <summary>Base no chão, ou topo no chão para tipos flushToGround
+    /// (pisos): assim o piso nunca engole o que está apoiado sobre ele.</summary>
+    private static float PlacementCenterY(DeviceTypeDef type, Vector3 size) =>
+        type.FlushToGround ? -size.Y / 2f : size.Y / 2f;
 
     private static Vector3 GhostSize(string typeId, DeviceTypeDef type)
     {

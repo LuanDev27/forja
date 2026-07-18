@@ -4,6 +4,7 @@
   "displayName": "Piso",
   "behavior": "static-body",
   "visualScene": "res://assets/devices/floor.tscn",
+  "flushToGround": true,
   "ports": [],
   "paramDefs": [
     { "name": "sizeX", "type": "float", "default": 10.0, "min": 0.5, "max": 100 },
