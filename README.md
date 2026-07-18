@@ -99,9 +99,33 @@ Princípios que valem para qualquer mudança (detalhe em
 - **Driver é plugin**: o core não conhece Modbus.
 - **Todo comportamento tem teste headless.**
 
+## Integração futura
+
+A Forja é o primeiro módulo de um ecossistema industrial maior (SCADA,
+Industrial API, IIoT, MES, Digital Twin). O papel dela nesse conjunto é ser a
+**fonte de dados do chão de fábrica**, exposta por Modbus TCP — nada mais.
+
+A ponte para o resto (`Modbus TCP ↔ MQTT ↔ Industrial API`) será um **Gateway
+externo**, projeto separado que ainda não existe. O core da Forja continua sem
+conhecer MQTT ou HTTP, fiel ao princípio de que **driver é plugin**.
+
+Nada disso está implementado — é intenção registrada, com a verificação de que
+a arquitetura atual comporta a integração sem retrabalho, em
+[`adr/0001-visao-de-integracao-ecossistema.md`](adr/0001-visao-de-integracao-ecossistema.md).
+
+Todo o ecossistema é construído sob restrição de **custo zero**: self-hostável
+numa máquina, licença permissiva por padrão, sem dependência de serviço
+gerenciado. A Forja já cumpre isso — nenhuma dependência paga, roda sem rede e
+sem conta. Detalhe e armadilhas de licença em
+[`adr/0002-ecossistema-de-custo-zero.md`](adr/0002-ecossistema-de-custo-zero.md).
+
 ## Estado
 
 v1 completa: as cinco fatias (esteira determinística → modo manual → editor →
 catálogo → PLC real) estão entregues e aceitas. O caminho detalhado, com
 tarefas e checklists de aceite, está em
 [`specs/001-forja-v1/`](specs/001-forja-v1/).
+
+O que vem depois — biblioteca de programas de CLP, sinais analógicos, Gateway e
+supervisório — está em [`ROADMAP.md`](ROADMAP.md), e as decisões que o
+sustentam em [`adr/`](adr/).
