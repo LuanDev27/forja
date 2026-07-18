@@ -35,6 +35,11 @@ public partial class Main : Node3D
 
     public DeviceCatalog Catalog { get; private set; } = null!;
 
+    /// <summary>Tempo do boot da engine até a Forja pronta, em ms (RNF-04).
+    /// Medido de dentro para não depender de cronometrar o processo por fora;
+    /// StartupLoadScenario cobra o limite.</summary>
+    public static long StartupMs { get; private set; }
+
     public override void _Ready()
     {
         string[] args = OS.GetCmdlineUserArgs();
@@ -123,8 +128,9 @@ public partial class Main : Node3D
                 loop.Enqueue(new SetModeCommand(SimMode.Run));
         }
 
-        GD.Print($"Forja pronta — cena '{doc.Name}', {doc.Devices.Count} dispositivo(s), " +
-                 $"driver '{doc.Connection.Driver}'.");
+        StartupMs = (long)Time.GetTicksMsec();
+        GD.Print($"Forja pronta em {StartupMs} ms — cena '{doc.Name}', " +
+                 $"{doc.Devices.Count} dispositivo(s), driver '{doc.Connection.Driver}'.");
     }
 
     public override void _PhysicsProcess(double delta) => _loop?.Tick();
