@@ -39,7 +39,14 @@ public sealed class GodotPhysicsWorld : IPhysicsWorld, IDisposable
             body, PhysicsServer3D.BodyState.Transform, ToTransform(spec.Pose, spec.TiltXDeg));
         PhysicsServer3D.BodySetParam(body, PhysicsServer3D.BodyParameter.Friction, spec.Friction);
         if (spec.Kind == BodyKind.Rigid)
+        {
             PhysicsServer3D.BodySetParam(body, PhysicsServer3D.BodyParameter.Mass, spec.Mass);
+
+            // Peça parada tem de dormir: é o que faz 200 peças caberem no
+            // orçamento de 16,6 ms (RNF-01). Explícito para não depender do
+            // default da engine — PerfScenario cobra esse comportamento.
+            PhysicsServer3D.BodySetState(body, PhysicsServer3D.BodyState.CanSleep, true);
+        }
 
         _entityByBody[body] = entityId;
         return new GodotBody(body, shape, spec.TiltXDeg);

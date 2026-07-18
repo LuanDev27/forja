@@ -35,6 +35,7 @@ public partial class HeadlessHost : Node
             new SeparadorDemoScenario(),
             new FailSafeScenario(),
             new DeterminismScenario(),
+            new PerfScenario(),
         });
     }
 
