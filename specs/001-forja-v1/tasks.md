@@ -130,10 +130,10 @@ undo/redo ≥ 50, salvar/carregar round-trip.
 ### Implementation for User Story 3
 
 - [x] T036 [US3] `IEditorCommand.cs` + `UndoRedoStack.cs` (100 níveis) em `src/Forja.Studio/Commands/` com comandos `PlaceDevice`, `MoveDevice`, `RotateDevice`, `DeleteSelection`, `DuplicateSelection`, `EditParam`, `ReassignAddress` — todos operando no `SceneDocument` (research R7)
-- [ ] T037 [US3] Painel de catálogo em `src/Forja.Studio/Editor/CatalogPanel.cs` listando `catalog/devices/*.json` em runtime (Artigo III.2) com preview e colocação por clique
-- [ ] T038 [US3] Seleção e gizmos em `src/Forja.Studio/Editor/`: `SelectionManager.cs`, `MoveGizmo.cs`/`RotateGizmo.cs` com snap de grid (0,1 m) e angular (15°), câmera orbital
-- [ ] T039 [US3] Painel de parâmetros em `src/Forja.Studio/Editor/ParamsPanel.cs` gerado de `DeviceTypeDef.paramDefs` (data-driven, sem UI hardcoded por tipo)
-- [ ] T040 [US3] Salvar/Carregar em `src/Forja.Studio/UI/FileDialogs.cs` (`.forja`, erro de carga com caminho+motivo — Artigo VII.3) + cena nova
+- [x] T037 [US3] Painel de catálogo em `src/Forja.Studio/Editor/CatalogPanel.cs` listando `catalog/devices/*.json` em runtime (Artigo III.2) com preview e colocação por clique
+- [x] T038 [US3] Seleção e gizmos em `src/Forja.Studio/Editor/`: `SelectionManager.cs`, `MoveGizmo.cs`/`RotateGizmo.cs` com snap de grid (0,1 m) e angular (15°), câmera orbital
+- [x] T039 [US3] Painel de parâmetros em `src/Forja.Studio/Editor/ParamsPanel.cs` gerado de `DeviceTypeDef.paramDefs` (data-driven, sem UI hardcoded por tipo)
+- [x] T040 [US3] Salvar/Carregar em `src/Forja.Studio/UI/FileDialogs.cs` (`.forja`, erro de carga com caminho+motivo — Artigo VII.3) + cena nova
 - [ ] T041 [US3] Validação manual RF-02: montar a cena demo do zero só no editor, documentar em `specs/001-forja-v1/checklists/editor-acceptance.md`
 
 **Checkpoint**: usuário monta, salva e roda a própria planta sem tocar em JSON.
