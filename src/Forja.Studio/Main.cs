@@ -7,6 +7,7 @@ using Forja.Core.Devices;
 using Forja.Core.Loop;
 using Forja.Core.Persistence;
 using Forja.Core.Physics;
+using Forja.Studio.Editor;
 using Forja.Studio.Headless;
 using Forja.Studio.Rendering;
 using Forja.Studio.UI;
@@ -92,8 +93,9 @@ public partial class Main : Node3D
         };
 
         // Camada visual sempre presente (também no headless — exercita o
-        // caminho de leitura sem custo de render); toolbar só interativo.
-        AddChild(new SceneView(this) { Name = "SceneView" });
+        // caminho de leitura sem custo de render); toolbar/editor só interativo.
+        var view = new SceneView(this) { Name = "SceneView" };
+        AddChild(view);
 
         if (Array.IndexOf(args, "--forja-tests") >= 0)
         {
@@ -105,6 +107,17 @@ public partial class Main : Node3D
             AddChild(new IoTablePanel(this) { Name = "IoTablePanel" });
             AddChild(new ValidationDialog(this) { Name = "ValidationDialog" });
             AddChild(new HmiInteraction(this) { Name = "HmiInteraction" });
+
+            // Editor (US3): câmera orbital + seleção/gizmos + catálogo +
+            // propriedades + arquivo. Todos dirigem o modelo de edição do
+            // core via EditorContext; ficam ocultos fora do modo Edit.
+            var ctx = new EditorContext(this, view);
+            AddChild(new EditorCamera { Name = "EditorCamera" });
+            AddChild(new SelectionManager(ctx) { Name = "SelectionManager" });
+            AddChild(new CatalogPanel(ctx) { Name = "CatalogPanel" });
+            AddChild(new ParamsPanel(ctx) { Name = "ParamsPanel" });
+            AddChild(new FileDialogs(ctx) { Name = "FileDialogs" });
+
             if (scenePath is not null)
                 loop.Enqueue(new SetModeCommand(SimMode.Run));
         }

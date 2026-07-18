@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using Forja.Anvil;
 using Forja.Anvil.Catalog;
 using Forja.Anvil.Scene;
 using Forja.Core.Devices;
@@ -27,6 +29,7 @@ public partial class SceneView : Node3D
     private readonly Main _main;
     private readonly Dictionary<uint, Node3D> _partNodes = new();
     private readonly HashSet<uint> _partsSeen = new();
+    private readonly HashSet<uint> _selected = new();
 
     private Node3D _devicesRoot = null!;
     private Node3D _partsRoot = null!;
@@ -60,6 +63,117 @@ public partial class SceneView : Node3D
 
             _devicesRoot.AddChild(CreateDeviceVisual(instance, type));
         }
+
+        ApplyHighlight();
+    }
+
+    /// <summary>Realça no 3D os dispositivos selecionados no editor (US3).</summary>
+    public void SetSelected(IEnumerable<uint> ids)
+    {
+        _selected.Clear();
+        foreach (uint id in ids)
+            _selected.Add(id);
+        ApplyHighlight();
+    }
+
+    private void ApplyHighlight()
+    {
+        foreach (var child in _devicesRoot.GetChildren())
+        {
+            if (child is Node3D node && TryParseId(node.Name, out uint id)
+                && node.GetNodeOrNull("outline") is Node3D outline)
+            {
+                outline.Visible = _selected.Contains(id);
+            }
+        }
+    }
+
+    /// <summary>Pick por raio no espaço do editor (Edit não tem física — testa
+    /// o raio contra a caixa unitária de cada visual, em espaço local).</summary>
+    public bool TryPickDevice(Vector3 rayOrigin, Vector3 rayDir, out uint id)
+    {
+        id = 0;
+        float best = float.MaxValue;
+        bool hit = false;
+
+        foreach (var child in _devicesRoot.GetChildren())
+        {
+            if (child is not Node3D node || !TryParseId(node.Name, out uint nid))
+                continue;
+
+            var inv = node.GlobalTransform.AffineInverse();
+            var localOrigin = inv * rayOrigin;
+            var localDir = inv.Basis * rayDir;
+            if (!RayUnitBox(localOrigin, localDir, out float t))
+                continue;
+
+            var worldHit = node.GlobalTransform * (localOrigin + localDir * t);
+            float dist = (worldHit - rayOrigin).Length();
+            if (dist < best)
+            {
+                best = dist;
+                id = nid;
+                hit = true;
+            }
+        }
+
+        return hit;
+    }
+
+    /// <summary>Pose provisória durante arrasto do editor (US3): move só o
+    /// visual — o Document é atualizado por comando no fim do gesto.</summary>
+    public void PreviewDevicePose(uint id, Pose pose)
+    {
+        if (_devicesRoot.GetNodeOrNull($"dev-{id}") is not Node3D node)
+            return;
+
+        foreach (var instance in _main.Loop.Document.Devices)
+        {
+            if (instance.Id != id)
+                continue;
+            if (!_main.Catalog.TryGet(instance.TypeId, out var type))
+                return;
+
+            node.Transform = GodotPhysicsWorld.ToTransform(pose, TiltDeg(instance, type));
+            node.Scale = VisualParams(instance, type).Size;
+            return;
+        }
+    }
+
+    private static bool TryParseId(StringName name, out uint id)
+    {
+        id = 0;
+        string s = name.ToString();
+        return s.StartsWith("dev-") && uint.TryParse(s.AsSpan(4), out id);
+    }
+
+    private static bool RayUnitBox(Vector3 o, Vector3 d, out float t)
+    {
+        t = 0f;
+        float tmin = float.NegativeInfinity, tmax = float.PositiveInfinity;
+        for (int i = 0; i < 3; i++)
+        {
+            float oi = o[i], di = d[i];
+            if (MathF.Abs(di) < 1e-8f)
+            {
+                if (oi < -0.5f || oi > 0.5f)
+                    return false;
+            }
+            else
+            {
+                float t1 = (-0.5f - oi) / di, t2 = (0.5f - oi) / di;
+                if (t1 > t2)
+                    (t1, t2) = (t2, t1);
+                tmin = MathF.Max(tmin, t1);
+                tmax = MathF.Min(tmax, t2);
+                if (tmin > tmax)
+                    return false;
+            }
+        }
+        if (tmax < 0f)
+            return false;
+        t = tmin >= 0f ? tmin : tmax;
+        return true;
     }
 
     public override void _Process(double delta)
@@ -122,9 +236,11 @@ public partial class SceneView : Node3D
         }
     }
 
-    private static Node3D CreateDeviceVisual(DeviceInstance instance, DeviceTypeDef type)
-    {
-        (Vector3 size, Color color, float alpha) = type.Behavior switch
+    /// <summary>Tamanho/cor do visual por comportamento. Público porque o
+    /// editor (US3) usa o mesmo cálculo no ghost de colocação e no preview.</summary>
+    public static (Vector3 Size, Color Color, float Alpha) VisualParams(
+        DeviceInstance instance, DeviceTypeDef type)
+        => type.Behavior switch
         {
             "static-body" => (SizeParams(instance, type), new Color(0.60f, 0.61f, 0.64f), 1f),
             "conveyor" or "conveyor-io" => (
@@ -141,12 +257,37 @@ public partial class SceneView : Node3D
             _ => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.45f, 0.46f, 0.50f), 1f),
         };
 
-        float tilt = type.Behavior == "static-body" ? GetFloat(instance, type, "tilt", 0f) : 0f;
+    /// <summary>Inclinação visual (só static-body tem "tilt") — mesma conversão
+    /// usada pela física.</summary>
+    public static float TiltDeg(DeviceInstance instance, DeviceTypeDef type) =>
+        type.Behavior == "static-body" ? GetFloat(instance, type, "tilt", 0f) : 0f;
+
+    private static Node3D CreateDeviceVisual(DeviceInstance instance, DeviceTypeDef type)
+    {
+        (Vector3 size, Color color, float alpha) = VisualParams(instance, type);
+        float tilt = TiltDeg(instance, type);
 
         var node = InstantiateVisual(type.VisualScene, color, alpha);
         node.Name = $"dev-{instance.Id}";
         node.Transform = GodotPhysicsWorld.ToTransform(instance.Transform, tilt);
         node.Scale = size;
+
+        // Contorno de seleção (oculto por padrão) — caixa levemente maior.
+        node.AddChild(new MeshInstance3D
+        {
+            Name = "outline",
+            Mesh = new BoxMesh(),
+            Scale = new Vector3(1.06f, 1.06f, 1.06f),
+            Visible = false,
+            MaterialOverride = new StandardMaterial3D
+            {
+                AlbedoColor = new Color(1f, 0.85f, 0.2f, 0.30f),
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                CullMode = BaseMaterial3D.CullModeEnum.Front,
+            },
+        });
+
         return node;
     }
 
