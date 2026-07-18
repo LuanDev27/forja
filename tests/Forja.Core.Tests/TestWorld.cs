@@ -87,6 +87,8 @@ internal sealed class FakePhysicsWorld : IPhysicsWorld
         public bool Asleep => false;
 
         public void SetSurfaceVelocity(Vec3 velocity) { }
+
+        public void Wake() { }
     }
 }
 

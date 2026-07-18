@@ -1,0 +1,14 @@
+{
+  "typeId": "sensor.height",
+  "category": "Sensor",
+  "displayName": "Sensor de altura",
+  "behavior": "height-sensor",
+  "visualScene": "res://assets/devices/sensor.height.tscn",
+  "ports": [
+    { "portName": "detect", "direction": "In" }
+  ],
+  "paramDefs": [
+    { "name": "range", "type": "float", "default": 2.0, "min": 0.1, "max": 10 },
+    { "name": "threshold", "type": "float", "default": 0.5, "min": 0.05, "max": 5 }
+  ]
+}

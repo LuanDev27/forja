@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat"]
+albedo_color = Color(0.45, 0.46, 0.52, 1)
+
+[sub_resource type="BoxMesh" id="box"]
+material = SubResource("mat")
+
+[node name="hmi_switch" type="MeshInstance3D"]
+mesh = SubResource("box")

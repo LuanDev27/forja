@@ -55,6 +55,22 @@ public sealed class ConveyorBeltIo : ConveyorBelt
         {
             _running = run;
             Body?.SetSurfaceVelocity(run ? LocalXAxis() * Speed : Vec3.Zero);
+
+            // Peças dormindo sobre a esteira não acordam sozinhas quando a
+            // superfície estática muda de velocidade — acorda o que está em cima.
+            if (run)
+                WakePartsOnBelt(ctx);
+        }
+    }
+
+    private void WakePartsOnBelt(SimContext ctx)
+    {
+        var center = Instance.Transform.Pos + new Vec3(0f, 0.2f, 0f);
+        var half = new Vec3(GetFloat("length", 3f) / 2f, 0.25f, GetFloat("width", 0.5f) / 2f);
+        foreach (uint id in ctx.Physics.QueryBox(center, half))
+        {
+            if (ctx.Parts.TryGet(id, out var part))
+                part.Body.Wake();
         }
     }
 

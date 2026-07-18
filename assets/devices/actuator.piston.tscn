@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat"]
+albedo_color = Color(0.62, 0.48, 0.30, 1)
+
+[sub_resource type="BoxMesh" id="box"]
+material = SubResource("mat")
+
+[node name="actuator_piston" type="MeshInstance3D"]
+mesh = SubResource("box")

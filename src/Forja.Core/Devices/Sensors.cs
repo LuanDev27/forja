@@ -30,6 +30,32 @@ public sealed class PhotoSensor : DeviceBehavior
 }
 
 /// <summary>
+/// Sensor de altura difuso (RF-03): montado ACIMA da esteira olhando para
+/// baixo (−Y), mede a distância até o primeiro corpo. Detecta quando o eco
+/// vem de uma peça a até "threshold" metros — peça alta chega perto do
+/// sensor, peça baixa fica além do threshold. É o sensor do separador por
+/// altura da demo (contracts/modbus-mapping.md).
+/// </summary>
+public sealed class HeightSensor : DeviceBehavior
+{
+    private bool _detected;
+
+    public override void Tick(SimContext ctx)
+    {
+        var from = Instance.Transform.Pos;
+        var to = from + new Vec3(0f, -GetFloat("range", 2f), 0f);
+
+        var hit = ctx.Physics.Raycast(from, to);
+        _detected = hit is { } h && ctx.Parts.IsPart(h.EntityId)
+            && from.Y - h.Point.Y <= GetFloat("threshold", 0.5f);
+
+        ctx.Io.SetInput(Id, "detect", _detected);
+    }
+
+    public override void WriteState(ref StateHasher hasher) => hasher.Add(_detected);
+}
+
+/// <summary>
 /// Sensor de proximidade (RF-03): capacitivo detecta qualquer peça;
 /// indutivo detecta só metal (usa PartKind.Material).
 /// </summary>

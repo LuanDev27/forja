@@ -150,6 +150,9 @@ public sealed class GodotPhysicsWorld : IPhysicsWorld, IDisposable
         public bool Asleep =>
             PhysicsServer3D.BodyGetState(Body, PhysicsServer3D.BodyState.Sleeping).AsBool();
 
+        public void Wake() =>
+            PhysicsServer3D.BodySetState(Body, PhysicsServer3D.BodyState.Sleeping, false);
+
         /// <summary>Em corpo estático, LinearVelocity vira velocidade constante
         /// de superfície (mesmo mecanismo do StaticBody3D — esteiras).</summary>
         public void SetSurfaceVelocity(Vec3 velocity) =>

@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat"]
+albedo_color = Color(0.36, 0.44, 0.58, 1)
+
+[sub_resource type="BoxMesh" id="box"]
+material = SubResource("mat")
+
+[node name="sensor_proximity" type="MeshInstance3D"]
+mesh = SubResource("box")

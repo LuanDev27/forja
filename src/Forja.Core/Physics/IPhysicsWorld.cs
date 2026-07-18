@@ -34,6 +34,11 @@ public interface IPhysicsBody
     void SetSurfaceVelocity(Vec3 velocity);
 
     bool Asleep { get; }
+
+    /// <summary>Acorda o corpo. Necessário quando uma superfície em contato
+    /// muda de velocidade (esteira liga) — a engine não acorda sozinha
+    /// corpos dormindo sobre um estático que mudou.</summary>
+    void Wake();
 }
 
 /// <summary>

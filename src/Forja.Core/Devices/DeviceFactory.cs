@@ -40,6 +40,7 @@ public sealed class DeviceFactory
         factory.Register("sink", () => new Sink());
         factory.Register("photo-sensor", () => new PhotoSensor());
         factory.Register("proximity-sensor", () => new ProximitySensor());
+        factory.Register("height-sensor", () => new HeightSensor());
         factory.Register("piston", () => new Piston());
         factory.Register("stopper", () => new Stopper());
         factory.Register("push-button", () => new PushButton());

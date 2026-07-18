@@ -147,12 +147,12 @@ e com teste headless.
 
 **Independent Test**: aceite RF-03 — teste headless por dispositivo.
 
-- [ ] T042 [P] [US4] `ConveyorBeltIo.cs` (liga/desliga por coil) em `src/Forja.Core/Devices/` + `catalog/devices/conveyor.belt.io.json` + teste em `tests/Forja.Headless.Tests/Devices/ConveyorIoTest.cs`
-- [ ] T043 [P] [US4] `ProximitySensor.cs` (capacitivo detecta tudo / indutivo só metal — usa `PartKind.material`) + `HeightSensor.cs` (difuso com threshold) + catálogos + testes em `tests/Forja.Headless.Tests/Devices/SensorsTest.cs`
-- [ ] T044 [P] [US4] `Pusher.cs` (desviador) + `Stopper.cs` (trava de esteira) + catálogos + testes em `tests/Forja.Headless.Tests/Devices/ActuatorsTest.cs`
-- [ ] T045 [P] [US4] Passivos: `guia lateral` e `grade estrutural` (variações de `StaticBody` via params) + catálogos + teste de colisão em `tests/Forja.Headless.Tests/Devices/PassiveTest.cs`
-- [ ] T046 [US4] Visuais `.tscn` em `assets/devices/` para todos os tipos novos + entrada no painel de catálogo (verificar que NENHUM exige recompilar o editor — Artigo III.2)
-- [ ] T047 [US4] Teste-matriz de persistência em `tests/Forja.Core.Tests/CatalogRoundTripTests.cs`: para cada um dos 16 typeIds — colocar, salvar, recarregar, comparar (aceite RF-03)
+- [x] T042 [P] [US4] `ConveyorBeltIo.cs` (liga/desliga por coil) em `src/Forja.Core/Devices/` + `catalog/devices/conveyor.belt.io.json` + teste em `tests/Forja.Headless.Tests/Devices/ConveyorIoTest.cs`
+- [x] T043 [P] [US4] `ProximitySensor.cs` (capacitivo detecta tudo / indutivo só metal — usa `PartKind.material`) + `HeightSensor.cs` (difuso com threshold) + catálogos + testes em `tests/Forja.Headless.Tests/Devices/SensorsTest.cs`
+- [x] T044 [P] [US4] `Pusher.cs` (desviador) + `Stopper.cs` (trava de esteira) + catálogos + testes em `tests/Forja.Headless.Tests/Devices/ActuatorsTest.cs`
+- [x] T045 [P] [US4] Passivos: `guia lateral` e `grade estrutural` (variações de `StaticBody` via params) + catálogos + teste de colisão em `tests/Forja.Headless.Tests/Devices/PassiveTest.cs`
+- [x] T046 [US4] Visuais `.tscn` em `assets/devices/` para todos os tipos novos + entrada no painel de catálogo (verificar que NENHUM exige recompilar o editor — Artigo III.2)
+- [x] T047 [US4] Teste-matriz de persistência em `tests/Forja.Core.Tests/CatalogRoundTripTests.cs`: para cada um dos 16 typeIds — colocar, salvar, recarregar, comparar (aceite RF-03)
 
 **Checkpoint**: catálogo v1 congelado e 100% testado.
 
@@ -268,3 +268,29 @@ US5 (PLC real). Nenhuma fase entrega "camada horizontal" (Artigo VIII).
   (timeout ⇒ Faulted, atividade nova ⇒ Ready); cliente com reconexão em
   backoff (500 ms→5 s). `DriverRegistry` resolve a chave da ConnectionConfig e
   dimensiona buffers por `IoTable.OutputCount`.
+
+## Notas de implementação (sessão 5, 2026-07-17 — US4)
+
+- **T042–T045**: testes como cenários do runner headless
+  (`src/Forja.Studio/Headless/DeviceScenarios.cs`): `ConveyorIoScenario`,
+  `SensorsScenario` (4 zonas: capacitivo/indutivo×plástico/metal + altura
+  S/L), `ActuatorsScenario` (stopper segura/solta + pusher), `PassivesScenario`
+  (grade colide, guia segura peça na esteira).
+- **T044**: `Pusher.cs` não existe — o comportamento `piston` já foi
+  desenhado para os dois papéis (porta "extended" opcional); o pusher é só
+  `catalog/devices/actuator.pusher.json` reutilizando `piston` sem a porta
+  (exatamente o caminho data-driven do Artigo III.2).
+- **T043**: `HeightSensor` é difuso para BAIXO (−Y): raycast mede distância
+  ao primeiro corpo; detecta peça com eco ≤ `threshold`. Peça L (topo 0,55 m)
+  dispara com sensor a 1 m e threshold 0,5; peça S (topo 0,2 m) não.
+- **Descoberta de física (T042)**: peça dormindo sobre esteira estática NÃO
+  acorda quando a superfície muda de velocidade — `IPhysicsBody.Wake()` novo;
+  `ConveyorBeltIo` acorda as peças sobre a esteira ao ligar.
+- **T046**: caixa unitária `.tscn` para todos os tipos, EXCETO `hmi.light` —
+  a luz usa de propósito o box procedural de fallback do SceneView, que cria
+  material POR INSTÂNCIA (um `.tscn` compartilharia o material e todas as
+  luzes acenderiam juntas).
+- **T047**: catálogo v1 congelado com **17 typeIds** (o "16" do plano não
+  contava o `actuator.pusher` separado do pistão); a matriz roda sobre o
+  catálogo REAL do repositório e também valida que todo behavior resolve na
+  `DeviceFactory`.

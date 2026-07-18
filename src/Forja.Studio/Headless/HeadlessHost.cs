@@ -28,6 +28,10 @@ public partial class HeadlessHost : Node
             new SimModeE2EScenario(),
             new SensorActuatorScenario(),
             new HmiScenario(),
+            new ConveyorIoScenario(),
+            new SensorsScenario(),
+            new ActuatorsScenario(),
+            new PassivesScenario(),
             new DeterminismScenario(),
         });
     }
