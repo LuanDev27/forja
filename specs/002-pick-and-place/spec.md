@@ -122,8 +122,10 @@ garra deve acompanhar visualmente os dois eixos.
 - **Garra ligada sem peça** — não prende nada e não trava a sequência (US1-4).
 - **Mais de uma peça ao alcance** — prende exatamente uma, escolhida por
   critério determinístico e estável entre execuções.
-- **Garra desligada em movimento** — a peça é solta e cai a partir dali,
-  herdando a velocidade do cabeçote, sem "teletransporte" nem repouso instantâneo.
+- **Garra desligada em movimento** — a peça é solta e cai a partir dali, **em
+  repouso**, sem herdar a inércia do cabeçote. Fisicamente imperfeito e assumido
+  como tal (ver FR-006): só é observável num comando que a lógica correta nunca
+  dá. O exigido é que não corrompa a simulação.
 - **Peça presa quando a simulação sai de Rodar** (Pause/Edit) — o estado é
   desmontado sem deixar peça órfã presa a um dispositivo que não existe mais.
 - **Peça presa atinge estrutura** — o comportamento é observável e não corrompe
@@ -146,7 +148,12 @@ garra deve acompanhar visualmente os dois eixos.
   vincular essa peça ao cabeçote, de modo que ela acompanhe ambos os eixos e
   deixe de responder à gravidade.
 - **FR-006**: Ao desacionar a garra, o sistema MUST devolver a peça ao
-  comportamento normal a partir da posição e velocidade correntes do cabeçote.
+  comportamento normal a partir da **posição** corrente do cabeçote.
+  *(Emendado após [research R2](research.md#r2--velocidade-ao-soltar-a-física-real-resolve-o-requisito):
+  a versão original exigia herdar também a velocidade. Um pick-and-place real
+  para antes de soltar, então soltar em movimento não é modo de operação — é
+  erro que o próprio cenário 06 ensina a evitar por intertravamento. Manter a
+  abstração de física mínima venceu.)*
 - **FR-007**: Quando houver mais de uma peça ao alcance, o sistema MUST prender
   exatamente uma, por critério determinístico.
 - **FR-008**: O estado do dispositivo — posição dos dois eixos e identidade da
