@@ -83,6 +83,22 @@ transferência e teste de queda do PLC) está em
 [`demo/openplc/README.md`](demo/openplc/README.md). O mapa de endereços é o de
 [`contracts/modbus-mapping.md`](specs/001-forja-v1/contracts/modbus-mapping.md).
 
+## Biblioteca de lógica de CLP
+
+[`plc/`](plc/) tem cenários clássicos de automação, cada um com a planta, o
+programa em Texto Estruturado e um README explicando o raciocínio — não só o
+que a lógica faz, mas a decisão de projeto por trás dela e o que dá errado sem
+aquele intertravamento.
+
+| # | Cenário | Conceitos |
+|---|---|---|
+| [01](plc/01-partida-parada-selo/) | Partida/parada com selo | selo, parada dominante, botoeira NA e NF, nível vs borda |
+| [02](plc/02-intertravamento-emergencia/) | Intertravamento e emergência | realimentação física, emergência travada, rearme obrigatório |
+| [03](plc/03-contagem-batelada/) | Contagem e batelada | contador `CTU`, filtro de repique, ordem de avaliação, erro de um |
+
+É o que a bancada existe para fazer: em vez de descrever a lógica no papel, ela
+roda contra uma planta que obedece à física, comandada por um CLP de verdade.
+
 ## Como o código é organizado
 
 Quatro camadas, dependência só para baixo — regra vigiada por teste de
