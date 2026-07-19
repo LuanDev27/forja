@@ -3,6 +3,10 @@
 *.translation
 export_credentials.cfg
 
+# .import é regenerado por `godot --headless --import` (o CI faz isso);
+# versioná-lo só geraria conflito a cada reimportação.
+*.import
+
 # .NET
 bin/
 obj/

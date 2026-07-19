@@ -33,7 +33,8 @@ os seis pontos em notação dupla, painel de conexão Modbus e o painel de HMI](
 
 ### Do pacote pronto (usuário)
 
-Baixe o ZIP, extraia e rode `Forja.exe`. Não precisa instalar nada — nem .NET.
+Baixe o ZIP em [**Releases**](../../releases), extraia e rode `Forja.exe`. Não
+precisa instalar nada — nem .NET.
 Depois: **Abrir…** → `demo\separador-altura.forja` → **Rodar**.
 
 ### Do código (desenvolvimento)
@@ -54,7 +55,7 @@ godot --path . -- --scene demo/separador-altura.forja
 ### Testes
 
 ```powershell
-dotnet test Forja.Studio.sln              # 110 testes de lógica (xUnit)
+dotnet test Forja.Studio.sln              # 111 testes de lógica (xUnit)
 godot --headless --path . -- --forja-tests  # 15 cenários com física real
 ```
 
@@ -129,3 +130,14 @@ tarefas e checklists de aceite, está em
 O que vem depois — biblioteca de programas de CLP, sinais analógicos, Gateway e
 supervisório — está em [`ROADMAP.md`](ROADMAP.md), e as decisões que o
 sustentam em [`adr/`](adr/).
+
+## Licença
+
+[MIT](LICENSE) — use, modifique e distribua à vontade, inclusive
+comercialmente, mantendo o aviso de copyright.
+
+A Forja não depende de nada pago nem de serviço gerenciado: roda offline, sem
+conta e sem chave de API. Godot (MIT), .NET (MIT) e Jolt (MIT) são todos
+permissivos, então o pacote inteiro pode ser redistribuído sem contaminação de
+licença — o critério está em
+[`adr/0002-ecossistema-de-custo-zero.md`](adr/0002-ecossistema-de-custo-zero.md).
