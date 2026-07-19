@@ -11,15 +11,27 @@ namespace Forja.Core.Tests;
 /// <summary>
 /// T047 / RF-03 / RF-08: matriz de persistência sobre o catálogo REAL do
 /// repositório — cada tipo é colocado por comando de editor, endereçado,
-/// salvo e recarregado; o JSON canônico tem de bater. Também congela a lista
-/// de typeIds da v1 e garante que todo behavior do catálogo resolve na
+/// salvo e recarregado; o JSON canônico tem de bater. Também mantém a lista
+/// de typeIds DECLARADA e garante que todo behavior do catálogo resolve na
 /// DeviceFactory (nada exige recompilar — Artigo III.2).
 /// </summary>
 public class CatalogRoundTripTests
 {
-    /// <summary>Catálogo v1 congelado (checkpoint da US4).</summary>
-    private static readonly string[] V1TypeIds =
+    /// <summary>
+    /// Catálogo declarado. Já foi "congelado em 17 tipos" (checkpoint da US4);
+    /// o ADR 0004 abriu o congelamento e o substituiu por um critério:
+    ///
+    ///   tipo novo entra quando habilita uma CLASSE de lógica de CLP que o
+    ///   catálogo atual não permite escrever — não por variação estética,
+    ///   conveniência de cena ou completude.
+    ///
+    /// Esta lista continua existindo porque o valor dela nunca foi o
+    /// congelamento, e sim a DELIBERAÇÃO: um tipo novo no disco quebra este
+    /// teste, e quem for consertá-lo tem de passar pelo critério acima.
+    /// </summary>
+    private static readonly string[] CatalogTypeIds =
     {
+        "actuator.pickplace",
         "actuator.piston",
         "actuator.pusher",
         "actuator.stopper",
@@ -40,7 +52,7 @@ public class CatalogRoundTripTests
     };
 
     public static IEnumerable<object[]> TypeIds() =>
-        V1TypeIds.Select(id => new object[] { id });
+        CatalogTypeIds.Select(id => new object[] { id });
 
     private static DeviceCatalog LoadRealCatalog()
     {
@@ -53,12 +65,12 @@ public class CatalogRoundTripTests
     }
 
     [Fact]
-    public void CatalogoV1Congelado()
+    public void CatalogoDoDiscoBateComODeclarado()
     {
         var catalog = LoadRealCatalog();
         var loaded = catalog.All.Select(t => t.TypeId).OrderBy(t => t, StringComparer.Ordinal);
 
-        Assert.Equal(V1TypeIds.OrderBy(t => t, StringComparer.Ordinal), loaded);
+        Assert.Equal(CatalogTypeIds.OrderBy(t => t, StringComparer.Ordinal), loaded);
     }
 
     [Fact]

@@ -737,3 +737,202 @@ public sealed class PickPlaceSpikeScenario : DeviceScenario
         Connection = new ConnectionConfig { Driver = "null" },
     };
 }
+
+/// <summary>
+/// Spec 002 / US1 e US2 (T017, T024): ciclo completo do pick-and-place com
+/// física real, comandado só por coils — o equivalente headless do modo manual.
+///
+/// Cada passo avança SOMENTE quando o fim de curso confirma (SC-001). Nenhum
+/// temporizador de percurso: é isso que separa uma sequência que funciona de
+/// uma que "funciona nesta velocidade".
+///
+/// Geometria: piso em y=0, peça S assenta em y=0,1. O ponto de pega fica em
+/// deviceY − strokeY − 0,06, então a unidade em y=0,56 com curso 0,4 coloca a
+/// garra exatamente sobre a peça.
+/// </summary>
+public sealed class PickPlaceScenario : DeviceScenario
+{
+    private const ushort AdvanceCoil = 0;
+    private const ushort LowerCoil = 1;
+    private const ushort GripCoil = 2;
+
+    private const ushort DiAdvanced = 0;
+    private const ushort DiRetracted = 1;
+    private const ushort DiLowered = 2;
+    private const ushort DiRaised = 3;
+    private const ushort DiHolding = 4;
+
+    private const float StrokeX = 0.8f;
+    private const float RestY = 0.1f;
+
+    private enum Phase
+    {
+        Settle, Lower, Grip, CarryUp, Advance, LowerAgain, Release, Land, Done,
+    }
+
+    private Phase _phase = Phase.Settle;
+    private float _pickX;
+    private long _safety;
+
+    public override void Begin() => StartRun(BuildScene());
+
+    public override void Tick()
+    {
+        if (++_safety > 6000)
+        {
+            Fail($"timeout na fase {_phase}.");
+            return;
+        }
+
+        var box = PartNear(0.4f, 0f, radius: 3f);
+        if (box is null)
+            return;
+
+        switch (_phase)
+        {
+            case Phase.Settle:
+                if (box.Body.LinearVelocity.Length() < 0.02f && box.Body.Pose.Pos.Y < 0.2f)
+                {
+                    _pickX = box.Body.Pose.Pos.X;
+                    Force(LowerCoil, true);
+                    _phase = Phase.Lower;
+                }
+                break;
+
+            case Phase.Lower:
+                if (Di(DiLowered))
+                {
+                    Force(GripCoil, true);
+                    _phase = Phase.Grip;
+                }
+                break;
+
+            case Phase.Grip:
+                if (!Di(DiHolding))
+                    return;
+                Force(LowerCoil, false);
+                _phase = Phase.CarryUp;
+                break;
+
+            case Phase.CarryUp:
+                // A prova de que está PRESA: sobe junto, contra a gravidade.
+                if (Di(DiRaised))
+                {
+                    if (box.Body.Pose.Pos.Y < RestY + 0.2f)
+                    {
+                        Fail($"cabeçote subiu mas a peça ficou (y={box.Body.Pose.Pos.Y:0.###}) "
+                             + "— a garra não carregou.");
+                        return;
+                    }
+                    Force(AdvanceCoil, true);
+                    _phase = Phase.Advance;
+                }
+                break;
+
+            case Phase.Advance:
+                if (Di(DiAdvanced))
+                {
+                    Force(LowerCoil, true);
+                    _phase = Phase.LowerAgain;
+                }
+                break;
+
+            case Phase.LowerAgain:
+                if (Di(DiLowered))
+                {
+                    Force(GripCoil, false);
+                    _phase = Phase.Release;
+                }
+                break;
+
+            case Phase.Release:
+                if (!Di(DiHolding))
+                {
+                    Force(LowerCoil, false);
+                    Force(AdvanceCoil, false);
+                    _phase = Phase.Land;
+                }
+                break;
+
+            case Phase.Land:
+                if (box.Body.LinearVelocity.Length() >= 0.05f)
+                    return;
+
+                float moved = box.Body.Pose.Pos.X - _pickX;
+                if (MathF.Abs(moved - StrokeX) > 0.15f)
+                {
+                    Fail($"peça deslocou {moved:0.###} m, esperado ~{StrokeX:0.###} m "
+                         + $"(de x={_pickX:0.###} para x={box.Body.Pose.Pos.X:0.###}).");
+                    return;
+                }
+                if (MathF.Abs(box.Body.Pose.Pos.Y - RestY) > 0.12f)
+                {
+                    Fail($"peça não assentou no piso (y={box.Body.Pose.Pos.Y:0.###}).");
+                    return;
+                }
+
+                Godot.GD.Print($"   pegou em x={_pickX:0.###} · depositou em "
+                    + $"x={box.Body.Pose.Pos.X:0.###} (deslocou {moved:0.###} m) · "
+                    + "sequência guiada só por fins de curso");
+                Pass();
+                _phase = Phase.Done;
+                break;
+        }
+    }
+
+    private void Force(ushort coil, bool value) =>
+        Loop.Enqueue(new ForceIoCommand(new IoAddress(IoArea.Coil, coil), value));
+
+    private static SceneDocument BuildScene() => new()
+    {
+        SchemaVersion = SceneDocument.CurrentSchemaVersion,
+        Name = "pick-and-place",
+        Seed = 7,
+        Devices = new()
+        {
+            new DeviceInstance
+            {
+                Id = 1, TypeId = "floor",
+                Transform = new Pose(new Vec3(0.4f, 0, 0), 0),
+                Params = new()
+                {
+                    ["sizeX"] = N(6), ["sizeY"] = N(0.2), ["sizeZ"] = N(4),
+                    ["friction"] = N(0.6),
+                },
+            },
+            new DeviceInstance
+            {
+                Id = 2, TypeId = "emitter",
+                Transform = new Pose(new Vec3(0, 0.5f, 0), 0),
+                Params = new()
+                {
+                    ["interval"] = N(0.1), ["maxParts"] = I(1),
+                    ["sizes"] = S("S"), ["material"] = S("plastic"),
+                },
+            },
+            new DeviceInstance
+            {
+                Id = 3, TypeId = "actuator.pickplace",
+                Transform = new Pose(new Vec3(0, 0.56f, 0), 0),
+                Params = new()
+                {
+                    ["strokeX"] = N(StrokeX), ["strokeY"] = N(0.4),
+                    ["speedX"] = N(1.2), ["speedY"] = N(1.0),
+                    ["gripRange"] = N(0.14),
+                },
+            },
+        },
+        IoMap = new()
+        {
+            new IoTag(3, "advance", new IoAddress(IoArea.Coil, AdvanceCoil)),
+            new IoTag(3, "lower", new IoAddress(IoArea.Coil, LowerCoil)),
+            new IoTag(3, "grip", new IoAddress(IoArea.Coil, GripCoil)),
+            new IoTag(3, "advanced", new IoAddress(IoArea.DiscreteInput, DiAdvanced)),
+            new IoTag(3, "retracted", new IoAddress(IoArea.DiscreteInput, DiRetracted)),
+            new IoTag(3, "lowered", new IoAddress(IoArea.DiscreteInput, DiLowered)),
+            new IoTag(3, "raised", new IoAddress(IoArea.DiscreteInput, DiRaised)),
+            new IoTag(3, "holding", new IoAddress(IoArea.DiscreteInput, DiHolding)),
+        },
+        Connection = new ConnectionConfig { Driver = "null" },
+    };
+}

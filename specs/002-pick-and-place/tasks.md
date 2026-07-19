@@ -60,18 +60,18 @@ manual pega uma peça e a deposita em outro lugar.
 ordem e ver a peça ser transportada. Inclui o caso negativo obrigatório: garra
 no vazio não prende e não trava.
 
-- [ ] T007 [US1] Criar `src/Forja.Core/Devices/PickPlace.cs` com os campos de estado de [data-model.md](data-model.md) e o corpo cinemático do cabeçote em `Build`
-- [ ] T008 [US1] Implementar movimento dos dois eixos em `PickPlace.Tick`, reusando o padrão de rampa de `Piston.Tick` (clamp por velocidade × `SimContext.Dt`)
-- [ ] T009 [US1] Implementar agarrar: `QueryBox` no alcance da garra, filtrar só peças, escolher **menor Id** (R3), converter para `Kinematic` e guardar `heldPartId`
-- [ ] T010 [US1] Implementar conduzir: a cada tick, pose da peça presa := pose do cabeçote
-- [ ] T011 [US1] Implementar soltar: converter de volta para `Rigid`, chamar `Wake()` (R5) e limpar `heldPartId`
-- [ ] T012 [US1] Implementar `Teardown` desfazendo o vínculo (FR-009), e tratar peça removida durante o transporte sem deixar id órfão
-- [ ] T013 [US1] Implementar `WriteState` com as duas extensões e `heldPartId` na ordem fixa de [data-model.md](data-model.md), peça ausente como `0`
-- [ ] T014 [US1] Registrar `factory.Register("pick-place", () => new PickPlace())` em `src/Forja.Core/Devices/DeviceFactory.cs`
-- [ ] T015 [P] [US1] Criar `catalog/devices/actuator.pickplace.json` exatamente como o [contrato](contracts/pickplace-io.md#definição-de-catálogo)
-- [ ] T016 [P] [US1] Testes xUnit em `tests/Forja.Core.Tests/` com física falsa: agarra a de menor id entre várias; garra no vazio não prende; soltar devolve a rígido; `Teardown` desfaz vínculo
-- [ ] T017 [US1] Criar `PickPlaceScenario` headless: ciclo completo pegar → mover → soltar, assertando posição final da peça
-- [ ] T018 [US1] Registrar `PickPlaceScenario` em `HeadlessHost`
+- [x] T007 [US1] Criar `src/Forja.Core/Devices/PickPlace.cs` com os campos de estado de [data-model.md](data-model.md) e o corpo cinemático do cabeçote em `Build`
+- [x] T008 [US1] Implementar movimento dos dois eixos em `PickPlace.Tick`, reusando o padrão de rampa de `Piston.Tick` (clamp por velocidade × `SimContext.Dt`)
+- [x] T009 [US1] Implementar agarrar: `QueryBox` no alcance da garra, filtrar só peças, escolher **menor Id** (R3), converter para `Kinematic` e guardar `heldPartId`
+- [x] T010 [US1] Implementar conduzir: a cada tick, pose da peça presa := pose do cabeçote
+- [x] T011 [US1] Implementar soltar: converter de volta para `Rigid`, chamar `Wake()` (R5) e limpar `heldPartId`
+- [x] T012 [US1] Implementar `Teardown` desfazendo o vínculo (FR-009), e tratar peça removida durante o transporte sem deixar id órfão
+- [x] T013 [US1] Implementar `WriteState` com as duas extensões e `heldPartId` na ordem fixa de [data-model.md](data-model.md), peça ausente como `0`
+- [x] T014 [US1] Registrar `factory.Register("pick-place", () => new PickPlace())` em `src/Forja.Core/Devices/DeviceFactory.cs`
+- [x] T015 [P] [US1] Criar `catalog/devices/actuator.pickplace.json` exatamente como o [contrato](contracts/pickplace-io.md#definição-de-catálogo)
+- [x] T016 [P] [US1] Testes xUnit em `tests/Forja.Core.Tests/` com física falsa: agarra a de menor id entre várias; garra no vazio não prende; soltar devolve a rígido; `Teardown` desfaz vínculo
+- [x] T017 [US1] Criar `PickPlaceScenario` headless: ciclo completo pegar → mover → soltar, assertando posição final da peça
+- [x] T018 [US1] Registrar `PickPlaceScenario` em `HeadlessHost`
 - [ ] T019 [US1] Criar cena mínima de aceite manual em `plc/06-pick-and-place/pick-and-place.forja` (esteira, unidade, destino, sem programa ainda)
 - [ ] T020 [US1] Executar V-B do quickstart no app e registrar o resultado
 
@@ -88,10 +88,10 @@ física em vez de por tempo.
 **Independent Test**: V-C do quickstart — durante o movimento, `advanced` e
 `retracted` são **ambos** falsos.
 
-- [ ] T021 [US2] Publicar os quatro fins de curso em `PickPlace.Tick` com a tolerância de `Piston` (R7), garantindo que não são negação um do outro
-- [ ] T022 [US2] Publicar `holding` a partir de `heldPartId`
-- [ ] T023 [P] [US2] Teste xUnit: no meio do curso os dois fins de curso do eixo são falsos; nos extremos, exatamente um é verdadeiro
-- [ ] T024 [US2] Estender `PickPlaceScenario` para avançar passos **somente** por fim de curso, provando SC-001 sem nenhum temporizador
+- [x] T021 [US2] Publicar os quatro fins de curso em `PickPlace.Tick` com a tolerância de `Piston` (R7), garantindo que não são negação um do outro
+- [x] T022 [US2] Publicar `holding` a partir de `heldPartId`
+- [x] T023 [P] [US2] Teste xUnit: no meio do curso os dois fins de curso do eixo são falsos; nos extremos, exatamente um é verdadeiro
+- [x] T024 [US2] Estender `PickPlaceScenario` para avançar passos **somente** por fim de curso, provando SC-001 sem nenhum temporizador
 - [ ] T025 [US2] Executar V-C do quickstart
 
 **Checkpoint**: o contrato de I/O está completo e provado.
