@@ -20,6 +20,7 @@ Cada pasta é um trio:
 | [01](01-partida-parada-selo/) | Partida/parada com selo | selo (*seal-in*), parada dominante, botoeira NA e NF, nível vs borda |
 | [02](02-intertravamento-emergencia/) | Intertravamento e emergência | intertravamento por realimentação física, emergência travada, rearme obrigatório, partida a frio |
 | [03](03-contagem-batelada/) | Contagem e batelada | contador `CTU`, filtro de repique, ordem de avaliação do reset, erro de um, retentividade |
+| [04](04-alarme-rearme/) | Alarme com rearme e sinaleiro | as duas dimensões do alarme, reconhecer ≠ rearmar, pisca vs fixo, oscilador em ST |
 
 Os cenários são cumulativos: todos reusam o selo do 01.
 

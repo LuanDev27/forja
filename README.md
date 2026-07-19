@@ -95,6 +95,7 @@ aquele intertravamento.
 | [01](plc/01-partida-parada-selo/) | Partida/parada com selo | selo, parada dominante, botoeira NA e NF, nível vs borda |
 | [02](plc/02-intertravamento-emergencia/) | Intertravamento e emergência | realimentação física, emergência travada, rearme obrigatório |
 | [03](plc/03-contagem-batelada/) | Contagem e batelada | contador `CTU`, filtro de repique, ordem de avaliação, erro de um |
+| [04](plc/04-alarme-rearme/) | Alarme com rearme e sinaleiro | latch de alarme, reconhecer ≠ rearmar, pisca vs fixo |
 
 É o que a bancada existe para fazer: em vez de descrever a lógica no papel, ela
 roda contra uma planta que obedece à física, comandada por um CLP de verdade.
