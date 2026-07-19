@@ -118,6 +118,7 @@ public partial class Main : Node3D
             // propriedades + arquivo. Todos dirigem o modelo de edição do
             // core via EditorContext; ficam ocultos fora do modo Edit.
             var ctx = new EditorContext(this, view);
+            AddChild(new EditorGrid(ctx) { Name = "EditorGrid" });
             AddChild(new EditorCamera { Name = "EditorCamera" });
             AddChild(new SelectionManager(ctx) { Name = "SelectionManager" });
             AddChild(new CatalogPanel(ctx) { Name = "CatalogPanel" });
