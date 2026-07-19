@@ -1,5 +1,9 @@
 # Forja
 
+[![CI](https://github.com/LuanDev27/forja/actions/workflows/ci.yml/badge.svg)](https://github.com/LuanDev27/forja/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/LuanDev27/forja?label=download)](https://github.com/LuanDev27/forja/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 > Forje a planta antes de construí-la.
 
 Simulador 3D de plantas industriais para **testar lógica de PLC sem hardware**.
