@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "name": "Pulmão com liberação por espaço",
+  "seed": 42,
+  "devices": [
+    {
+      "id": 1,
+      "typeId": "emitter",
+      "transform": { "pos": [-2.0, 0.6, 0], "rotY": 0 },
+      "params": { "interval": 2.0, "maxParts": 0, "sizes": "S", "material": "plastic" }
+    },
+    {
+      "id": 2,
+      "typeId": "conveyor.belt.io",
+      "transform": { "pos": [0, 0.2, 0], "rotY": 0 },
+      "params": { "length": 5.0, "width": 0.5, "speed": 0.5 }
+    },
+    {
+      "id": 3,
+      "typeId": "sensor.photo",
+      "transform": { "pos": [-1.00, 0.32, 0.45], "rotY": 90 },
+      "params": { "range": 0.9 }
+    },
+    {
+      "id": 4,
+      "typeId": "guide.side",
+      "transform": { "pos": [-0.45, 0.35, 0.28], "rotY": 0 },
+      "params": { "sizeX": 0.8, "sizeY": 0.3, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 5,
+      "typeId": "guide.side",
+      "transform": { "pos": [-0.45, 0.35, -0.28], "rotY": 0 },
+      "params": { "sizeX": 0.8, "sizeY": 0.3, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 6,
+      "typeId": "sensor.photo",
+      "transform": { "pos": [0.05, 0.32, 0.45], "rotY": 90 },
+      "params": { "range": 0.9 }
+    },
+    {
+      "id": 7,
+      "typeId": "actuator.stopper",
+      "transform": { "pos": [0.20, 0.35, 0], "rotY": 0 },
+      "params": { "width": 0.5 }
+    },
+    {
+      "id": 8,
+      "typeId": "sensor.photo",
+      "transform": { "pos": [1.20, 0.32, 0.45], "rotY": 90 },
+      "params": { "range": 0.9 }
+    },
+    {
+      "id": 9,
+      "typeId": "chute",
+      "transform": { "pos": [3.16, -0.14, 0], "rotY": 90 },
+      "params": { "sizeX": 0.6, "sizeY": 0.1, "sizeZ": 1.4, "tilt": 20.0, "friction": 0.2 }
+    },
+    {
+      "id": 10,
+      "typeId": "sink",
+      "transform": { "pos": [4.3, -0.7, 0], "rotY": 0 },
+      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+    },
+    {
+      "id": 11,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.8, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 12,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.45, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 13,
+      "typeId": "hmi.light",
+      "transform": { "pos": [-2.1, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 14,
+      "typeId": "hmi.light",
+      "transform": { "pos": [-1.75, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    }
+  ],
+  "ioMap": [
+    { "deviceId": 11, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 0 } },
+    { "deviceId": 12, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 1 } },
+    { "deviceId": 3, "portName": "detect", "address": { "area": "DiscreteInput", "offset": 2 } },
+    { "deviceId": 6, "portName": "detect", "address": { "area": "DiscreteInput", "offset": 3 } },
+    { "deviceId": 8, "portName": "detect", "address": { "area": "DiscreteInput", "offset": 4 } },
+    { "deviceId": 2, "portName": "run", "address": { "area": "Coil", "offset": 0 } },
+    { "deviceId": 7, "portName": "close", "address": { "area": "Coil", "offset": 1 } },
+    { "deviceId": 13, "portName": "on", "address": { "area": "Coil", "offset": 2 } },
+    { "deviceId": 14, "portName": "on", "address": { "area": "Coil", "offset": 3 } }
+  ],
+  "connection": {
+    "driver": "modbus-tcp-server",
+    "bindAddress": "0.0.0.0",
+    "port": 5020,
+    "unitId": 1,
+    "timeoutMs": 1000
+  }
+}
