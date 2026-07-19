@@ -222,36 +222,76 @@ public partial class SceneView : Node3D
                 _partNodes.Remove(id);
         }
 
-        UpdateIndicatorLights();
+        UpdateDeviceVisualState();
     }
 
-    /// <summary>Acende as luzes indicadoras lendo IndicatorLight.On do core
-    /// (leitura apenas).</summary>
-    private void UpdateIndicatorLights()
+    private static readonly Color LampOn = new(0.95f, 0.85f, 0.25f);
+    private static readonly Color LensOn = new(0.95f, 0.35f, 0.25f);
+    private static readonly Color GlowOff = new(0.30f, 0.30f, 0.20f);
+
+    /// <summary>
+    /// Sincroniza as partes móveis e os indicadores com o estado do core —
+    /// LEITURA apenas (Artigo II.2). Haste e trava usam as mesmas fórmulas de
+    /// Piston.Tick/Stopper.Tick, então o desenho fica exatamente sobre o
+    /// corpo cinemático que empurra a peça, e não perto dele.
+    /// </summary>
+    private void UpdateDeviceVisualState()
     {
         foreach (var device in _main.Loop.Devices)
         {
-            if (device is not IndicatorLight light)
-                continue;
-            if (_devicesRoot.GetNodeOrNull($"dev-{light.Id}") is not Node3D node)
-                continue;
-            if (LampMaterial(node) is not { } mat)
+            if (_devicesRoot.GetNodeOrNull($"dev-{device.Id}") is not Node3D node)
                 continue;
 
-            mat.EmissionEnabled = light.On;
-            mat.Emission = light.On ? new Color(0.95f, 0.85f, 0.25f) : Colors.Black;
-            mat.AlbedoColor = light.On ? new Color(0.85f, 0.78f, 0.25f) : new Color(0.30f, 0.30f, 0.20f);
+            switch (device)
+            {
+                case IndicatorLight light:
+                    SetGlow(node, DeviceVisuals.LampNode, light.On, LampOn);
+                    break;
+
+                case Piston piston when node.GetNodeOrNull<Node3D>(DeviceVisuals.RodNode) is { } rod:
+                    // +X local: a mesma direção de Piston.LocalXAxis(), já que
+                    // a rotação do dispositivo está na base do nó.
+                    rod.Position = new Vector3(piston.Extension, 0f, 0f);
+                    break;
+
+                case Stopper stopper when node.GetNodeOrNull<Node3D>(DeviceVisuals.GateNode) is { } gate:
+                    gate.Position = new Vector3(0f, -Stopper.Drop * (1f - stopper.Raise), 0f);
+                    break;
+
+                case PhotoSensor photo:
+                    SetGlow(node, DeviceVisuals.LensNode, photo.Detected, LensOn);
+                    break;
+
+                case HeightSensor height:
+                    SetGlow(node, DeviceVisuals.LensNode, height.Detected, LensOn);
+                    break;
+
+                case ProximitySensor prox:
+                    SetGlow(node, DeviceVisuals.LensNode, prox.Detected, LensOn);
+                    break;
+            }
         }
     }
 
-    /// <summary>
-    /// Material da lâmpada do dispositivo. Tem de ser um material EXCLUSIVO
-    /// da instância: os materiais de paleta são compartilhados, e mexer neles
-    /// acenderia todas as luzes da cena de uma vez.
-    /// </summary>
-    private static StandardMaterial3D? LampMaterial(Node3D device)
+    /// <summary>Acende (ou apaga) a lente/lâmpada nomeada do dispositivo.</summary>
+    private static void SetGlow(Node3D device, string nodeName, bool on, Color color)
     {
-        var mesh = device.GetNodeOrNull<MeshInstance3D>(DeviceVisuals.LampNode)
+        if (GlowMaterial(device, nodeName) is not { } mat)
+            return;
+
+        mat.EmissionEnabled = on;
+        mat.Emission = on ? color : Colors.Black;
+        mat.AlbedoColor = on ? color * 0.85f : GlowOff;
+    }
+
+    /// <summary>
+    /// Material da lente/lâmpada do dispositivo. Tem de ser um material
+    /// EXCLUSIVO da instância: os materiais de paleta são compartilhados, e
+    /// mexer neles acenderia todas as luzes da cena de uma vez.
+    /// </summary>
+    private static StandardMaterial3D? GlowMaterial(Node3D device, string nodeName)
+    {
+        var mesh = device.GetNodeOrNull<MeshInstance3D>(nodeName)
                    ?? device.GetNodeOrNull<MeshInstance3D>("body");
         if (mesh is null)
             return null;
@@ -280,6 +320,20 @@ public partial class SceneView : Node3D
             "push-button" => (new Vector3(0.12f, 0.06f, 0.12f), new Color(0.70f, 0.28f, 0.24f), 1f),
             "selector-switch" => (new Vector3(0.12f, 0.06f, 0.12f), new Color(0.45f, 0.46f, 0.52f), 1f),
             "indicator-light" => (new Vector3(0.12f, 0.12f, 0.12f), new Color(0.30f, 0.30f, 0.20f), 1f),
+            // Atuadores: a caixa lógica é a do corpo cinemático que a física
+            // move (Piston.Build / Stopper.Build), recolhido. Assim o alvo de
+            // clique e o contorno de seleção coincidem com o que empurra peça.
+            "piston" => (
+                new Vector3(
+                    GetFloat(instance, type, "rodLength", 0.3f),
+                    0.2f,
+                    GetFloat(instance, type, "rodWidth", 0.3f)),
+                new Color(0.55f, 0.57f, 0.62f), 1f),
+            "stopper" => (
+                new Vector3(0.1f, 0.3f, GetFloat(instance, type, "width", 0.5f)),
+                new Color(0.72f, 0.55f, 0.18f), 1f),
+            "photo-sensor" or "height-sensor" or "proximity-sensor" => (
+                new Vector3(0.1f, 0.1f, 0.1f), new Color(0.24f, 0.25f, 0.28f), 1f),
             _ => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.45f, 0.46f, 0.50f), 1f),
         };
 
@@ -368,18 +422,8 @@ public partial class SceneView : Node3D
         GetFloat(instance, type, "sizeZ", 1f));
 
     /// <summary>Parâmetro da instância com fallback no default do catálogo —
-    /// mesma resolução do DeviceBehavior, replicada porque a camada 4 não
-    /// enxerga behaviors instanciados em Edit.</summary>
-    private static float GetFloat(DeviceInstance instance, DeviceTypeDef type, string name, float fallback)
-    {
-        if (instance.Params.TryGetValue(name, out var el) && el.ValueKind == JsonValueKind.Number)
-            return el.GetSingle();
-
-        foreach (var def in type.ParamDefs)
-        {
-            if (def.Name == name && def.Default is { ValueKind: JsonValueKind.Number } dflt)
-                return dflt.GetSingle();
-        }
-        return fallback;
-    }
+    /// mora em DeviceVisuals porque os dois lados (medida lógica e geometria
+    /// desenhada) têm de resolver o parâmetro do MESMO jeito.</summary>
+    private static float GetFloat(DeviceInstance instance, DeviceTypeDef type, string name, float fallback) =>
+        DeviceVisuals.GetFloat(instance, type, name, fallback);
 }
