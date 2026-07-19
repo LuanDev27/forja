@@ -95,7 +95,7 @@ public sealed class PickPlace : DeviceBehavior
         if (_heldPartId != 0)
         {
             if (ctx.Parts.TryGet(_heldPartId, out var held))
-                held.Body.Pose = GripPose(headPose);
+                held.Body.Pose = HeldPose(headPose, held);
             else
                 _heldPartId = 0;
         }
@@ -138,9 +138,24 @@ public sealed class PickPlace : DeviceBehavior
         };
     }
 
-    /// <summary>Onde a peça presa fica: logo abaixo do cabeçote.</summary>
+    /// <summary>
+    /// Face de pega: a "ventosa", na base do cabeçote. É daqui que sai a busca
+    /// por peça e é aqui que a peça encosta.
+    /// </summary>
     private static Pose GripPose(Pose head) =>
         head with { Pos = head.Pos + new Vec3(0f, -HeadHalfY, 0f) };
+
+    /// <summary>
+    /// Onde a peça presa fica: PENDURADA pela face superior, não centrada na
+    /// ventosa. Sem descontar a meia-altura da peça, ela subiria ao ser
+    /// agarrada e o cabeçote teria de penetrá-la para alcançar o centro — que
+    /// é o oposto de como uma ventosa segura.
+    /// </summary>
+    private static Pose HeldPose(Pose head, Part part) =>
+        head with
+        {
+            Pos = head.Pos + new Vec3(0f, -HeadHalfY - part.Kind.HalfExtents.Y, 0f),
+        };
 
     private void TryGrip(SimContext ctx, Pose headPose)
     {

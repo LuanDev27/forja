@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "name": "Pick-and-place sequencial",
+  "seed": 42,
+  "devices": [
+    {
+      "id": 1,
+      "typeId": "conveyor.belt.io",
+      "transform": { "pos": [0, 0.2, 0], "rotY": 0 },
+      "params": { "length": 3.0, "width": 0.5, "speed": 0.4 }
+    },
+    {
+      "id": 2,
+      "typeId": "emitter",
+      "transform": { "pos": [-1.2, 0.6, 0], "rotY": 0 },
+      "params": { "interval": 5.0, "maxParts": 0, "sizes": "S", "material": "plastic" }
+    },
+    {
+      "id": 3,
+      "typeId": "guide.side",
+      "transform": { "pos": [-0.4, 0.35, 0.28], "rotY": 0 },
+      "params": { "sizeX": 1.8, "sizeY": 0.3, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 4,
+      "typeId": "guide.side",
+      "transform": { "pos": [-0.4, 0.35, -0.28], "rotY": 0 },
+      "params": { "sizeX": 1.8, "sizeY": 0.3, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 5,
+      "typeId": "sensor.photo",
+      "transform": { "pos": [0.75, 0.32, 0.45], "rotY": 90 },
+      "params": { "range": 0.9 }
+    },
+    {
+      "id": 6,
+      "typeId": "actuator.stopper",
+      "transform": { "pos": [0.90, 0.35, 0], "rotY": 0 },
+      "params": { "width": 0.5 }
+    },
+    {
+      "id": 7,
+      "typeId": "actuator.pickplace",
+      "transform": { "pos": [0.75, 0.88, 0], "rotY": 0 },
+      "params": {
+        "strokeX": 0.9,
+        "strokeY": 0.35,
+        "speedX": 0.7,
+        "speedY": 0.5,
+        "gripRange": 0.14
+      }
+    },
+    {
+      "id": 8,
+      "typeId": "sink",
+      "transform": { "pos": [1.65, -0.4, 0], "rotY": 0 },
+      "params": { "sizeX": 1.0, "sizeY": 1.2, "sizeZ": 1.0 }
+    },
+    {
+      "id": 9,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.2, 0.1, -1.4], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 10,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-1.85, 0.1, -1.4], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 11,
+      "typeId": "hmi.light",
+      "transform": { "pos": [-1.5, 0.1, -1.4], "rotY": 0 },
+      "params": {}
+    }
+  ],
+  "ioMap": [
+    { "deviceId": 9, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 0 } },
+    { "deviceId": 10, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 1 } },
+    { "deviceId": 5, "portName": "detect", "address": { "area": "DiscreteInput", "offset": 2 } },
+    { "deviceId": 7, "portName": "advanced", "address": { "area": "DiscreteInput", "offset": 3 } },
+    { "deviceId": 7, "portName": "retracted", "address": { "area": "DiscreteInput", "offset": 4 } },
+    { "deviceId": 7, "portName": "lowered", "address": { "area": "DiscreteInput", "offset": 5 } },
+    { "deviceId": 7, "portName": "raised", "address": { "area": "DiscreteInput", "offset": 6 } },
+    { "deviceId": 7, "portName": "holding", "address": { "area": "DiscreteInput", "offset": 7 } },
+    { "deviceId": 1, "portName": "run", "address": { "area": "Coil", "offset": 0 } },
+    { "deviceId": 6, "portName": "close", "address": { "area": "Coil", "offset": 1 } },
+    { "deviceId": 7, "portName": "advance", "address": { "area": "Coil", "offset": 2 } },
+    { "deviceId": 7, "portName": "lower", "address": { "area": "Coil", "offset": 3 } },
+    { "deviceId": 7, "portName": "grip", "address": { "area": "Coil", "offset": 4 } },
+    { "deviceId": 11, "portName": "on", "address": { "area": "Coil", "offset": 5 } }
+  ],
+  "connection": {
+    "driver": "modbus-tcp-server",
+    "bindAddress": "0.0.0.0",
+    "port": 5020,
+    "unitId": 1,
+    "timeoutMs": 1000
+  }
+}

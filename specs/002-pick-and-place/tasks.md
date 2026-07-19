@@ -72,8 +72,8 @@ no vazio não prende e não trava.
 - [x] T016 [P] [US1] Testes xUnit em `tests/Forja.Core.Tests/` com física falsa: agarra a de menor id entre várias; garra no vazio não prende; soltar devolve a rígido; `Teardown` desfaz vínculo
 - [x] T017 [US1] Criar `PickPlaceScenario` headless: ciclo completo pegar → mover → soltar, assertando posição final da peça
 - [x] T018 [US1] Registrar `PickPlaceScenario` em `HeadlessHost`
-- [ ] T019 [US1] Criar cena mínima de aceite manual em `plc/06-pick-and-place/pick-and-place.forja` (esteira, unidade, destino, sem programa ainda)
-- [ ] T020 [US1] Executar V-B do quickstart no app e registrar o resultado
+- [x] T019 [US1] Criar cena mínima de aceite manual em `plc/06-pick-and-place/pick-and-place.forja` (esteira, unidade, destino, sem programa ainda)
+- [x] T020 [US1] Executar V-B do quickstart no app e registrar o resultado
 
 **Checkpoint**: equipamento funcional e operável à mão. **Já é entregável** — o
 usuário consegue demonstrar pick-and-place sem CLP externo.
@@ -92,7 +92,7 @@ física em vez de por tempo.
 - [x] T022 [US2] Publicar `holding` a partir de `heldPartId`
 - [x] T023 [P] [US2] Teste xUnit: no meio do curso os dois fins de curso do eixo são falsos; nos extremos, exatamente um é verdadeiro
 - [x] T024 [US2] Estender `PickPlaceScenario` para avançar passos **somente** por fim de curso, provando SC-001 sem nenhum temporizador
-- [ ] T025 [US2] Executar V-C do quickstart
+- [x] T025 [US2] Executar V-C do quickstart
 
 **Checkpoint**: o contrato de I/O está completo e provado.
 
@@ -104,12 +104,12 @@ física em vez de por tempo.
 
 **Independent Test**: V-D do quickstart — ciclo contínuo sem intervenção.
 
-- [ ] T026 [US3] Completar `plc/06-pick-and-place/pick-and-place.forja` com esteira de origem, destino e HMI, seguindo as lições de geometria dos cenários 03–05 (guias não cruzam feixe; calha e caçamba nas posições validadas no T054)
-- [ ] T027 [US3] Escrever `plc/06-pick-and-place/pick-and-place.st` com a sequência canônica do [contrato](contracts/pickplace-io.md#sequência-canônica) e os três intertravamentos
-- [ ] T028 [US3] Escrever `plc/06-pick-and-place/README.md` explicando máquina de estado por passos, por que cada intertravamento existe e o que acontece sem ele (SC-005)
-- [ ] T029 [P] [US3] Atualizar os índices em `plc/README.md` e no `README.md` da raiz
-- [ ] T030 [US3] Verificar a cena sob master Modbus emulado, medindo que a premissa física se sustenta (peça ao alcance no ponto de coleta), como feito nos cenários 04 e 05
-- [ ] T031 [US3] Executar V-D e V-F do quickstart (ciclo contínuo e 20 transferências sem perder peça)
+- [x] T026 [US3] Completar `plc/06-pick-and-place/pick-and-place.forja` com esteira de origem, destino e HMI, seguindo as lições de geometria dos cenários 03–05 (guias não cruzam feixe; calha e caçamba nas posições validadas no T054)
+- [x] T027 [US3] Escrever `plc/06-pick-and-place/pick-and-place.st` com a sequência canônica do [contrato](contracts/pickplace-io.md#sequência-canônica) e os três intertravamentos
+- [x] T028 [US3] Escrever `plc/06-pick-and-place/README.md` explicando máquina de estado por passos, por que cada intertravamento existe e o que acontece sem ele (SC-005)
+- [x] T029 [P] [US3] Atualizar os índices em `plc/README.md` e no `README.md` da raiz
+- [x] T030 [US3] Verificar a cena sob master Modbus emulado, medindo que a premissa física se sustenta (peça ao alcance no ponto de coleta), como feito nos cenários 04 e 05
+- [x] T031 [US3] Executar V-D e V-F do quickstart (ciclo contínuo e 20 transferências sem perder peça)
 
 **Checkpoint**: Fase 1 do ROADMAP completa, 6 de 6 cenários.
 
@@ -135,7 +135,7 @@ física em vez de por tempo.
 - [ ] T036 [P] Executar V-E (determinismo) e confirmar que o cenário existente continua verde com a unidade em operação
 - [ ] T037 [P] Executar V-G (orçamento de tick) e comparar a folga com a medição atual
 - [ ] T038 Executar V-H (voltar para Edit com peça presa) e V-I (falha de driver com peça presa)
-- [ ] T039 Atualizar a contagem de dispositivos de 17 para 18 no `README.md` da raiz e onde mais aparecer
+- [x] T039 Atualizar a contagem de dispositivos de 17 para 18 no `README.md` da raiz e onde mais aparecer
 - [ ] T040 Rodar a suíte completa (`dotnet test` + `--forja-tests`) e confirmar CI verde no repositório público
 
 ---

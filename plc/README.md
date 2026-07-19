@@ -22,6 +22,7 @@ Cada pasta é um trio:
 | [03](03-contagem-batelada/) | Contagem e batelada | contador `CTU`, filtro de repique, ordem de avaliação do reset, erro de um, retentividade |
 | [04](04-alarme-rearme/) | Alarme com rearme e sinaleiro | as duas dimensões do alarme, reconhecer ≠ rearmar, pisca vs fixo, oscilador em ST |
 | [05](05-pulmao-semaforo/) | Pulmão com liberação por espaço | `CTUD`, `TP`, singularização, ocupação deduzida vs medida |
+| [06](06-pick-and-place/) | Pick-and-place sequencial | máquina de estado por passos, avanço só por confirmação física, intertravamento entre eixos |
 
 Os cenários são cumulativos: todos reusam o selo do 01.
 

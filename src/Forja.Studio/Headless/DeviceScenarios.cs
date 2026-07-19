@@ -746,9 +746,9 @@ public sealed class PickPlaceSpikeScenario : DeviceScenario
 /// temporizador de percurso: é isso que separa uma sequência que funciona de
 /// uma que "funciona nesta velocidade".
 ///
-/// Geometria: piso em y=0, peça S assenta em y=0,1. O ponto de pega fica em
-/// deviceY − strokeY − 0,06, então a unidade em y=0,56 com curso 0,4 coloca a
-/// garra exatamente sobre a peça.
+/// Geometria: piso em y=0, peça S assenta com centro em y=0,1 e topo em 0,2.
+/// A ventosa fica em deviceY − strokeY − 0,06 e deve parar LOGO ACIMA do topo
+/// (0,22), não dentro da peça — daí a unidade em y=0,68 com curso 0,4.
 /// </summary>
 public sealed class PickPlaceScenario : DeviceScenario
 {
@@ -913,7 +913,7 @@ public sealed class PickPlaceScenario : DeviceScenario
             new DeviceInstance
             {
                 Id = 3, TypeId = "actuator.pickplace",
-                Transform = new Pose(new Vec3(0, 0.56f, 0), 0),
+                Transform = new Pose(new Vec3(0, 0.68f, 0), 0),
                 Params = new()
                 {
                     ["strokeX"] = N(StrokeX), ["strokeY"] = N(0.4),

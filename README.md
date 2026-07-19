@@ -20,9 +20,9 @@ os seis pontos em notação dupla, painel de conexão Modbus e o painel de HMI](
 
 - **Editor de cena**: coloca, move (snap 0,1 m), gira (snap 15°), duplica,
   desfaz/refaz e salva a planta num arquivo `.forja` (JSON versionado).
-- **Catálogo de 17 dispositivos**: esteiras (fixa e acionada por I/O), emissor,
+- **Catálogo de 18 dispositivos**: esteiras (fixa e acionada por I/O), emissor,
   removedor, sensores (fotoelétrico, proximidade capacitiva/indutiva, altura),
-  atuadores (pistão, empurrador, trava), HMI (botão, chave, luz) e passivos
+  atuadores (pistão, empurrador, trava, pick-and-place de 2 eixos), HMI e passivos
   (piso, calha, guia lateral, grade).
 - **Modo manual sem PLC**: tabela de I/O com forçar bit — dá para operar a
   planta inteira na mão antes de existir programa nenhum.
@@ -97,6 +97,7 @@ aquele intertravamento.
 | [03](plc/03-contagem-batelada/) | Contagem e batelada | contador `CTU`, filtro de repique, ordem de avaliação, erro de um |
 | [04](plc/04-alarme-rearme/) | Alarme com rearme e sinaleiro | latch de alarme, reconhecer ≠ rearmar, pisca vs fixo |
 | [05](plc/05-pulmao-semaforo/) | Pulmão com liberação por espaço | `CTUD`, `TP`, singularização, ocupação deduzida |
+| [06](plc/06-pick-and-place/) | Pick-and-place sequencial | máquina de estado por passos, intertravamento entre eixos |
 
 É o que a bancada existe para fazer: em vez de descrever a lógica no papel, ela
 roda contra uma planta que obedece à física, comandada por um CLP de verdade.
