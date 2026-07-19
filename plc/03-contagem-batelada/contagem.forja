@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "name": "Contagem e batelada",
+  "seed": 42,
+  "devices": [
+    {
+      "id": 1,
+      "typeId": "emitter",
+      "transform": { "pos": [-1.6, 0.6, 0], "rotY": 0 },
+      "params": { "interval": 1.5, "maxParts": 0, "sizes": "S", "material": "plastic" }
+    },
+    {
+      "id": 2,
+      "typeId": "conveyor.belt.io",
+      "transform": { "pos": [0, 0.2, 0], "rotY": 0 },
+      "params": { "length": 4.0, "width": 0.5, "speed": 0.5 }
+    },
+    {
+      "id": 3,
+      "typeId": "actuator.stopper",
+      "transform": { "pos": [-0.5, 0.35, 0], "rotY": 0 },
+      "params": { "width": 0.5 }
+    },
+    {
+      "id": 12,
+      "typeId": "guide.side",
+      "transform": { "pos": [-1.0, 0.35, 0.28], "rotY": 0 },
+      "params": { "sizeX": 2.0, "sizeY": 0.3, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 13,
+      "typeId": "guide.side",
+      "transform": { "pos": [-1.0, 0.35, -0.28], "rotY": 0 },
+      "params": { "sizeX": 2.0, "sizeY": 0.3, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 4,
+      "typeId": "sensor.photo",
+      "transform": { "pos": [0.3, 0.32, 0.45], "rotY": 90 },
+      "params": { "range": 0.9 }
+    },
+    {
+      "id": 5,
+      "typeId": "chute",
+      "transform": { "pos": [2.66, -0.14, 0], "rotY": 90 },
+      "params": { "sizeX": 0.6, "sizeY": 0.1, "sizeZ": 1.4, "tilt": 20.0, "friction": 0.2 }
+    },
+    {
+      "id": 6,
+      "typeId": "sink",
+      "transform": { "pos": [3.8, -0.7, 0], "rotY": 0 },
+      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+    },
+    {
+      "id": 7,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.8, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 8,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.45, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 9,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.1, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 10,
+      "typeId": "hmi.light",
+      "transform": { "pos": [-1.75, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 11,
+      "typeId": "hmi.light",
+      "transform": { "pos": [-1.4, 0.1, -1.6], "rotY": 0 },
+      "params": {}
+    }
+  ],
+  "ioMap": [
+    { "deviceId": 7, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 0 } },
+    { "deviceId": 8, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 1 } },
+    { "deviceId": 9, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 2 } },
+    { "deviceId": 4, "portName": "detect", "address": { "area": "DiscreteInput", "offset": 3 } },
+    { "deviceId": 2, "portName": "run", "address": { "area": "Coil", "offset": 0 } },
+    { "deviceId": 3, "portName": "close", "address": { "area": "Coil", "offset": 1 } },
+    { "deviceId": 10, "portName": "on", "address": { "area": "Coil", "offset": 2 } },
+    { "deviceId": 11, "portName": "on", "address": { "area": "Coil", "offset": 3 } }
+  ],
+  "connection": {
+    "driver": "modbus-tcp-server",
+    "bindAddress": "0.0.0.0",
+    "port": 5020,
+    "unitId": 1,
+    "timeoutMs": 1000
+  }
+}

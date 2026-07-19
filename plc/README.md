@@ -19,8 +19,9 @@ Cada pasta é um trio:
 |---|---|---|
 | [01](01-partida-parada-selo/) | Partida/parada com selo | selo (*seal-in*), parada dominante, botoeira NA e NF, nível vs borda |
 | [02](02-intertravamento-emergencia/) | Intertravamento e emergência | intertravamento por realimentação física, emergência travada, rearme obrigatório, partida a frio |
+| [03](03-contagem-batelada/) | Contagem e batelada | contador `CTU`, filtro de repique, ordem de avaliação do reset, erro de um, retentividade |
 
-Os cenários são cumulativos: o 02 reusa o selo do 01.
+Os cenários são cumulativos: todos reusam o selo do 01.
 
 ## Como ligar o CLP
 
