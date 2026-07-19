@@ -166,6 +166,29 @@ public sealed class GodotPhysicsWorld : IPhysicsWorld, IDisposable
             PhysicsServer3D.BodySetState(
                 Body, PhysicsServer3D.BodyState.LinearVelocity, ToGodot(velocity));
 
+        /// <summary>
+        /// Troca o modo do corpo (ADR 0004 — garra do pick-and-place).
+        ///
+        /// Shape, space e entity id são configurados à parte de BodySetMode e
+        /// sobrevivem à troca. A velocidade é zerada de propósito: um corpo
+        /// que vira cinemático não deve manter inércia, e um que volta a ser
+        /// rígido deve cair a partir do repouso — decisão R2 da spec 002.
+        /// </summary>
+        public void SetKind(BodyKind kind)
+        {
+            PhysicsServer3D.BodySetMode(Body, kind switch
+            {
+                BodyKind.Static => PhysicsServer3D.BodyMode.Static,
+                BodyKind.Kinematic => PhysicsServer3D.BodyMode.Kinematic,
+                _ => PhysicsServer3D.BodyMode.Rigid,
+            });
+
+            PhysicsServer3D.BodySetState(
+                Body, PhysicsServer3D.BodyState.LinearVelocity, Vector3.Zero);
+            PhysicsServer3D.BodySetState(
+                Body, PhysicsServer3D.BodyState.AngularVelocity, Vector3.Zero);
+        }
+
         public void Free()
         {
             PhysicsServer3D.FreeRid(Body);

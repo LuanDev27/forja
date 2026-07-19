@@ -39,6 +39,20 @@ public interface IPhysicsBody
     /// muda de velocidade (esteira liga) — a engine não acorda sozinha
     /// corpos dormindo sobre um estático que mudou.</summary>
     void Wake();
+
+    /// <summary>
+    /// Troca o tipo do corpo em tempo de execução.
+    ///
+    /// Existe por UM motivo: a garra do pick-and-place. Uma peça agarrada
+    /// deixa de cair sob gravidade (<see cref="BodyKind.Rigid"/>) e passa a ser
+    /// conduzida pelo cabeçote (<see cref="BodyKind.Kinematic"/>); ao ser
+    /// solta, volta. Ver ADR 0004.
+    ///
+    /// NÃO use para conveniência. Trocar o tipo de um corpo muda como ele
+    /// participa da simulação inteira, e a peça é o único caso em que essa
+    /// troca tem significado de domínio.
+    /// </summary>
+    void SetKind(BodyKind kind);
 }
 
 /// <summary>

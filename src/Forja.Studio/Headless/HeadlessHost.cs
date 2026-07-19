@@ -24,6 +24,7 @@ public partial class HeadlessHost : Node
         _pending = new Queue<HeadlessScenario>(new HeadlessScenario[]
         {
             new SmokeBootScenario(),
+            new PickPlaceSpikeScenario(),
             new ConveyorFlowScenario(),
             new SimModeE2EScenario(),
             new SensorActuatorScenario(),

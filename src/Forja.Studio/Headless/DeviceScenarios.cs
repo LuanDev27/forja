@@ -4,6 +4,7 @@ using Forja.Anvil;
 using Forja.Anvil.Contracts;
 using Forja.Anvil.Scene;
 using Forja.Core.Devices;
+using Forja.Core.Physics;
 
 namespace Forja.Studio.Headless;
 
@@ -577,6 +578,158 @@ public sealed class PassivesScenario : DeviceScenario
                 {
                     ["sizeX"] = N(0.8), ["sizeY"] = N(0.4),
                     ["sizeZ"] = N(0.05), ["friction"] = N(0.1),
+                },
+            },
+        },
+        IoMap = new(),
+        Connection = new ConnectionConfig { Driver = "null" },
+    };
+}
+
+/// <summary>
+/// Spike do ADR 0004 / spec 002 (T004): prova que <c>IPhysicsBody.SetKind</c>
+/// funciona em tempo de execução — a capacidade que a garra do pick-and-place
+/// precisa e que não existia.
+///
+/// É o PORTÃO do plano 002: se este cenário reprovar, o caminho de agarrar por
+/// posse cinemática não serve e o desenho inteiro muda (a alternativa seria
+/// recriar o corpo, com o custo de id que o ADR documenta).
+///
+/// O que prova, em ordem:
+///   1. peça rígida cai e assenta no piso;
+///   2. virada cinemática, ela OBEDECE à pose imposta e não cai;
+///   3. devolvida a rígida, volta a cair sob gravidade;
+///   4. e continua colidindo com o piso — o shape sobreviveu às trocas.
+/// </summary>
+public sealed class PickPlaceSpikeScenario : DeviceScenario
+{
+    private const float LiftY = 1.8f;
+
+    private enum Phase { Settle, Carry, CarryVerify, Release, ReleaseVerify, Landed, Done }
+
+    private Phase _phase = Phase.Settle;
+    private int _wait;
+    private float _restY;
+    private float _releaseY;
+    private long _safety;
+
+    public override void Begin() => StartRun(BuildScene());
+
+    public override void Tick()
+    {
+        if (++_safety > 4000)
+        {
+            Fail($"timeout na fase {_phase}.");
+            return;
+        }
+
+        var box = PartNear(0f, 0f, radius: 4f);
+        if (box is null)
+            return;
+
+        switch (_phase)
+        {
+            case Phase.Settle:
+                // Assentou no piso como corpo rígido normal.
+                if (box.Body.LinearVelocity.Length() < 0.02f && box.Body.Pose.Pos.Y < 0.4f)
+                {
+                    _restY = box.Body.Pose.Pos.Y;
+                    box.Body.SetKind(BodyKind.Kinematic);
+                    _phase = Phase.Carry;
+                }
+                break;
+
+            case Phase.Carry:
+                // Conduzida: a pose é imposta, como a garra fará.
+                box.Body.Pose = box.Body.Pose with
+                {
+                    Pos = new Vec3(0f, LiftY, 0f),
+                };
+                _wait = 30;
+                _phase = Phase.CarryVerify;
+                break;
+
+            case Phase.CarryVerify:
+                // Meio segundo no ar SEM cair: é o que "agarrado" significa.
+                if (box.Body.Pose.Pos.Y < LiftY - 0.05f)
+                {
+                    Fail($"peça cinemática caiu (y={box.Body.Pose.Pos.Y:0.###}, esperado {LiftY:0.###}). "
+                         + "SetKind não segurou — reabrir R1.");
+                    return;
+                }
+                if (--_wait <= 0)
+                {
+                    _releaseY = box.Body.Pose.Pos.Y;
+                    box.Body.SetKind(BodyKind.Rigid);
+                    box.Body.Wake();
+                    _wait = 40;
+                    _phase = Phase.Release;
+                }
+                break;
+
+            case Phase.Release:
+                // Voltou a rígida: tem de começar a cair.
+                if (--_wait <= 0)
+                {
+                    if (box.Body.Pose.Pos.Y >= _releaseY - 0.05f)
+                    {
+                        Fail($"peça devolvida a rígida não caiu (y={box.Body.Pose.Pos.Y:0.###} "
+                             + $"contra {_releaseY:0.###} na soltura).");
+                        return;
+                    }
+                    _phase = Phase.ReleaseVerify;
+                }
+                break;
+
+            case Phase.ReleaseVerify:
+                // E tem de PARAR no piso: prova que o shape sobreviveu às trocas.
+                if (box.Body.LinearVelocity.Length() < 0.05f
+                    && MathF.Abs(box.Body.Pose.Pos.Y - _restY) < 0.08f)
+                {
+                    _phase = Phase.Landed;
+                }
+                else if (box.Body.Pose.Pos.Y < _restY - 0.5f)
+                {
+                    Fail($"peça atravessou o piso (y={box.Body.Pose.Pos.Y:0.###}) — "
+                         + "o shape não sobreviveu à troca de modo.");
+                    return;
+                }
+                break;
+
+            case Phase.Landed:
+                Godot.GD.Print($"   rigido->cinematico->rigido OK · repouso y={_restY:0.###} · "
+                    + $"carregada a y={LiftY:0.###} · reassentou em y={box.Body.Pose.Pos.Y:0.###}");
+                Pass();
+                _phase = Phase.Done;
+                break;
+        }
+    }
+
+    private static SceneDocument BuildScene() => new()
+    {
+        SchemaVersion = SceneDocument.CurrentSchemaVersion,
+        Name = "spike SetKind",
+        Seed = 4,
+        Devices = new()
+        {
+            new DeviceInstance
+            {
+                Id = 1, TypeId = "floor",
+                Transform = new Pose(new Vec3(0, 0, 0), 0),
+                Params = new()
+                {
+                    ["sizeX"] = N(6), ["sizeY"] = N(0.2), ["sizeZ"] = N(6),
+                    ["friction"] = N(0.6),
+                },
+            },
+            new DeviceInstance
+            {
+                Id = 2, TypeId = "emitter",
+                Transform = new Pose(new Vec3(0, 0.8f, 0), 0),
+                Params = new()
+                {
+                    ["interval"] = N(0.1), ["maxParts"] = I(1),
+                    ["sizes"] = S("S"), ["material"] = S("plastic"),
                 },
             },
         },

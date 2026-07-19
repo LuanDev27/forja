@@ -1,3 +1,4 @@
+using System.Linq;
 using Forja.Anvil;
 using Forja.Anvil.Catalog;
 using Forja.Anvil.Contracts;
@@ -74,11 +75,17 @@ internal sealed class FakePhysicsWorld : IPhysicsWorld
 
     public RayHit? Raycast(Vec3 from, Vec3 to) => null;
 
-    public IReadOnlyList<uint> QueryBox(Vec3 center, Vec3 halfExtents) => Array.Empty<uint>();
+    /// <summary>O que a próxima QueryBox devolve. A ordem é embaralhada de
+    /// propósito na leitura: quem depender dela em vez de ordenar por id
+    /// quebra o Artigo I.3, e o teste tem de acusar isso.</summary>
+    public List<uint> QueryResult { get; } = new();
+
+    public IReadOnlyList<uint> QueryBox(Vec3 center, Vec3 halfExtents) =>
+        QueryResult.Count == 0 ? Array.Empty<uint>() : QueryResult.AsEnumerable().Reverse().ToArray();
 
     public void SetActive(bool active) => Active = active;
 
-    private sealed class FakeBody : IPhysicsBody
+    internal sealed class FakeBody : IPhysicsBody
     {
         public Pose Pose { get; set; }
 
@@ -86,9 +93,17 @@ internal sealed class FakePhysicsWorld : IPhysicsWorld
 
         public bool Asleep => false;
 
+        /// <summary>Exposto para os testes conferirem que a garra converteu
+        /// o corpo (e o devolveu) — ver ADR 0004.</summary>
+        public BodyKind Kind { get; private set; } = BodyKind.Rigid;
+
+        public int WakeCalls { get; private set; }
+
         public void SetSurfaceVelocity(Vec3 velocity) { }
 
-        public void Wake() { }
+        public void Wake() => WakeCalls++;
+
+        public void SetKind(BodyKind kind) => Kind = kind;
     }
 }
 
