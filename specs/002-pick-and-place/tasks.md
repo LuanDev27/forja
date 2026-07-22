@@ -121,10 +121,10 @@ física em vez de por tempo.
 
 **Independent Test**: V-B observado visualmente; a garra acompanha os dois eixos.
 
-- [ ] T032 [US4] Modelar a unidade em `src/Forja.Studio/Rendering/DeviceVisuals.cs`: coluna, travessa, carro horizontal, haste vertical e garra, com nós nomeados para animação
-- [ ] T033 [US4] Expor `ExtensionX`, `ExtensionY` e `HeldPartId` como leitura em `PickPlace` (Artigo II.2 — a camada visual só lê)
-- [ ] T034 [US4] Animar os dois eixos em `SceneView.UpdateDeviceVisualState`, usando as mesmas fórmulas do `Tick`
-- [ ] T035 [US4] Definir a caixa lógica do tipo em `SceneView.VisualParams` para o pick do editor bater com o equipamento
+- [x] T032 [US4] Modelar a unidade em `src/Forja.Studio/Rendering/DeviceVisuals.cs`: coluna, travessa, carro horizontal, haste vertical e garra, com nós nomeados para animação
+- [x] T033 [US4] Expor `ExtensionX`, `ExtensionY` e `HeldPartId` como leitura em `PickPlace` (Artigo II.2 — a camada visual só lê)
+- [x] T034 [US4] Animar os dois eixos em `SceneView.UpdateDeviceVisualState`, usando as mesmas fórmulas do `Tick`
+- [x] T035 [US4] Definir a caixa lógica do tipo em `SceneView.VisualParams` para o pick do editor bater com o equipamento
 
 **Checkpoint**: coerente com os outros 17 tipos, já modelados.
 

@@ -34,6 +34,12 @@ public static class DeviceVisuals
     /// <summary>Nome do nó da lente do sensor (acende ao detectar).</summary>
     public const string LensNode = "lens";
 
+    /// <summary>Carro horizontal do pick-and-place; desliza em +X por ExtensionX.</summary>
+    public const string CarriageNode = "carriage";
+
+    /// <summary>Cabeçote vertical do pick-and-place; desce em −Y por ExtensionY.</summary>
+    public const string HeadNode = "head";
+
     // Paleta industrial: estrutura em cinza claro, superfícies de trabalho em
     // borracha escura, metal só onde há peça girando ou deslizando.
     private static readonly Color FrameColor = new(0.62f, 0.64f, 0.67f);
@@ -123,6 +129,14 @@ public static class DeviceVisuals
 
             case "static-body":
                 BuildStaticBody(root, type.TypeId, size, fallbackColor);
+                break;
+
+            case "pick-place":
+                BuildPickPlace(
+                    root,
+                    GetFloat(instance, type, "strokeX", 0.8f),
+                    GetFloat(instance, type, "strokeY", 0.4f),
+                    standHeight);
                 break;
 
             default:
@@ -399,6 +413,95 @@ public static class DeviceVisuals
                 new Vector3(0f, railY, sz * (size.Z / 2f - 0.015f)),
                 Frame));
         }
+    }
+
+    /// <summary>
+    /// Pick-and-place cartesiano de dois eixos. Só duas partes se movem, e são
+    /// nós nomeados que o SceneView desloca com as MESMAS fórmulas de
+    /// PickPlace.Tick: o carro ("carriage") desliza em +X local por ExtensionX,
+    /// e o cabeçote ("head", filho do carro, herda o X) desce em −Y por
+    /// ExtensionY. Assim a garra desenhada fica exatamente sobre o cabeçote
+    /// cinemático que a física move. Travessa e colunas são fixas.
+    ///
+    /// O cabeçote em repouso nasce na origem (recolhido e no alto, extX=extY=0),
+    /// que é onde a física põe o corpo cinemático — a garra pega em x=0 e
+    /// deposita em x=strokeX, como manda a sequência do cenário 06.
+    /// </summary>
+    private static void BuildPickPlace(Node3D root, float strokeX, float strokeY, float standHeight)
+    {
+        const float beamTop = 0.30f;    // altura da travessa acima do cabeçote recolhido
+        const float headHalfY = 0.06f;  // = PickPlace.HeadHalfY
+
+        // --- Estrutura fixa: travessa em X sobre o curso horizontal + folga ---
+        float beamLen = strokeX + 0.3f;
+        float beamCx = strokeX / 2f;
+        root.AddChild(BoxMesh(
+            "crossbeam",
+            new Vector3(beamLen, 0.08f, 0.1f),
+            new Vector3(beamCx, beamTop, 0f),
+            Frame));
+
+        // Colunas nas duas pontas da travessa até o chão (só quando elevado).
+        float colHeight = beamTop + standHeight;
+        if (colHeight > 0.15f)
+        {
+            var colSize = new Vector3(0.06f, colHeight, 0.06f);
+            float colY = beamTop - colHeight / 2f;
+            float leftX = beamCx - beamLen / 2f + 0.05f;
+            float rightX = beamCx + beamLen / 2f - 0.05f;
+            root.AddChild(BoxMesh("column-a", colSize, new Vector3(leftX, colY, 0f), Frame));
+            root.AddChild(BoxMesh("column-b", colSize, new Vector3(rightX, colY, 0f), Frame));
+        }
+
+        // --- Carro horizontal: leva os trilhos verticais e o cabeçote. ---
+        var carriage = new Node3D { Name = CarriageNode };
+        carriage.AddChild(BoxMesh(
+            "car-block",
+            new Vector3(0.16f, 0.1f, 0.18f),
+            new Vector3(0f, beamTop, 0f),
+            Steel));
+
+        // Trilhos verticais: fixos ao carro, cobrindo o curso inteiro para o
+        // cabeçote nunca "sair" deles quando desce.
+        float railBottom = -(strokeY + 0.08f);
+        float railLen = beamTop - railBottom;
+        float railCy = (beamTop + railBottom) / 2f;
+        foreach (int sz in new[] { -1, 1 })
+        {
+            carriage.AddChild(Cylinder(
+                $"guide-{sz}",
+                railLen,
+                0.012f,
+                new Vector3(0f, railCy, sz * 0.07f),
+                Axis.Y,
+                Chrome));
+        }
+
+        // --- Cabeçote vertical: filho do carro, desce em −Y. ---
+        var head = new Node3D { Name = HeadNode };
+        head.AddChild(BoxMesh(
+            "head-block",
+            new Vector3(0.14f, 0.12f, 0.14f),
+            Vector3.Zero,
+            Housing));
+
+        // Garra na base do cabeçote — a mesma face de pega de PickPlace.GripPose.
+        head.AddChild(BoxMesh(
+            "gripper",
+            new Vector3(0.1f, 0.03f, 0.08f),
+            new Vector3(0f, -headHalfY - 0.015f, 0f),
+            Steel));
+        foreach (int sx in new[] { -1, 1 })
+        {
+            head.AddChild(BoxMesh(
+                $"finger-{(sx < 0 ? "a" : "b")}",
+                new Vector3(0.02f, 0.06f, 0.05f),
+                new Vector3(sx * 0.045f, -headHalfY - 0.05f, 0f),
+                Accent));
+        }
+
+        carriage.AddChild(head);
+        root.AddChild(carriage);
     }
 
     private static MeshInstance3D BoxMesh(string name, Vector3 size, Vector3 pos, Material material) =>

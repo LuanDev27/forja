@@ -258,6 +258,15 @@ public partial class SceneView : Node3D
                     gate.Position = new Vector3(0f, -Stopper.Drop * (1f - stopper.Raise), 0f);
                     break;
 
+                case PickPlace pick when node.GetNodeOrNull<Node3D>(DeviceVisuals.CarriageNode) is { } carriage:
+                    // Mesmas fórmulas de PickPlace.HeadPose: carro em +X local,
+                    // cabeçote (filho do carro) em −Y. O carro carrega o cabeçote,
+                    // então a composição dá exatamente a pose do corpo cinemático.
+                    carriage.Position = new Vector3(pick.ExtensionX, 0f, 0f);
+                    if (carriage.GetNodeOrNull<Node3D>(DeviceVisuals.HeadNode) is { } head)
+                        head.Position = new Vector3(0f, -pick.ExtensionY, 0f);
+                    break;
+
                 case PhotoSensor photo:
                     SetGlow(node, DeviceVisuals.LensNode, photo.Detected, LensOn);
                     break;
@@ -332,6 +341,12 @@ public partial class SceneView : Node3D
             "stopper" => (
                 new Vector3(0.1f, 0.3f, GetFloat(instance, type, "width", 0.5f)),
                 new Color(0.72f, 0.55f, 0.18f), 1f),
+            // Caixa lógica = o cabeçote cinemático (PickPlace.Build, meia-altura
+            // 0,06), recolhido na origem. O alvo de clique fica sobre a garra —
+            // a ponta de trabalho — e não sobre a travessa fixa.
+            "pick-place" => (
+                new Vector3(0.12f, 0.12f, 0.12f),
+                new Color(0.50f, 0.52f, 0.58f), 1f),
             "photo-sensor" or "height-sensor" or "proximity-sensor" => (
                 new Vector3(0.1f, 0.1f, 0.1f), new Color(0.24f, 0.25f, 0.28f), 1f),
             _ => (new Vector3(0.3f, 0.3f, 0.3f), new Color(0.45f, 0.46f, 0.50f), 1f),
