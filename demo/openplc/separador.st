@@ -28,7 +28,9 @@ PROGRAM separador
     belt_run        AT %QX0.0 : BOOL;
     piston_extend   AT %QX0.1 : BOOL;
     run_light       AT %QX0.2 : BOOL;
+  END_VAR
 
+  VAR
     running : BOOL := FALSE;   (* planta ligada (Start alterna) *)
     pushing : BOOL := FALSE;   (* ciclo de desvio em andamento *)
 

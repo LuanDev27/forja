@@ -43,7 +43,9 @@ PROGRAM alarme
     gate_close AT %QX0.1 : BOOL;
     lamp_run   AT %QX0.2 : BOOL;
     lamp_alarm AT %QX0.3 : BOOL;
+  END_VAR
 
+  VAR
     running : BOOL := FALSE;
 
     (* As duas dimensões do alarme, guardadas separadas de propósito. *)

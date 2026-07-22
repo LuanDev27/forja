@@ -35,14 +35,19 @@ se está**, e é isso que a variável `passo` faz.
 
 ```pascal
 CASE passo OF
-  ST_DESCE:      IF lowered THEN passo := ST_PEGA;      END_IF;
-  ST_PEGA:       IF holding THEN passo := ST_SOBE;      END_IF;
-  ST_SOBE:       IF raised  THEN passo := ST_AVANCA;    END_IF;
+  1:  (* ST_DESCE *)  IF lowered THEN passo := ST_PEGA;   END_IF;
+  2:  (* ST_PEGA  *)  IF holding THEN passo := ST_SOBE;   END_IF;
+  3:  (* ST_SOBE  *)  IF raised  THEN passo := ST_AVANCA; END_IF;
   ...
 ```
 
-Os passos são **constantes nomeadas**, não `1..8` soltos. Quem lê o código seis
-meses depois precisa saber o que o passo 5 significa sem contar nos dedos.
+Os passos são **constantes nomeadas** (`VAR CONSTANT ST_* : INT`), usadas em
+todo avanço `passo := ST_x` e em toda saída `passo = ST_x`: quem lê o código
+seis meses depois sabe o que o passo 5 significa sem contar nos dedos. Só os
+**rótulos do `CASE`** aparecem como `1..8` — a IEC 61131-3 exige literal (ou
+faixa) como rótulo de `CASE`, não constante nomeada, então o nome de cada passo
+vai no comentário ao lado do rótulo. (É a única limitação real que o compilador
+STruC++/MatIEC impõe a esta máquina de estado.)
 
 Em CLPs com suporte a SFC (*Sequential Function Chart*, a quinta linguagem da
 IEC 61131-3), este mesmo ciclo seria desenhado como um grafo de passos e

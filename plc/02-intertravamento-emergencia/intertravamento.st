@@ -45,7 +45,9 @@ PROGRAM intertravamento
     piston_extend   AT %QX0.1 : BOOL;
     lamp_run        AT %QX0.2 : BOOL;
     lamp_emerg      AT %QX0.3 : BOOL;
+  END_VAR
 
+  VAR
     (* Nasce TRUE de propósito: na energização a máquina está travada e
        exige rearme deliberado. Ver "Partida a frio" no README. *)
     emergency : BOOL := TRUE;

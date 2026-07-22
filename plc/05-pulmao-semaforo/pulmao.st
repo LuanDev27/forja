@@ -43,7 +43,9 @@ PROGRAM pulmao
     gate_close   AT %QX0.1 : BOOL;
     lamp_run     AT %QX0.2 : BOOL;
     lamp_full    AT %QX0.3 : BOOL;
+  END_VAR
 
+  VAR
     running : BOOL := FALSE;
 
     occupancy : CTUD;      (* quantas peças estão no pulmão agora *)

@@ -64,7 +64,9 @@ PROGRAM pick_and_place
     lower      AT %QX0.3 : BOOL;
     grip       AT %QX0.4 : BOOL;
     lamp_run   AT %QX0.5 : BOOL;
+  END_VAR
 
+  VAR
     running : BOOL := FALSE;
     passo   : INT  := 0;
   END_VAR
@@ -86,15 +88,20 @@ PROGRAM pick_and_place
      confirmação física.
      ------------------------------------------------------------------ *)
   IF running THEN
+    (* Os rótulos abaixo são os literais inteiros dos passos, não os nomes
+       ST_*: a IEC 61131-3 exige literal (ou faixa) como rótulo de CASE, e
+       não constante nomeada. O nome de cada passo vai no comentário ao
+       lado, e as constantes ST_* seguem nomeando tudo no resto da lógica
+       (nos avanços `passo := ST_x` e nas saídas `passo = ST_x`). *)
     CASE passo OF
 
       (* Peça encostada na trava e sensor confirmando. Só então começa. *)
-      ST_AGUARDA:
+      0:  (* ST_AGUARDA *)
         IF s_peca AND raised AND retracted THEN
           passo := ST_DESCE;
         END_IF;
 
-      ST_DESCE:
+      1:  (* ST_DESCE *)
         IF lowered THEN
           passo := ST_PEGA;
         END_IF;
@@ -102,38 +109,38 @@ PROGRAM pick_and_place
       (* Espera a garra CONFIRMAR que pegou. Sem isso o ciclo seguiria com a
          garra vazia e depositaria nada no destino — a falha mais comum de
          pick-and-place mal escrito. *)
-      ST_PEGA:
+      2:  (* ST_PEGA *)
         IF holding THEN
           passo := ST_SOBE;
         END_IF;
 
-      ST_SOBE:
+      3:  (* ST_SOBE *)
         IF raised THEN
           passo := ST_AVANCA;
         END_IF;
 
-      ST_AVANCA:
+      4:  (* ST_AVANCA *)
         IF advanced THEN
           passo := ST_DESCE_DEP;
         END_IF;
 
-      ST_DESCE_DEP:
+      5:  (* ST_DESCE_DEP *)
         IF lowered THEN
           passo := ST_SOLTA;
         END_IF;
 
       (* Confirma a SOLTURA, não só o comando de soltar. *)
-      ST_SOLTA:
+      6:  (* ST_SOLTA *)
         IF NOT holding THEN
           passo := ST_SOBE_DEP;
         END_IF;
 
-      ST_SOBE_DEP:
+      7:  (* ST_SOBE_DEP *)
         IF raised THEN
           passo := ST_RECUA;
         END_IF;
 
-      ST_RECUA:
+      8:  (* ST_RECUA *)
         IF retracted THEN
           passo := ST_AGUARDA;
         END_IF;
