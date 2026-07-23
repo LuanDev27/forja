@@ -29,17 +29,26 @@ depois que os primeiros ensinarem o que ainda não sei.
 
 ## Estado atual
 
-**Forja v1 completa** — 60/60 tarefas, cinco fatias entregues e aceitas
-(esteira determinística → modo manual → editor → catálogo → PLC real).
-17 dispositivos no catálogo, 110 testes .NET + 15 cenários headless com física,
-validada ponta a ponta contra OpenPLC v4.
+**Fases 0 e 1 fechadas.**
 
-O ativo mais subaproveitado do projeto hoje: a Forja é uma **bancada de CLP
-funcionando**, e existe exatamente um programa de CLP escrito para ela.
+- **Fase 0** — repositório público no GitHub, release `v1.0.0` (ZIP portátil),
+  CI verde em `windows-latest`.
+- **Fase 1** — biblioteca de **6 cenários de CLP** entregues (selo · intertravamento
+  e emergência · contagem/batelada · pulmão com semáforo · alarme com rearme ·
+  pick-and-place sequencial). Os `.st` validados **7/7 no MatIEC** e — nos cenários
+  representativos (01, 02, 06) — também no **STruC++**, o toolchain do OpenPLC que
+  roda em hardware.
 
-**Próximo passo:** Fase 0 (publicar o repositório). Depois, a Fase 1 entra pelo
-fluxo normal do projeto — `/speckit-specify` para virar `specs/002-…`, como foi
-feito na v1.
+**Spec 002 (pick-and-place v2)** fechada — 40/40. O pick-and-place ganhou física
+de garra própria (`IPhysicsBody.SetKind`), geometria de gantry cartesiano e
+cobertura headless das transições críticas (voltar para Edit e falha de driver,
+ambas com peça presa na garra).
+
+Números atuais: **18 dispositivos** no catálogo, **122 testes xUnit** + **19
+cenários headless** com física, validada ponta a ponta contra OpenPLC v4.
+
+**Próximo passo:** Fase 2 (sinais analógicos) — entra pelo fluxo normal do
+projeto com `/speckit-specify`, virando `specs/003-…`.
 
 ---
 
