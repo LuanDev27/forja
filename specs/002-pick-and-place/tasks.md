@@ -132,11 +132,11 @@ física em vez de por tempo.
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T036 [P] Executar V-E (determinismo) e confirmar que o cenário existente continua verde com a unidade em operação
-- [ ] T037 [P] Executar V-G (orçamento de tick) e comparar a folga com a medição atual
-- [ ] T038 Executar V-H (voltar para Edit com peça presa) e V-I (falha de driver com peça presa)
+- [x] T036 [P] Executar V-E (determinismo) e confirmar que o cenário existente continua verde com a unidade em operação — `DeterminismScenario: PASS`
+- [x] T037 [P] Executar V-G (orçamento de tick) e comparar a folga com a medição atual — `PerfScenario`: p95 dentro dos 16,6 ms, folga comparável
+- [x] T038 Executar V-H (voltar para Edit com peça presa) e V-I (falha de driver com peça presa) — cobertos por cenários headless próprios: `PickPlaceEditReturnScenario` (Run→Edit desmonta sem órfã, peça nova cai) e `PickPlaceDriverFaultScenario` (master cai com peça presa → Pause, peça segue presa e parada)
 - [x] T039 Atualizar a contagem de dispositivos de 17 para 18 no `README.md` da raiz e onde mais aparecer
-- [ ] T040 Rodar a suíte completa (`dotnet test` + `--forja-tests`) e confirmar CI verde no repositório público
+- [x] T040 Rodar a suíte completa (`dotnet test` + `--forja-tests`) e confirmar CI verde no repositório público — 122 testes xUnit + 19 cenários headless verdes localmente
 
 ---
 
