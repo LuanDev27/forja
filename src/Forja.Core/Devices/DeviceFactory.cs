@@ -36,6 +36,7 @@ public sealed class DeviceFactory
         factory.Register("static-body", () => new StaticBodyDevice());
         factory.Register("conveyor", () => new ConveyorBelt());
         factory.Register("conveyor-io", () => new ConveyorBeltIo());
+        factory.Register("conveyor-vspeed", () => new VariableSpeedConveyor());
         factory.Register("emitter", () => new Emitter());
         factory.Register("sink", () => new Sink());
         factory.Register("photo-sensor", () => new PhotoSensor());

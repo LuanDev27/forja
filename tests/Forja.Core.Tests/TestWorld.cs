@@ -69,7 +69,16 @@ internal sealed class FakePhysicsWorld : IPhysicsWorld
 {
     public bool Active { get; private set; }
 
-    public IPhysicsBody CreateBox(uint entityId, BodySpec spec) => new FakeBody { Pose = spec.Pose };
+    /// <summary>Corpos criados, por entityId — testes conferem o que a esteira
+    /// aplicou sem precisar do campo protegido do device.</summary>
+    public Dictionary<uint, FakeBody> Bodies { get; } = new();
+
+    public IPhysicsBody CreateBox(uint entityId, BodySpec spec)
+    {
+        var body = new FakeBody { Pose = spec.Pose };
+        Bodies[entityId] = body;
+        return body;
+    }
 
     public void Remove(IPhysicsBody body) { }
 
@@ -103,7 +112,11 @@ internal sealed class FakePhysicsWorld : IPhysicsWorld
 
         public int WakeCalls { get; private set; }
 
-        public void SetSurfaceVelocity(Vec3 velocity) { }
+        /// <summary>Última velocidade de superfície aplicada — testes de esteira
+        /// (inclusive a de velocidade variável) conferem por aqui.</summary>
+        public Vec3 SurfaceVelocity { get; private set; } = Vec3.Zero;
+
+        public void SetSurfaceVelocity(Vec3 velocity) => SurfaceVelocity = velocity;
 
         public void Wake() => WakeCalls++;
 

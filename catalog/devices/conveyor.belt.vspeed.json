@@ -1,0 +1,17 @@
+{
+  "typeId": "conveyor.belt.vspeed",
+  "category": "Transport",
+  "displayName": "Esteira de velocidade variável",
+  "behavior": "conveyor-vspeed",
+  "visualScene": "res://assets/devices/conveyor.belt.tscn",
+  "ports": [
+    { "portName": "speed", "direction": "Out", "type": "Word" }
+  ],
+  "paramDefs": [
+    { "name": "length", "type": "float", "default": 3.0, "min": 0.5, "max": 20 },
+    { "name": "width", "type": "float", "default": 0.5, "min": 0.2, "max": 2 },
+    { "name": "euMin", "type": "float", "default": 0.0, "min": -10, "max": 10 },
+    { "name": "euMax", "type": "float", "default": 2.0, "min": 0.1, "max": 10 },
+    { "name": "euUnit", "type": "string", "default": "m/s" }
+  ]
+}

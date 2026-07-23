@@ -108,10 +108,10 @@ TODAS as user stories. Só fecha com o teste de determinismo verde (Artigo I.4).
 
 **Independent Test**: forçar setpoints crescentes no `%QW` via tabela manual e assertar a velocidade escalando monotonicamente; ponta a ponta, o CLP escreve `%QW` e a sim lê no tick seguinte.
 
-- [ ] T026 [P] [US2] Cenário headless da esteira VV em `tests/Forja.Core.Tests/VariableSpeedConveyorTests.cs`: setpoint 0 → parada, meio → ~1 m/s, fundo → máx; monotônico
-- [ ] T027 [US2] Implementar `VariableSpeedConveyor` (lê `GetOutputWord(Id, "speed")` e aplica à velocidade) reusando a base de `src/Forja.Core/Devices/Conveyors.cs`
-- [ ] T028 [US2] Registrar o comportamento na `src/Forja.Core/Devices/DeviceFactory.cs`
-- [ ] T029 [P] [US2] Catálogo `catalog/devices/conveyor.belt.vspeed.json` (porta `speed` Word/Out, params `euMin`/`euMax`)
+- [x] T026 [P] [US2] Cenário headless da esteira VV em `tests/Forja.Core.Tests/VariableSpeedConveyorTests.cs`: setpoint 0 → parada, meio → ~1 m/s, fundo → máx; monotônico
+- [x] T027 [US2] Implementar `VariableSpeedConveyor` (lê `GetOutputWord(Id, "speed")` e aplica à velocidade) reusando a base de `src/Forja.Core/Devices/Conveyors.cs`
+- [x] T028 [US2] Registrar o comportamento na `src/Forja.Core/Devices/DeviceFactory.cs`
+- [x] T029 [P] [US2] Catálogo `catalog/devices/conveyor.belt.vspeed.json` (porta `speed` Word/Out, params `euMin`/`euMax`)
 - [ ] T030 [US2] Validar ponta a ponta no OpenPLC v4 (quickstart US2) — CLP escreve `%QW`, sim reflete ≤ 1 tick
 
 **Checkpoint**: saída analógica demonstrável sozinha; entrada (US1) intacta.

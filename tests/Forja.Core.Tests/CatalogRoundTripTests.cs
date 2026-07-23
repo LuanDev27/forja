@@ -38,6 +38,7 @@ public class CatalogRoundTripTests
         "chute",
         "conveyor.belt",
         "conveyor.belt.io",
+        "conveyor.belt.vspeed",
         "emitter",
         "floor",
         "guide.side",
