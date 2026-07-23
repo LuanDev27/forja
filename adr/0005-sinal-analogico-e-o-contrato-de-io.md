@@ -1,13 +1,13 @@
 # ADR 0005 — Sinal analógico: palavras no contrato de I/O e onde vive o escalonamento
 
-**Status:** Proposta (a ratificar ao abrir `specs/003-analogico`)
-**Data:** 2026-07-22
-**Motiva:** Fase 2 do [ROADMAP](../ROADMAP.md) (`specs/003-analogico`, a criar)
+**Status:** Aceito (ratificado em 2026-07-23 ao formalizar `specs/003-analogico/spec.md`)
+**Data:** 2026-07-22 (proposto) · 2026-07-23 (ratificado)
+**Motiva:** Fase 2 do [ROADMAP](../ROADMAP.md) ([`specs/003-analogico`](../specs/003-analogico/spec.md))
 
-> Este ADR é um **rascunho** deixado ao fim da sessão de 22/07 para dar
-> arranque à Fase 2. As três decisões abaixo tocam a **camada 1** (o contrato
-> com o PLC) e mudá-las depois custaria caro — por isso ficam fixadas antes da
-> primeira linha de código. Ratificar ou revisar ao formalizar a spec.
+> Rascunho deixado ao fim da sessão de 22/07 para dar arranque à Fase 2,
+> **ratificado sem alterações** em 23/07 junto com a `spec.md`. As quatro
+> decisões abaixo tocam a **camada 1** (o contrato com o PLC) e mudá-las depois
+> custaria caro — por isso ficam fixadas antes da primeira linha de código.
 
 ## Contexto
 
