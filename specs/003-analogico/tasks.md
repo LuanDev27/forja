@@ -92,10 +92,10 @@ TODAS as user stories. Só fecha com o teste de determinismo verde (Artigo I.4).
 
 **Independent Test**: montar cena com sensor de nível de grandeza conhecida, rodar N ticks, assertar o bruto no input register; ponta a ponta, ler `%IW` no OpenPLC v4 e reconstruir a EU.
 
-- [ ] T021 [P] [US1] Cenário headless do sensor de nível em `tests/Forja.Core.Tests/LevelSensorTests.cs`: 0/50/100 cm → 0/~32767/65535; fora-da-faixa satura; dois cartões diferentes → brutos diferentes (AS1–AS4)
-- [ ] T022 [US1] Implementar o comportamento `LevelSensor : DeviceBehavior` (grandeza física → `SetInputWord(Id, "level", eu)`, `WriteState`) em `src/Forja.Core/Devices/Sensors.cs`
-- [ ] T023 [US1] Registrar o comportamento na `src/Forja.Core/Devices/DeviceFactory.cs`
-- [ ] T024 [P] [US1] Catálogo `catalog/devices/sensor.level.json` (porta `level` Word/In, params `euMin`/`euMax`, `VisualScene`)
+- [x] T021 [P] [US1] Cenário headless do sensor de nível em `tests/Forja.Core.Tests/LevelSensorTests.cs`: 0/50/100 cm → 0/~32767/65535; fora-da-faixa satura; dois cartões diferentes → brutos diferentes (AS1–AS4)
+- [x] T022 [US1] Implementar o comportamento `LevelSensor : DeviceBehavior` (grandeza física → `SetInputWord(Id, "level", eu)`, `WriteState`) em `src/Forja.Core/Devices/Sensors.cs`
+- [x] T023 [US1] Registrar o comportamento na `src/Forja.Core/Devices/DeviceFactory.cs`
+- [x] T024 [P] [US1] Catálogo `catalog/devices/sensor.level.json` (porta `level` Word/In, params `euMin`/`euMax`, `VisualScene`)
 - [ ] T025 [US1] Validar ponta a ponta no OpenPLC v4 (quickstart US1) e registrar o `.st` de leitura/escala em `plc/`
 
 **Checkpoint**: entrada analógica demonstrável sozinha — MVP da fase.

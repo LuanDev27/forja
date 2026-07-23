@@ -46,6 +46,7 @@ public class CatalogRoundTripTests
         "hmi.switch",
         "rack.frame",
         "sensor.height",
+        "sensor.level",
         "sensor.photo",
         "sensor.proximity",
         "sink",

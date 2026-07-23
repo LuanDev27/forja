@@ -73,7 +73,11 @@ internal sealed class FakePhysicsWorld : IPhysicsWorld
 
     public void Remove(IPhysicsBody body) { }
 
-    public RayHit? Raycast(Vec3 from, Vec3 to) => null;
+    /// <summary>O que o próximo Raycast devolve (null = feixe livre). Settável
+    /// pelos testes de sensores analógicos/ópticos.</summary>
+    public RayHit? RayResult { get; set; }
+
+    public RayHit? Raycast(Vec3 from, Vec3 to) => RayResult;
 
     /// <summary>O que a próxima QueryBox devolve. A ordem é embaralhada de
     /// propósito na leitura: quem depender dela em vez de ordenar por id

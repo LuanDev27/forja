@@ -64,6 +64,45 @@ public sealed class HeightSensor : DeviceBehavior
 }
 
 /// <summary>
+/// Sensor de nível analógico (Fase 2, US1): montado no topo de um silo/tanque
+/// olhando para baixo (−Y), mede a distância até a superfície do material
+/// (primeira peça abaixo) e reporta o NÍVEL preenchido como grandeza contínua
+/// — o equivalente a um sensor ultrassônico de nível. É o primeiro sensor que
+/// escreve uma palavra (`%IW`) em vez de um bit.
+///
+/// Nível (% cheio) = (alcance − distância à superfície) / alcance, saturado em
+/// [0, 100]: superfície mais alta (mais material) → nível maior. Sem peça no
+/// feixe → tanque vazio (0%). A porta `level` é PortType.Word; o cartão da cena
+/// escala o percentual→bruto e o programa de CLP reescala em ST (ADR 0005).
+/// </summary>
+public sealed class LevelSensor : DeviceBehavior
+{
+    private float _level;
+
+    /// <summary>Nível medido em % (0–100), só leitura.</summary>
+    public float Level => _level;
+
+    public override void Tick(SimContext ctx)
+    {
+        float range = GetFloat("range", 1f);
+        var from = Instance.Transform.Pos;
+        var to = from + new Vec3(0f, -range, 0f);
+
+        var hit = ctx.Physics.Raycast(from, to);
+        float fill = hit is { } h && ctx.Parts.IsPart(h.EntityId) && range > 0f
+            ? Math.Clamp((range - (from.Y - h.Point.Y)) / range, 0f, 1f)
+            : 0f;
+        _level = fill * 100f;
+
+        ctx.Io.SetInputWord(Id, "level", _level);
+    }
+
+    // Grandeza contínua entra no hash quantizada (mm), como as poses (research
+    // R5); o bruto do registrador também entra pelo hash da IoTable.
+    public override void WriteState(ref StateHasher hasher) => hasher.AddQuantized(_level);
+}
+
+/// <summary>
 /// Sensor de proximidade (RF-03): capacitivo detecta qualquer peça;
 /// indutivo detecta só metal (usa PartKind.Material).
 /// </summary>
