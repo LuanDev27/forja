@@ -61,31 +61,36 @@ public static class IoMapValidator
                     new[] { device.Id }));
             }
 
-            // Digital-only na v1
-            if (tag.Address.Area is IoArea.InputRegister or IoArea.HoldingRegister)
+            // Matriz direção × área × tipo (Fase 2, contrato scaling-eu-raw V1).
+            // Modo cliente: a Forja é master e pode ler/escrever as áreas do
+            // master remoto (limite do protocolo — contracts/modbus-mapping.md).
+            bool areaOk = (port.Type, port.Direction) switch
             {
-                errors.Add(new ValidationError(
-                    "analog-not-supported",
-                    $"Endereço {tag.Address.ToDisplay()} usa registers — v1 é digital-only.",
-                    new[] { device.Id }));
-                continue;
-            }
-
-            // Direção × área (V2). Modo cliente: In também pode mapear em coil
-            // remoto (limite do protocolo — contracts/modbus-mapping.md).
-            bool areaOk = port.Direction switch
-            {
-                IoDirection.In => tag.Address.Area == IoArea.DiscreteInput
+                (PortType.Bool, IoDirection.In) => tag.Address.Area == IoArea.DiscreteInput
                                   || (clientMode && tag.Address.Area == IoArea.Coil),
-                IoDirection.Out => tag.Address.Area == IoArea.Coil,
+                (PortType.Bool, IoDirection.Out) => tag.Address.Area == IoArea.Coil,
+                (PortType.Word, IoDirection.In) => tag.Address.Area == IoArea.InputRegister
+                                  || (clientMode && tag.Address.Area == IoArea.HoldingRegister),
+                (PortType.Word, IoDirection.Out) => tag.Address.Area == IoArea.HoldingRegister,
                 _ => false,
             };
             if (!areaOk)
             {
                 errors.Add(new ValidationError(
-                    "direction-mismatch",
-                    $"Porta '{tag.PortName}' ({port.Direction}) do dispositivo {device.Id} " +
+                    "type-area-mismatch",
+                    $"Porta '{tag.PortName}' ({port.Direction}, {port.Type}) do dispositivo {device.Id} " +
                     $"não pode mapear em {tag.Address.ToDisplay()}.",
+                    new[] { device.Id }));
+            }
+
+            // Escala do cartão degenerada (V2): faixa bruta nula → divisão por
+            // zero na conversão. Só se aplica a portas de palavra.
+            if (port.Type == PortType.Word && tag.Scale is { } scale && scale.RawMin == scale.RawMax)
+            {
+                errors.Add(new ValidationError(
+                    "invalid-scale",
+                    $"Porta '{tag.PortName}' do dispositivo {device.Id} tem faixa bruta nula " +
+                    $"(rawMin == rawMax == {scale.RawMin}).",
                     new[] { device.Id }));
             }
 

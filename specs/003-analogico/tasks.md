@@ -34,7 +34,7 @@ catálogo de dados em `catalog/devices/`.
 
 **Purpose**: preparar terreno; o projeto e as 4 camadas já existem.
 
-- [ ] T001 Confirmar build/testes verdes na `main` antes de tocar camada 1: `dotnet build` + `dotnet test`
+- [x] T001 Confirmar build/testes verdes na `main` antes de tocar camada 1: `dotnet build` + `dotnet test`
 - [ ] T002 [P] Criar cena de fixture v1 real em `tests/Forja.Core.Tests/fixtures/` copiando uma cena digital da biblioteca (base do teste de migração US4)
 
 ---
@@ -48,39 +48,39 @@ TODAS as user stories. Só fecha com o teste de determinismo verde (Artigo I.4).
 
 ### Contrato e catálogo (Anvil, camada 1)
 
-- [ ] T003 [P] Adicionar enum `PortType { Bool, Word }` e estender `PortDef` com `Type = PortType.Bool` em `src/Forja.Anvil/Catalog/DeviceTypeDef.cs`
-- [ ] T004 [P] Adicionar `ReadOnlyMemory<ushort> Words` ao `IoSnapshot` e ajustar `Empty(tick)` em `src/Forja.Anvil/Contracts/IPlcDriver.cs` (contrato W1/W2)
-- [ ] T005 [P] Adicionar record `AnalogScale(ushort RawMin=0, ushort RawMax=65535)` e campo opcional `Scale` ao `IoTag` em `src/Forja.Anvil/Scene/IoTypes.cs`
-- [ ] T006 Subir `CurrentSchemaVersion` de 1 para 2 em `src/Forja.Anvil/Scene/SceneDocument.cs`
+- [x] T003 [P] Adicionar enum `PortType { Bool, Word }` e estender `PortDef` com `Type = PortType.Bool` em `src/Forja.Anvil/Catalog/DeviceTypeDef.cs`
+- [x] T004 [P] Adicionar `ReadOnlyMemory<ushort> Words` ao `IoSnapshot` e ajustar `Empty(tick)` em `src/Forja.Anvil/Contracts/IPlcDriver.cs` (contrato W1/W2)
+- [x] T005 [P] Adicionar record `AnalogScale(ushort RawMin=0, ushort RawMax=65535)` e campo opcional `Scale` ao `IoTag` em `src/Forja.Anvil/Scene/IoTypes.cs`
+- [x] T006 Subir `CurrentSchemaVersion` de 1 para 2 em `src/Forja.Anvil/Scene/SceneDocument.cs`
 
 ### Conversão e canal de palavras (Core, camada 2)
 
-- [ ] T007 Adicionar buffers `ushort[]` de entrada/saída e força numérica (`_inputWords`, `_outputWords`, `_forcedInputWords`, `_forcedOutputWords`) ao `src/Forja.Core/Io/IoTable.cs`
-- [ ] T008 Implementar a conversão EU↔bruto saturante (`SetInputWord`, `GetOutputWord`, `ForceWord`) na fronteira `IoTable`, lendo `euMin`/`euMax` do tipo e a `AnalogScale` do ponto (contrato scaling-eu-raw S1–S4)
-- [ ] T009 Preencher `Words` em `BuildInputSnapshot` e aplicar `snapshot.Words` em `ApplyOutputSnapshot` (respeitando `!Valid`) em `src/Forja.Core/Io/IoTable.cs`
-- [ ] T010 Hashear `_inputWords`/`_outputWords` em ordem de endereço no `WriteState` do `src/Forja.Core/Io/IoTable.cs` (Artigo I.4, contrato W6)
-- [ ] T011 Estender `IoPointView` com valor numérico/unidade e populá-lo em `BuildView` no `src/Forja.Core/Io/IoTable.cs`
+- [x] T007 Adicionar buffers `ushort[]` de entrada/saída e força numérica (`_inputWords`, `_outputWords`, `_forcedInputWords`, `_forcedOutputWords`) ao `src/Forja.Core/Io/IoTable.cs`
+- [x] T008 Implementar a conversão EU↔bruto saturante (`SetInputWord`, `GetOutputWord`, `ForceWord`) na fronteira `IoTable`, lendo `euMin`/`euMax` do tipo e a `AnalogScale` do ponto (contrato scaling-eu-raw S1–S4)
+- [x] T009 Preencher `Words` em `BuildInputSnapshot` e aplicar `snapshot.Words` em `ApplyOutputSnapshot` (respeitando `!Valid`) em `src/Forja.Core/Io/IoTable.cs`
+- [x] T010 Hashear `_inputWords`/`_outputWords` em ordem de endereço no `WriteState` do `src/Forja.Core/Io/IoTable.cs` (Artigo I.4, contrato W6)
+- [x] T011 Estender `IoPointView` com valor numérico/unidade e populá-lo em `BuildView` no `src/Forja.Core/Io/IoTable.cs`
 
 ### Migração de schema (Core, camada 2)
 
-- [ ] T012 Implementar e registrar `MigrationV1ToV2` (aditiva, só carimba versão) na cadeia `SceneSerializer.Migrations` em `src/Forja.Core/Persistence/SceneSerializer.cs` (research R4)
+- [x] T012 Implementar e registrar `MigrationV1ToV2` (aditiva, só carimba versão) na cadeia `SceneSerializer.Migrations` em `src/Forja.Core/Persistence/SceneSerializer.cs` (research R4)
 
 ### Validação (Anvil, camada 1)
 
-- [ ] T013 Remover o bloco `analog-not-supported` e implementar a matriz direção×área×tipo (`type-area-mismatch`) + regra `invalid-scale` em `src/Forja.Anvil/Validation/IoMapValidator.cs` (contrato V1–V3)
+- [x] T013 Remover o bloco `analog-not-supported` e implementar a matriz direção×área×tipo (`type-area-mismatch`) + regra `invalid-scale` em `src/Forja.Anvil/Validation/IoMapValidator.cs` (contrato V1–V3)
 
 ### Driver (Bellows, camada 3)
 
-- [ ] T014 Fiar os `RegisterSource` do `src/Forja.Bellows/Modbus/MirrorDataStore.cs`: input registers como double-buffer (`PublishInputWords`) e holding registers com `CopyHolding(dest)` por tick (research R5)
-- [ ] T015 Passar `inputs.Words` e devolver holding registers no `Words` de saída no `Exchange` de `src/Forja.Bellows/Modbus/ModbusTcpServerDriver.cs` (contrato W2/W5)
-- [ ] T016 Ler/escrever input e holding registers do master remoto no modo cliente `src/Forja.Bellows/Modbus/ModbusTcpClientDriver.cs`
+- [x] T014 Fiar os `RegisterSource` do `src/Forja.Bellows/Modbus/MirrorDataStore.cs`: input registers como double-buffer (`PublishInputWords`) e holding registers com `CopyHolding(dest)` por tick (research R5)
+- [x] T015 Passar `inputs.Words` e devolver holding registers no `Words` de saída no `Exchange` de `src/Forja.Bellows/Modbus/ModbusTcpServerDriver.cs` (contrato W2/W5)
+- [x] T016 Ler/escrever input e holding registers do master remoto no modo cliente `src/Forja.Bellows/Modbus/ModbusTcpClientDriver.cs`
 
 ### Testes do gate (o que fecha a fase)
 
-- [ ] T017 [P] Testes de escala em `tests/Forja.Core.Tests/AnalogScaleTests.cs`: tabela `(euMin,euMax,rawMin,rawMax,eu)→raw` (meio, fundo, topo, fora-da-faixa satura) e round-trip estável (contrato S2/S3)
-- [ ] T018 [P] Testes da matriz de validação em `tests/Forja.Anvil.Tests/IoMapValidatorTests.cs`: uma célula inválida por linha + `invalid-scale` + `duplicate-address` com dois `%IW0`
-- [ ] T019 **Teste de determinismo** em `tests/Forja.Core.Tests/`: cena com um ponto analógico rodada 2× com mesmo seed/entradas por N ticks → hash idêntico (Artigo I.4). **Critério de fechamento do gate.**
-- [ ] T020 [P] Teste do canal de palavras no driver em `tests/Forja.Bellows.Tests/`: publica input register conhecido e lê de volta; escreve holding register e o tick seguinte enxerga (defasagem ≤ 1 tick)
+- [x] T017 [P] Testes de escala em `tests/Forja.Core.Tests/AnalogScaleTests.cs`: tabela `(euMin,euMax,rawMin,rawMax,eu)→raw` (meio, fundo, topo, fora-da-faixa satura) e round-trip estável (contrato S2/S3)
+- [x] T018 [P] Testes da matriz de validação em `tests/Forja.Anvil.Tests/IoMapValidatorTests.cs`: uma célula inválida por linha + `invalid-scale` + `duplicate-address` com dois `%IW0`
+- [x] T019 **Teste de determinismo** em `tests/Forja.Core.Tests/`: cena com um ponto analógico rodada 2× com mesmo seed/entradas por N ticks → hash idêntico (Artigo I.4). **Critério de fechamento do gate.**
+- [x] T020 [P] Teste do canal de palavras no driver em `tests/Forja.Bellows.Tests/`: publica input register conhecido e lê de volta; escreve holding register e o tick seguinte enxerga (defasagem ≤ 1 tick)
 
 **Checkpoint**: cano de palavras verde ponta a ponta no núcleo + determinismo. Os 18 dispositivos digitais continuam passando (SC-007). US podem começar.
 

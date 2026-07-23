@@ -87,7 +87,7 @@ public partial class Main : Node3D
             Catalog,
             DeviceFactory.CreateDefault(),
             physics,
-            config => DriverRegistry.Create(config, loop.Io?.OutputCount ?? 0));
+            config => DriverRegistry.Create(config, loop.Io?.OutputCount ?? 0, loop.Io?.OutputWordCount ?? 0));
         _loop = loop;
 
         loop.DriverFault += reason =>

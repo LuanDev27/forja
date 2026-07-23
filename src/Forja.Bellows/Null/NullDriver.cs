@@ -11,12 +11,16 @@ namespace Forja.Bellows.Null;
 public sealed class NullDriver : PlcDriverBase
 {
     private readonly bool[] _coils;
+    private readonly ushort[] _holdings;
 
-    public NullDriver(int outputCount = 256)
+    public NullDriver(int outputCount = 256, int outputWordCount = 0)
     {
         if (outputCount < 0)
             throw new ArgumentOutOfRangeException(nameof(outputCount));
+        if (outputWordCount < 0)
+            throw new ArgumentOutOfRangeException(nameof(outputWordCount));
         _coils = new bool[outputCount];
+        _holdings = new ushort[outputWordCount];
     }
 
     /// <summary>Último snapshot de sensores publicado (inspeção em testes).</summary>
@@ -29,9 +33,12 @@ public sealed class NullDriver : PlcDriverBase
     /// <summary>Força uma coil local (equivale ao master escrever o bit).</summary>
     public void SetCoil(int offset, bool value) => _coils[offset] = value;
 
+    /// <summary>Força um holding register local (equivale ao master escrever o setpoint).</summary>
+    public void SetHolding(int offset, ushort value) => _holdings[offset] = value;
+
     public override IoSnapshot Exchange(IoSnapshot inputs)
     {
         LastInputs = inputs;
-        return new IoSnapshot(inputs.TickNumber, _coils);
+        return new IoSnapshot(inputs.TickNumber, _coils, _holdings);
     }
 }

@@ -15,13 +15,22 @@ public enum DriverState
 }
 
 /// <summary>
-/// Snapshot de bits digitais trocado com o driver, indexado por offset
-/// (0..N-1, N = maior offset usado + 1). Valid=false marca snapshot obsoleto
-/// devolvido durante falha (regra C1 do contrato).
+/// Snapshot de I/O trocado com o driver, indexado por offset (0..N-1, N = maior
+/// offset usado + 1). <see cref="Bits"/> carrega os digitais (discrete inputs na
+/// entrada, coils na saída) e <see cref="Words"/> os analógicos brutos de 16 bits
+/// (input registers na entrada, holding registers na saída) — canais paralelos,
+/// uma troca só (ADR 0005, decisão 1; contrato W1/W2). Valid=false marca snapshot
+/// obsoleto devolvido durante falha (regra C1). Palavra é sempre bruto: a unidade
+/// de engenharia vive só na fronteira IoTable, nunca no fio (contrato W3).
 /// </summary>
-public readonly record struct IoSnapshot(ulong TickNumber, ReadOnlyMemory<bool> Bits, bool Valid = true)
+public readonly record struct IoSnapshot(
+    ulong TickNumber,
+    ReadOnlyMemory<bool> Bits,
+    ReadOnlyMemory<ushort> Words = default,
+    bool Valid = true)
 {
-    public static IoSnapshot Empty(ulong tick) => new(tick, ReadOnlyMemory<bool>.Empty);
+    public static IoSnapshot Empty(ulong tick) =>
+        new(tick, ReadOnlyMemory<bool>.Empty, ReadOnlyMemory<ushort>.Empty);
 }
 
 /// <summary>

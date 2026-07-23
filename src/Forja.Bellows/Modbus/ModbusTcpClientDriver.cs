@@ -20,8 +20,11 @@ public sealed class ModbusTcpClientDriver : PlcDriverBase
 {
     private readonly object _gate = new();
     private readonly int _outputCount;
+    private readonly int _outputWordCount;
     private readonly bool[] _lastOutputs;
+    private readonly ushort[] _lastOutputWords;
     private bool[] _inputBuffer = Array.Empty<bool>();
+    private ushort[] _inputWordBuffer = Array.Empty<ushort>();
 
     private ConnectionConfig _config = new();
     private CancellationTokenSource? _cts;
@@ -31,13 +34,20 @@ public sealed class ModbusTcpClientDriver : PlcDriverBase
 
     /// <param name="outputCount">Quantas coils remotas ler por tick —
     /// tipicamente IoTable.OutputCount.</param>
-    public ModbusTcpClientDriver(int outputCount = 256)
+    /// <param name="outputWordCount">Quantos holding registers remotos ler por
+    /// tick (setpoints de atuadores) — tipicamente IoTable.OutputWordCount.</param>
+    public ModbusTcpClientDriver(int outputCount = 256, int outputWordCount = 0)
     {
         if (outputCount is < 0 or > 2000)
             throw new ArgumentOutOfRangeException(
                 nameof(outputCount), "FC01 lê no máximo 2000 coils por request.");
+        if (outputWordCount is < 0 or > 125)
+            throw new ArgumentOutOfRangeException(
+                nameof(outputWordCount), "FC03 lê no máximo 125 registers por request.");
         _outputCount = outputCount;
+        _outputWordCount = outputWordCount;
         _lastOutputs = new bool[outputCount];
+        _lastOutputWords = new ushort[outputWordCount];
     }
 
     public override void Start(ConnectionConfig config)
@@ -162,7 +172,7 @@ public sealed class ModbusTcpClientDriver : PlcDriverBase
     {
         var master = _master;
         if (State != DriverState.Ready || master is null)
-            return new IoSnapshot(inputs.TickNumber, _lastOutputs, Valid: false);
+            return new IoSnapshot(inputs.TickNumber, _lastOutputs, _lastOutputWords, Valid: false);
 
         try
         {
@@ -174,6 +184,16 @@ public sealed class ModbusTcpClientDriver : PlcDriverBase
                 master.WriteMultipleCoils(_config.UnitId, _config.InputBaseOffset, _inputBuffer);
             }
 
+            // Palavras de sensores → holding registers remotos no base offset
+            // (FC16). Input registers do slave são read-only para o master.
+            if (inputs.Words.Length > 0)
+            {
+                if (_inputWordBuffer.Length != inputs.Words.Length)
+                    _inputWordBuffer = new ushort[inputs.Words.Length];
+                inputs.Words.Span.CopyTo(_inputWordBuffer);
+                master.WriteMultipleRegisters(_config.UnitId, _config.InputBaseOffset, _inputWordBuffer);
+            }
+
             if (_outputCount > 0)
             {
                 var coils = master.ReadCoils(_config.UnitId, 0, (ushort)_outputCount);
@@ -181,7 +201,15 @@ public sealed class ModbusTcpClientDriver : PlcDriverBase
                 Array.Copy(coils, _lastOutputs, n);
             }
 
-            return new IoSnapshot(inputs.TickNumber, _lastOutputs);
+            // Setpoints de atuadores ← holding registers remotos 0..N (FC03).
+            if (_outputWordCount > 0)
+            {
+                var regs = master.ReadHoldingRegisters(_config.UnitId, 0, (ushort)_outputWordCount);
+                int n = Math.Min(regs.Length, _lastOutputWords.Length);
+                Array.Copy(regs, _lastOutputWords, n);
+            }
+
+            return new IoSnapshot(inputs.TickNumber, _lastOutputs, _lastOutputWords);
         }
         catch (Exception ex)
         {
@@ -191,7 +219,7 @@ public sealed class ModbusTcpClientDriver : PlcDriverBase
             var cts = _cts;
             if (cts is not null && !cts.IsCancellationRequested)
                 BeginConnect(cts.Token);
-            return new IoSnapshot(inputs.TickNumber, _lastOutputs, Valid: false);
+            return new IoSnapshot(inputs.TickNumber, _lastOutputs, _lastOutputWords, Valid: false);
         }
     }
 }

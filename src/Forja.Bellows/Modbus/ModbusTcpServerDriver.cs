@@ -21,6 +21,7 @@ public sealed class ModbusTcpServerDriver : PlcDriverBase
     private readonly object _gate = new();
     private readonly MirrorDataStore _store = new();
     private readonly bool[] _outputs;
+    private readonly ushort[] _outputWords;
 
     private TcpListener? _listener;
     private IModbusSlaveNetwork? _network;
@@ -29,11 +30,16 @@ public sealed class ModbusTcpServerDriver : PlcDriverBase
 
     /// <param name="outputCount">Bits de saída (coils) que o core consome —
     /// tipicamente IoTable.OutputCount.</param>
-    public ModbusTcpServerDriver(int outputCount = 256)
+    /// <param name="outputWordCount">Palavras de saída (holding registers) que o
+    /// core consome — tipicamente IoTable.OutputWordCount (Fase 2).</param>
+    public ModbusTcpServerDriver(int outputCount = 256, int outputWordCount = 0)
     {
         if (outputCount < 0)
             throw new ArgumentOutOfRangeException(nameof(outputCount));
+        if (outputWordCount < 0)
+            throw new ArgumentOutOfRangeException(nameof(outputWordCount));
         _outputs = new bool[outputCount];
+        _outputWords = new ushort[outputWordCount];
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types",
@@ -130,11 +136,12 @@ public sealed class ModbusTcpServerDriver : PlcDriverBase
     {
         var state = State;
         if (state is DriverState.Stopped)
-            return new IoSnapshot(inputs.TickNumber, _outputs, Valid: false);
+            return new IoSnapshot(inputs.TickNumber, _outputs, _outputWords, Valid: false);
 
-        // Publica sensores mesmo antes do master chegar: o primeiro FC02 já
-        // deve enxergar o estado corrente (< 20 ms — RNF-02).
+        // Publica sensores mesmo antes do master chegar: o primeiro FC02/FC04 já
+        // deve enxergar o estado corrente (< 20 ms — RNF-02). Bits e palavras.
         _store.PublishInputs(inputs.Bits);
+        _store.PublishInputWords(inputs.Words);
 
         long now = Environment.TickCount64;
         long idle = now - _store.LastMasterActivity;
@@ -147,7 +154,7 @@ public sealed class ModbusTcpServerDriver : PlcDriverBase
 
             case DriverState.Ready when idle > _timeoutMs:
                 Fault($"master sem atividade há {idle} ms (timeout {_timeoutMs} ms)");
-                return new IoSnapshot(inputs.TickNumber, _outputs, Valid: false);
+                return new IoSnapshot(inputs.TickNumber, _outputs, _outputWords, Valid: false);
 
             case DriverState.Faulted when _store.MasterSeen && idle <= _timeoutMs:
                 // Master voltou a falar — recupera sem exigir Edit→Run.
@@ -155,10 +162,11 @@ public sealed class ModbusTcpServerDriver : PlcDriverBase
                 break;
 
             case DriverState.Faulted:
-                return new IoSnapshot(inputs.TickNumber, _outputs, Valid: false);
+                return new IoSnapshot(inputs.TickNumber, _outputs, _outputWords, Valid: false);
         }
 
         _store.CopyCoils(_outputs);
-        return new IoSnapshot(inputs.TickNumber, _outputs);
+        _store.CopyHolding(_outputWords);
+        return new IoSnapshot(inputs.TickNumber, _outputs, _outputWords);
     }
 }

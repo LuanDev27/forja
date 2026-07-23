@@ -36,6 +36,12 @@ public struct StateHasher
 
     public void Add(int value) => Add(unchecked((ulong)value));
 
+    public void Add(ushort value)
+    {
+        Add((byte)value);
+        Add((byte)(value >> 8));
+    }
+
     public void Add(bool value) => Add(value ? (byte)1 : (byte)0);
 
     public void Add(string value)

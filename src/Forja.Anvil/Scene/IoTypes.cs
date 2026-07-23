@@ -20,6 +20,26 @@ public enum IoDirection
     Out,
 }
 
+/// <summary>
+/// Tipo de dado da porta (Fase 2, ADR 0005). Bool = um bit (discrete input/coil);
+/// Word = uma palavra de 16 bits (input/holding register). Default Bool: os
+/// dispositivos digitais seguem sem tocar em nada.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<PortType>))]
+public enum PortType
+{
+    Bool,
+    Word,
+}
+
+/// <summary>
+/// Faixa bruta do "cartão" analógico, por instância do ponto na cena (ADR 0005,
+/// decisão 2). O registrador carrega bruto nesta faixa; a fronteira IoTable
+/// converte de/para a unidade de engenharia do device. RawMin==RawMax é erro
+/// de validação (evita divisão por zero na conversão).
+/// </summary>
+public sealed record AnalogScale(ushort RawMin = 0, ushort RawMax = 65535);
+
 /// <summary>Endereço canônico (decisão Q2: cru no arquivo; IEC só na UI).</summary>
 public readonly record struct IoAddress(IoArea Area, ushort Offset)
 {
@@ -44,6 +64,8 @@ public readonly record struct IoAddress(IoArea Area, ushort Offset)
 
 /// <summary>
 /// Mapeia device.port → endereço. Artigo VI: contrato explícito, salvo na
-/// cena, sem mapeamento implícito.
+/// cena, sem mapeamento implícito. <see cref="Scale"/> é preenchido só quando a
+/// porta é <see cref="PortType.Word"/>; null em portas de bit (aditivo: cena v1
+/// desserializa com null).
 /// </summary>
-public sealed record IoTag(uint DeviceId, string PortName, IoAddress Address);
+public sealed record IoTag(uint DeviceId, string PortName, IoAddress Address, AnalogScale? Scale = null);

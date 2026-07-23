@@ -17,8 +17,9 @@ public enum DeviceCategory
 }
 
 /// <summary>Porta de I/O declarada pelo tipo. Cada porta mapeia para exatamente
-/// um endereço (Artigo VI.1).</summary>
-public sealed record PortDef(string PortName, IoDirection Direction);
+/// um endereço (Artigo VI.1). <see cref="Type"/> distingue bit de palavra
+/// (Fase 2, ADR 0005); default Bool preserva os dispositivos digitais.</summary>
+public sealed record PortDef(string PortName, IoDirection Direction, PortType Type = PortType.Bool);
 
 /// <summary>Definição de parâmetro editável do dispositivo.</summary>
 public sealed record ParamDef

@@ -14,6 +14,8 @@ internal sealed class MirrorDataStore : ISlaveDataStore
 
     private readonly InputSource _inputs;
     private readonly CoilSource _coils;
+    private readonly InputRegisterSource _inputRegs;
+    private readonly HoldingRegisterSource _holdingRegs;
     private long _lastMasterActivity = long.MinValue;
     private int _masterSeen;
 
@@ -21,17 +23,19 @@ internal sealed class MirrorDataStore : ISlaveDataStore
     {
         _inputs = new InputSource(Touch);
         _coils = new CoilSource(Touch);
+        _inputRegs = new InputRegisterSource(Touch);
+        _holdingRegs = new HoldingRegisterSource(Touch);
     }
 
     public IPointSource<bool> CoilDiscretes => _coils;
 
     public IPointSource<bool> CoilInputs => _inputs;
 
-    // v1 é digital-only (contracts/modbus-mapping.md); registradores existem
-    // apenas para o master não receber exceção ao sondá-los.
-    public IPointSource<ushort> HoldingRegisters { get; } = new RegisterSource();
+    // Fase 2 (ADR 0005): input registers = sensores→master (double-buffer);
+    // holding registers = master→atuadores (master escreve, sim copia por tick).
+    public IPointSource<ushort> HoldingRegisters => _holdingRegs;
 
-    public IPointSource<ushort> InputRegisters { get; } = new RegisterSource();
+    public IPointSource<ushort> InputRegisters => _inputRegs;
 
     /// <summary>Algum request do master já chegou desde o Start?</summary>
     public bool MasterSeen => Volatile.Read(ref _masterSeen) != 0;
@@ -48,8 +52,14 @@ internal sealed class MirrorDataStore : ISlaveDataStore
     /// <summary>Publica o snapshot dos sensores (fim do tick, thread da sim).</summary>
     public void PublishInputs(ReadOnlyMemory<bool> bits) => _inputs.Publish(bits);
 
+    /// <summary>Publica as palavras dos sensores nos input registers (double-buffer).</summary>
+    public void PublishInputWords(ReadOnlyMemory<ushort> words) => _inputRegs.Publish(words);
+
     /// <summary>Copia as coils escritas pelo master para o buffer do tick.</summary>
     public void CopyCoils(bool[] destination) => _coils.CopyTo(destination);
+
+    /// <summary>Copia os holding registers escritos pelo master para o buffer do tick.</summary>
+    public void CopyHolding(ushort[] destination) => _holdingRegs.CopyTo(destination);
 
     /// <summary>Discrete inputs: master lê, simulação publica (double-buffer).</summary>
     private sealed class InputSource : IPointSource<bool>
@@ -128,13 +138,60 @@ internal sealed class MirrorDataStore : ISlaveDataStore
         }
     }
 
-    /// <summary>Registradores tolerados mas fora do escopo v1 (digital-only).</summary>
-    private sealed class RegisterSource : IPointSource<ushort>
+    /// <summary>Input registers: master lê (FC04), simulação publica (double-buffer).</summary>
+    private sealed class InputRegisterSource : IPointSource<ushort>
     {
-        private readonly ushort[] _values = new ushort[BitSpace];
+        private readonly Action _touch;
+        private ushort[] _front = Array.Empty<ushort>();
+        private ushort[] _back = Array.Empty<ushort>();
+
+        public InputRegisterSource(Action touch) => _touch = touch;
+
+        public void Publish(ReadOnlyMemory<ushort> words)
+        {
+            if (_back.Length != words.Length)
+                _back = new ushort[words.Length];
+            words.Span.CopyTo(_back);
+            _back = Interlocked.Exchange(ref _front, _back);
+        }
 
         public ushort[] ReadPoints(ushort startAddress, ushort numberOfPoints)
         {
+            _touch();
+            var snapshot = Volatile.Read(ref _front);
+            var result = new ushort[numberOfPoints];
+            for (int i = 0; i < numberOfPoints; i++)
+            {
+                int address = startAddress + i;
+                if (address < snapshot.Length)
+                    result[i] = snapshot[address];
+            }
+
+            return result;
+        }
+
+        // Input register é somente-leitura para o master; o NModbus não gera
+        // escrita aqui em operação normal — ignorar é seguro.
+        public void WritePoints(ushort startAddress, ushort[] points) => _touch();
+    }
+
+    /// <summary>Holding registers: master escreve (FC06/FC16), simulação copia por tick.</summary>
+    private sealed class HoldingRegisterSource : IPointSource<ushort>
+    {
+        private readonly Action _touch;
+        private readonly ushort[] _values = new ushort[BitSpace];
+
+        public HoldingRegisterSource(Action touch) => _touch = touch;
+
+        public void CopyTo(ushort[] destination)
+        {
+            int n = Math.Min(destination.Length, _values.Length);
+            Array.Copy(_values, destination, n);
+        }
+
+        public ushort[] ReadPoints(ushort startAddress, ushort numberOfPoints)
+        {
+            _touch();
             var result = new ushort[numberOfPoints];
             for (int i = 0; i < numberOfPoints; i++)
             {
@@ -148,6 +205,7 @@ internal sealed class MirrorDataStore : ISlaveDataStore
 
         public void WritePoints(ushort startAddress, ushort[] points)
         {
+            _touch();
             for (int i = 0; i < points.Length; i++)
             {
                 int address = startAddress + i;

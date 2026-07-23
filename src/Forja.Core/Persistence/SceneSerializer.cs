@@ -14,6 +14,18 @@ public interface ISceneMigration
 }
 
 /// <summary>
+/// v1 → v2 (Fase 2, ADR 0005): analógico é puramente aditivo — PortType e
+/// AnalogScale entram por default do modelo na desserialização. A migração é
+/// não-destrutiva: não remove nem renomeia campo, só existe para o Load poder
+/// carimbar a versão (sem ela registrada, toda cena v1 falharia ao carregar).
+/// </summary>
+internal sealed class MigrationV1ToV2 : ISceneMigration
+{
+    public int FromVersion => 1;
+    public JsonNode Apply(JsonNode scene) => scene;
+}
+
+/// <summary>
 /// Persistência do .forja: JSON versionado, legível e diffável (RF-08).
 /// Regras S1–S8 em contracts/forja-schema.md. Todo erro carrega caminho do
 /// arquivo e motivo (Artigo VII.3).
@@ -28,8 +40,11 @@ public static class SceneSerializer
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
     };
 
-    /// <summary>Cadeia de migrações registradas (vazia enquanto schema = 1).</summary>
-    public static readonly List<ISceneMigration> Migrations = new();
+    /// <summary>Cadeia de migrações registradas, uma por salto de versão.</summary>
+    public static readonly List<ISceneMigration> Migrations = new()
+    {
+        new MigrationV1ToV2(),
+    };
 
     /// <summary>Serializa normalizado: devices em id crescente (S2).</summary>
     public static string Save(SceneDocument doc)

@@ -39,7 +39,7 @@ public class IoMapValidatorTests
 
         var errors = IoMapValidator.Validate(doc, TestCatalog.Build());
 
-        Assert.Contains(errors, e => e.Code == "direction-mismatch" && e.DeviceIds.Contains(1u));
+        Assert.Contains(errors, e => e.Code == "type-area-mismatch" && e.DeviceIds.Contains(1u));
     }
 
     [Fact]
@@ -58,15 +58,18 @@ public class IoMapValidatorTests
     }
 
     [Fact]
-    public void Registers_RejeitadosNaV1()
+    public void PortaBool_EmRegister_Erro()
     {
+        // Fase 2 (FR-011/FR-012): a regra digital-only virou matriz
+        // direção×área×tipo. Uma porta Bool ("detect") num register é
+        // incoerência de tipo — erro, não warning.
         var doc = Doc(
             new() { TestCatalog.Sensor(1) },
             new() { new IoTag(1, "detect", new IoAddress(IoArea.InputRegister, 0)) });
 
         var errors = IoMapValidator.Validate(doc, TestCatalog.Build());
 
-        Assert.Contains(errors, e => e.Code == "analog-not-supported");
+        Assert.Contains(errors, e => e.Code == "type-area-mismatch");
     }
 
     /// <summary>

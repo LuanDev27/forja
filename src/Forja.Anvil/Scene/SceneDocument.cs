@@ -21,8 +21,10 @@ public sealed record DeviceInstance
 /// </summary>
 public sealed record SceneDocument
 {
-    /// <summary>Versão atual do schema. Migrações: Core.Persistence.</summary>
-    public const int CurrentSchemaVersion = 1;
+    /// <summary>Versão atual do schema. Migrações: Core.Persistence.
+    /// v2 (Fase 2): analógico aditivo — PortType e AnalogScale. Cena v1 carrega
+    /// via MigrationV1ToV2 (não-destrutiva) com os campos novos por default.</summary>
+    public const int CurrentSchemaVersion = 2;
 
     public required int SchemaVersion { get; init; }
     public required string Name { get; init; }
