@@ -53,8 +53,11 @@ function Invoke-Modbus {
 
   # MBAP: 6 bytes (tx, protocolo, tamanho). O unitId ja conta no tamanho.
   $cab = Read-Exato 6
-  $txResp = (($cab[0] -shl 8) -bor $cab[1])
-  $tamanho = (($cab[4] -shl 8) -bor $cab[5])
+  # [int] obrigatorio nos dois: ver a nota em Read-Registrador. Sem ele o
+  # transaction id acima de 255 vira lixo e o proprio guarda contra
+  # dessincronizacao passa a acusar erro que nao existe.
+  $txResp  = (([int]$cab[0] -shl 8) -bor [int]$cab[1])
+  $tamanho = (([int]$cab[4] -shl 8) -bor [int]$cab[5])
   $resto = Read-Exato $tamanho          # unitId + PDU
   if ($Hex) {
     Write-Host ("    -> " + (($quadro | % { $_.ToString('X2') }) -join ' '))

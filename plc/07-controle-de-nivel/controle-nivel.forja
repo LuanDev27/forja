@@ -6,7 +6,7 @@
     {
       "id": 1,
       "typeId": "sensor.level",
-      "transform": { "pos": [0, 1.0, 0], "rotY": 0 },
+      "transform": { "pos": [-0.95, 1.25, 0], "rotY": 0 },
       "params": { "range": 1.0, "euMin": 0.0, "euMax": 100.0, "euUnit": "%" }
     },
     {
@@ -18,14 +18,38 @@
     {
       "id": 3,
       "typeId": "emitter",
-      "transform": { "pos": [-1.6, 0.9, 0], "rotY": 0 },
-      "params": { "interval": 1.5, "maxParts": 0, "sizes": "S", "material": "plastic" }
+      "transform": { "pos": [-1.28, 1.35, 0], "rotY": 0 },
+      "params": { "interval": 0.22, "maxParts": 0, "sizes": "S", "material": "plastic" }
     },
     {
       "id": 4,
       "typeId": "sink",
-      "transform": { "pos": [3.2, -0.7, 0], "rotY": 0 },
-      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+      "transform": { "pos": [2.7, -0.35, 0], "rotY": 0 },
+      "params": { "sizeX": 2.2, "sizeY": 2.0, "sizeZ": 2.0 }
+    },
+    {
+      "id": 5,
+      "typeId": "guide.side",
+      "transform": { "pos": [-0.9, 0.65, 0.3], "rotY": 0 },
+      "params": { "sizeX": 1.0, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 6,
+      "typeId": "guide.side",
+      "transform": { "pos": [-0.9, 0.65, -0.3], "rotY": 0 },
+      "params": { "sizeX": 1.0, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 7,
+      "typeId": "guide.side",
+      "transform": { "pos": [-1.4, 0.65, 0], "rotY": 90 },
+      "params": { "sizeX": 0.6, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
+    },
+    {
+      "id": 8,
+      "typeId": "guide.side",
+      "transform": { "pos": [-0.4, 0.9, 0], "rotY": 90 },
+      "params": { "sizeX": 0.6, "sizeY": 0.3, "sizeZ": 0.05, "friction": 0.1 }
     }
   ],
   "ioMap": [

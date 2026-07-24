@@ -24,18 +24,20 @@ as duas direções do double-buffer, e o fail-safe de timeout.
 É o degrau entre o teste headless e o CLP de verdade — e não depende de ter o
 OpenPLC configurado.
 
-## Resultado de referência (23/07/2026)
+## Resultado de referência (23/07/2026, cena com o vaso)
 
 ```
 ciclo | %IW0 (nivel) | pct | drenando | %QW0 escrito | %QW0 lido
-   30 |        55241 |  84 |     True |        49151 | 49151
-   35 |        28464 |  43 |    False |        16384 | 16384
+   60 |        39201 |  59 |    False |        16384 | 16384
+   65 |        49653 |  75 |     True |        49151 | 49151
+   70 |         6375 |   9 |    False |        16384 | 16384
 ```
 
-A malha atravessou a banda morta **nos dois sentidos** sobre o fio: subiu de 43%
-para 84% (passou de `SP+BANDA` = 65) e comandou a drenagem rápida; caiu para 43%
-(abaixo de `SP-BANDA` = 55) e voltou para a lenta. O `%QW0` lido de volta bate
-com o escrito nos dois casos.
+O material acumula no silo, o nível passa de `SP+BANDA` (65 %), o programa
+comanda drenagem rápida, o vaso esvazia abaixo de `SP-BANDA` (55 %) e a
+velocidade volta para a lenta — **ciclo completo, várias vezes, sobre TCP**.
+Numa corrida de 300 leituras aparecem ~200 valores distintos no `%IW0` e os dois
+setpoints no `%QW0`, com o lido de volta batendo com o escrito.
 
 ## Duas armadilhas
 
@@ -56,11 +58,12 @@ frame apareça como erro em vez de valor errado.
 
 ## Limite conhecido da cena 07
 
-O nível só sobe quando peças passam sob o sensor — a cena **não tem um vaso**
-onde o material se acumule. Os picos de 84% são peças cruzando o feixe, não uma
-coluna de material. Para uma demonstração honesta de controle de nível falta
-montar o pulmão com corpos estáticos; enquanto isso, a cena serve para provar o
-canal analógico, não a dinâmica do processo.
+O `sensor.level` lança **um raio**. Quando ele cai numa fresta entre duas peças,
+atravessa até a correia e o nível lê **0** mesmo com o vaso meio cheio — daí as
+quedas bruscas a zero no meio de uma sequência saudável. É o comportamento real
+de sensor pontual sobre material granular, não defeito de simulação; o conserto
+industrial é amortecimento ou medição por área. Ver o
+[README do cenário 07](../../plc/07-controle-de-nivel/).
 
 ## Parâmetros
 

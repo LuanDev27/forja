@@ -89,14 +89,27 @@ public class LevelControlLoopTests
         public required PlcDeNivel Plc { get; init; }
         public required uint PartId { get; init; }
 
+        /// <summary>Altura do sensor e alcance dele, lidos da CENA — não
+        /// hardcodados. A primeira versão deste teste assumia "sensor em Y=1,
+        /// alcance 1" e quebrou no dia em que a cena ganhou o vaso e o sensor
+        /// subiu para Y=1,25: o teste passou a medir outra coisa sem avisar.</summary>
+        public required float SensorY { get; init; }
+
+        public required float Alcance { get; init; }
+
         /// <summary>Velocidade em m/s que a esteira aplicou de fato.</summary>
         public float VelocidadeDaEsteira =>
             Loop.Devices.OfType<VariableSpeedConveyor>().Single().Setpoint;
 
-        /// <summary>Põe a superfície do material numa altura que vale
-        /// <paramref name="pct"/>% do alcance do sensor (sensor em Y=1, alcance 1).</summary>
+        /// <summary>Altura da superfície do material que o sensor leria como
+        /// <paramref name="fracao"/> (0..1) do alcance. Inversa da conta do
+        /// LevelSensor: fill = (range − (sensorY − hitY)) / range.</summary>
+        public float AlturaPara(float fracao) => SensorY - Alcance * (1f - fracao);
+
+        /// <summary>Põe a superfície do material na altura que vale
+        /// <paramref name="pct"/>% do alcance do sensor.</summary>
         public void Nivel(int pct) =>
-            Physics.RayResult = new RayHit(PartId, new Vec3(0, pct / 100f, 0));
+            Physics.RayResult = new RayHit(PartId, new Vec3(0, AlturaPara(pct / 100f), 0));
 
         public void Ticks(int n)
         {
@@ -119,10 +132,23 @@ public class LevelControlLoopTests
         Assert.Equal(SimMode.Run, loop.Mode);
 
         // Uma peça serve de "superfície do material": mover o eco do raycast é
-        // como encher e esvaziar o pulmão, sem depender da física de verdade.
+        // como encher e esvaziar o vaso, sem depender da física de verdade.
         var part = loop.Parts!.SpawnBox(new PartKind("S", "plastic"), new Pose(new Vec3(0, 0, 0), 0));
-        return new Malha { Loop = loop, Physics = physics, Plc = plc, PartId = part.Id };
+
+        var sensor = Assert.Single(doc.Devices, d => d.TypeId == "sensor.level");
+        return new Malha
+        {
+            Loop = loop,
+            Physics = physics,
+            Plc = plc,
+            PartId = part.Id,
+            SensorY = sensor.Transform.Pos.Y,
+            Alcance = ParamFloat(sensor, "range", 1f),
+        };
     }
+
+    private static float ParamFloat(DeviceInstance device, string nome, float padrao) =>
+        device.Params.TryGetValue(nome, out var v) ? (float)v.GetDouble() : padrao;
 
     // ---- T031: a cena da biblioteca é válida e usa os endereços do .st ----
 
@@ -249,7 +275,8 @@ public class LevelControlLoopTests
         for (int i = 0; i < 40; i++)
         {
             ushort raw = (ushort)(Fronteira - (i % 2));
-            malha.Physics.RayResult = new RayHit(malha.PartId, new Vec3(0, raw / 65535f, 0));
+            malha.Physics.RayResult = new RayHit(
+                malha.PartId, new Vec3(0, malha.AlturaPara(raw / 65535f), 0));
             malha.Ticks(1);
 
             // O controlador SEM banda morta, alimentado pelo mesmo sinal.
