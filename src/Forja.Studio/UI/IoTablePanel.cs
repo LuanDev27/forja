@@ -9,9 +9,20 @@ namespace Forja.Studio.UI;
 /// <summary>
 /// Tabela de I/O ao vivo (T031, RF-05). Lê <see cref="IoTable.BuildView"/> a
 /// cada frame (Artigo II.2 — só leitura) e mostra cada ponto em notação dupla
-/// (%IX0.0 (DI 0)), direção e valor atual. Cada linha permite FORÇAR o bit —
-/// ciclo —/1/0 via <see cref="ForceIoCommand"/> — com indicação visual do
-/// override (fundo âmbar). Em Edit não há tabela: a IoTable só existe em Run.
+/// (%IX0.0 (DI 0)), direção e valor atual. Cada linha permite FORÇAR o ponto,
+/// com indicação visual do override (fundo âmbar). Em Edit não há tabela: a
+/// IoTable só existe em Run.
+///
+/// Dois tipos de linha (Fase 2, FR-019/FR-020):
+///   bit      → valor ● 1 / ○ 0, botão em ciclo —/1/0 (<see cref="ForceIoCommand"/>)
+///   palavra  → valor em unidade de engenharia + a contagem bruta entre
+///              parênteses, e um campo para forçar a CONTAGEM
+///              (<see cref="ForceWordCommand"/>).
+///
+/// A força de palavra é em bruto de propósito: é o que um canal analógico
+/// forçado numa bancada de verdade aceita, e mantém a conversão EU↔bruto presa
+/// à fronteira IoTable (ADR 0005). A UI mostra a EU ao lado para não obrigar
+/// ninguém a fazer regra de três de cabeça.
 /// </summary>
 public partial class IoTablePanel : CanvasLayer
 {
@@ -91,7 +102,7 @@ public partial class IoTablePanel : CanvasLayer
         ClearRows();
         foreach (var point in view)
         {
-            var row = new Row(point.Address, OnForce);
+            var row = new Row(point, OnForce, OnForceWord);
             _rows[point.Address] = row;
             _list.AddChild(row.Node);
         }
@@ -109,48 +120,84 @@ public partial class IoTablePanel : CanvasLayer
     private void OnForce(IoAddress address, bool? value) =>
         _main.Loop.Enqueue(new ForceIoCommand(address, value));
 
+    /// <summary>Força/libera a contagem bruta de um ponto analógico.</summary>
+    private void OnForceWord(IoAddress address, ushort? raw) =>
+        _main.Loop.Enqueue(new ForceWordCommand(address, raw));
+
     private static string BuildSignature(IReadOnlyList<IoPointView> view)
     {
         var sb = new System.Text.StringBuilder();
         foreach (var p in view)
-            sb.Append(p.Address.Area).Append(p.Address.Offset).Append('|');
+            sb.Append(p.Address.Area).Append(p.Address.Offset).Append(p.IsAnalog ? 'W' : 'X').Append('|');
         return sb.ToString();
     }
 
-    /// <summary>Uma linha da tabela: endereço · direção · valor · botão forçar.</summary>
+    /// <summary>Uma linha da tabela: endereço · valor · controle de força.</summary>
     private sealed class Row
     {
         private readonly IoAddress _address;
+        private readonly bool _analog;
         private readonly System.Action<IoAddress, bool?> _onForce;
+        private readonly System.Action<IoAddress, ushort?> _onForceWord;
         private readonly Label _value;
         private readonly Button _force;
+        private readonly SpinBox? _raw;
         private bool? _forcedTarget;
+        private bool _wordForced;
 
         public HBoxContainer Node { get; }
 
-        public Row(IoAddress address, System.Action<IoAddress, bool?> onForce)
+        public Row(
+            IoPointView point,
+            System.Action<IoAddress, bool?> onForce,
+            System.Action<IoAddress, ushort?> onForceWord)
         {
-            _address = address;
+            _address = point.Address;
+            _analog = point.IsAnalog;
             _onForce = onForce;
+            _onForceWord = onForceWord;
 
             Node = new HBoxContainer();
             Node.AddThemeConstantOverride("separation", 8);
 
             Node.AddChild(new Label
             {
-                Text = address.ToDisplay(),
+                Text = point.Address.ToDisplay(),
                 CustomMinimumSize = new Vector2(150, 0),
             });
 
-            _value = new Label { CustomMinimumSize = new Vector2(70, 0) };
+            // Palavra precisa de mais largura: cabe "100,0 % (65535)".
+            _value = new Label { CustomMinimumSize = new Vector2(_analog ? 130 : 70, 0) };
             Node.AddChild(_value);
 
+            if (_analog)
+            {
+                _raw = new SpinBox
+                {
+                    MinValue = 0,
+                    MaxValue = ushort.MaxValue,
+                    Step = 1,
+                    CustomMinimumSize = new Vector2(90, 0),
+                };
+                Node.AddChild(_raw);
+            }
+
             _force = new Button { CustomMinimumSize = new Vector2(60, 0) };
-            _force.Pressed += Cycle;
+            _force.Pressed += _analog ? ToggleWord : Cycle;
             Node.AddChild(_force);
         }
 
         public void Update(IoPointView point)
+        {
+            if (_analog)
+                UpdateAnalog(point);
+            else
+                UpdateBit(point);
+
+            SetForcedTint(point.Forced);
+        }
+
+        private void UpdateBit(IoPointView point)
         {
             _value.Text = point.Value ? "● 1" : "○ 0";
             _value.AddThemeColorOverride("font_color", point.Value ? OnColor : OffColor);
@@ -165,7 +212,24 @@ public partial class IoTablePanel : CanvasLayer
                 false => "Forçar 0",
                 _ => "Livre",
             };
-            SetForcedTint(point.Forced);
+        }
+
+        private void UpdateAnalog(IoPointView point)
+        {
+            string unit = string.IsNullOrEmpty(point.Unit) ? "" : " " + point.Unit;
+            _value.Text = $"{point.AnalogEu:0.0}{unit} ({point.AnalogRaw})";
+            _value.AddThemeColorOverride("font_color", point.AnalogRaw > 0 ? OnColor : OffColor);
+
+            if (!point.Forced)
+            {
+                _wordForced = false;
+                // Livre: o campo acompanha a leitura, para forçar já partir do
+                // valor corrente em vez de saltar para zero.
+                if (_raw is not null && !_raw.GetLineEdit().HasFocus())
+                    _raw.Value = point.AnalogRaw;
+            }
+
+            _force.Text = _wordForced ? "Forçado" : "Livre";
         }
 
         private void Cycle()
@@ -177,6 +241,12 @@ public partial class IoTablePanel : CanvasLayer
                 false => null,
             };
             _onForce(_address, _forcedTarget);
+        }
+
+        private void ToggleWord()
+        {
+            _wordForced = !_wordForced;
+            _onForceWord(_address, _wordForced ? (ushort)_raw!.Value : null);
         }
 
         private void SetForcedTint(bool forced)

@@ -307,3 +307,101 @@ public class LevelControlLoopTests
         Assert.NotEqual(a.Loop.ComputeStateHash(), b.Loop.ComputeStateHash());
     }
 }
+
+/// <summary>
+/// T039 (spec 003): o que a Tabela de I/O da UI precisa do núcleo — número com
+/// unidade para exibir, e força de palavra por comando (Artigo II.2: a UI nunca
+/// muda estado direto, enfileira <see cref="ForceWordCommand"/>). O painel em si
+/// é Godot; o contrato que ele consome é testável headless.
+/// </summary>
+public class AnalogIoViewTests
+{
+    private static string RepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !Directory.Exists(Path.Combine(dir.FullName, "catalog", "devices")))
+            dir = dir.Parent;
+        Assert.True(dir is not null, "raiz do repositório não encontrada acima do bin de teste.");
+        return dir!.FullName;
+    }
+
+    private static SimulationLoop Rodando()
+    {
+        var doc = SceneSerializer.LoadFile(Path.Combine(
+            RepoRoot(), "plc", "07-controle-de-nivel", "controle-nivel.forja")).Require();
+        var catalog = DeviceCatalog
+            .LoadFromDirectory(Path.Combine(RepoRoot(), "catalog", "devices")).Require();
+
+        var loop = new SimulationLoop(
+            doc, catalog, DeviceFactory.CreateDefault(), new FakePhysicsWorld(), _ => new FakeDriver());
+        loop.Enqueue(new SetModeCommand(SimMode.Run));
+        loop.Tick();
+        return loop;
+    }
+
+    [Fact]
+    public void PontoAnalogico_ApareceNaViewComNumeroEUnidade()
+    {
+        using var loop = Rodando();
+
+        var linha = Assert.Single(
+            loop.Io!.BuildView(), p => p.Address == new IoAddress(IoArea.HoldingRegister, 0));
+
+        Assert.True(linha.IsAnalog);
+        Assert.Equal("m/s", linha.Unit);
+        Assert.False(linha.Forced);
+    }
+
+    [Fact]
+    public void PontoDigital_ContinuaSemNumero()
+    {
+        // Guarda contra a UI passar a tratar todo ponto como analógico.
+        var doc = SceneSerializer.LoadFile(Path.Combine(
+            RepoRoot(), "plc", "01-partida-parada-selo", "partida-parada.forja")).Require();
+        var catalog = DeviceCatalog
+            .LoadFromDirectory(Path.Combine(RepoRoot(), "catalog", "devices")).Require();
+
+        using var loop = new SimulationLoop(
+            doc, catalog, DeviceFactory.CreateDefault(), new FakePhysicsWorld(), _ => new FakeDriver());
+        loop.Enqueue(new SetModeCommand(SimMode.Run));
+        loop.Tick();
+
+        Assert.All(loop.Io!.BuildView(), p => Assert.False(p.IsAnalog));
+    }
+
+    [Fact]
+    public void ForcarPalavraPorComando_PrevaleceEAparecerNaView()
+    {
+        using var loop = Rodando();
+        var endereco = new IoAddress(IoArea.HoldingRegister, 0);
+
+        loop.Enqueue(new ForceWordCommand(endereco, 32768));
+        loop.Tick();
+
+        var linha = Assert.Single(loop.Io!.BuildView(), p => p.Address == endereco);
+        Assert.True(linha.Forced);
+        Assert.Equal(32768, linha.AnalogRaw);
+        Assert.Equal(1.0f, linha.AnalogEu, 2); // 32768/65535 × 2 m/s
+
+        // E o atuador obedece ao valor forçado, não ao do driver.
+        Assert.Equal(1.0f, loop.Devices.OfType<VariableSpeedConveyor>().Single().Setpoint, 2);
+    }
+
+    [Fact]
+    public void LiberarAForca_DevolveOControleAoDriver()
+    {
+        using var loop = Rodando();
+        var endereco = new IoAddress(IoArea.HoldingRegister, 0);
+
+        loop.Enqueue(new ForceWordCommand(endereco, 65535));
+        loop.Tick();
+        Assert.True(Assert.Single(loop.Io!.BuildView(), p => p.Address == endereco).Forced);
+
+        loop.Enqueue(new ForceWordCommand(endereco, null));
+        loop.Tick();
+
+        var linha = Assert.Single(loop.Io!.BuildView(), p => p.Address == endereco);
+        Assert.False(linha.Forced);
+        Assert.Equal(0, linha.AnalogRaw); // FakeDriver não escreve nada
+    }
+}

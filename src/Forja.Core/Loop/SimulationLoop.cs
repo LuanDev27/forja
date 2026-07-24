@@ -165,6 +165,10 @@ public sealed class SimulationLoop : IDisposable
                 _ctx?.Io.Force(force.Address, force.Value);
                 break;
 
+            case ForceWordCommand forceWord:
+                _ctx?.Io.ForceWord(forceWord.Address, forceWord.Raw);
+                break;
+
             case HmiCommand hmi:
                 if (_devicesById.TryGetValue(hmi.DeviceId, out var device))
                     device.OnHmi(hmi.PortName, hmi.Value);

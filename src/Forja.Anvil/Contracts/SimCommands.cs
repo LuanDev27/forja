@@ -26,5 +26,12 @@ public sealed record SetModeCommand(SimMode Target) : ISimCommand;
 /// </summary>
 public sealed record ForceIoCommand(IoAddress Address, bool? Value) : ISimCommand;
 
+/// <summary>
+/// Força uma palavra de I/O (RF-05 / FR-020). Raw null libera o override.
+/// O valor viaja em CONTAGEM BRUTA, não em unidade de engenharia: a conversão
+/// mora na fronteira IoTable (ADR 0005) e não pode escapar para a camada 4.
+/// </summary>
+public sealed record ForceWordCommand(IoAddress Address, ushort? Raw) : ISimCommand;
+
 /// <summary>Interação de HMI (botão/chave) vinda da UI (RF-03 HMI).</summary>
 public sealed record HmiCommand(uint DeviceId, string PortName, bool Value) : ISimCommand;
