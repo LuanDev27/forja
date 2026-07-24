@@ -151,7 +151,7 @@ TODAS as user stories. Só fecha com o teste de determinismo verde (Artigo I.4).
 
 - [ ] T038 [P] Terceiro dispositivo analógico: `Scale : DeviceBehavior` (balança — soma peso das peças → input register) em `src/Forja.Core/Devices/Sensors.cs` + catálogo `catalog/devices/sensor.scale.json` + cenário headless (prova que o canal de entrada é genérico, research R8)
 - [ ] T039 [US1] [US2] UI: `src/Forja.Studio/UI/IoTablePanel.cs` exibe número+unidade e força valor numérico em ponto analógico (FR-019, FR-020)
-- [ ] T040 [P] Teste de arquitetura: confirmar que `float` (EU) não vaza para a camada 1/3 em `tests/Forja.Architecture.Tests/LayerRulesTests.cs`
+- [x] T040 [P] Teste de arquitetura: confirmar que `float` (EU) não vaza para a camada 1/3 em `tests/Forja.Architecture.Tests/LayerRulesTests.cs` (contrato de I/O da camada 1 + Bellows inteira, com guarda anti-teste-vazio)
 - [ ] T041 [P] Atualizar `ROADMAP.md` (Fase 2 em progresso→fechada) e a memória de estado do projeto
 - [ ] T042 Rodar a validação completa do `quickstart.md` (US1–US4) e fechar a spec
 
