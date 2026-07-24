@@ -27,6 +27,7 @@ Locations válidas no Simulator: `%IX0.0–0.7`, `%QX0.0–0.7`.
 | 04 | `04-alarme-rearme/alarme.st` |
 | 05 | `05-pulmao-semaforo/pulmao.st` |
 | 06 | `06-pick-and-place/pick-and-place.st` |
+| 07 | `07-controle-de-nivel/controle-nivel.st` |
 | demo | `../demo/openplc/separador.st` |
 
 ---
