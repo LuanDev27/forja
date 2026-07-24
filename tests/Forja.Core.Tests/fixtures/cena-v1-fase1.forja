@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "name": "Partida/parada com selo",
+  "seed": 42,
+  "devices": [
+    {
+      "id": 2,
+      "typeId": "emitter",
+      "transform": { "pos": [-1.6, 0.6, 0], "rotY": 0 },
+      "params": { "interval": 2.5, "maxParts": 0, "sizes": "S", "material": "plastic" }
+    },
+    {
+      "id": 3,
+      "typeId": "conveyor.belt.io",
+      "transform": { "pos": [0, 0.2, 0], "rotY": 0 },
+      "params": { "length": 4.0, "width": 0.5, "speed": 0.5 }
+    },
+    {
+      "id": 14,
+      "typeId": "chute",
+      "transform": { "pos": [2.66, -0.14, 0], "rotY": 90 },
+      "params": { "sizeX": 0.6, "sizeY": 0.1, "sizeZ": 1.4, "tilt": 20.0, "friction": 0.2 }
+    },
+    {
+      "id": 4,
+      "typeId": "sink",
+      "transform": { "pos": [3.8, -0.7, 0], "rotY": 0 },
+      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+    },
+    {
+      "id": 5,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.8, 0.1, 1.2], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 6,
+      "typeId": "hmi.button",
+      "transform": { "pos": [-2.4, 0.1, 1.2], "rotY": 0 },
+      "params": {}
+    },
+    {
+      "id": 7,
+      "typeId": "hmi.light",
+      "transform": { "pos": [-2.0, 0.1, 1.2], "rotY": 0 },
+      "params": {}
+    }
+  ],
+  "ioMap": [
+    { "deviceId": 5, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 0 } },
+    { "deviceId": 6, "portName": "pressed", "address": { "area": "DiscreteInput", "offset": 1 } },
+    { "deviceId": 3, "portName": "run", "address": { "area": "Coil", "offset": 0 } },
+    { "deviceId": 7, "portName": "on", "address": { "area": "Coil", "offset": 1 } }
+  ],
+  "connection": {
+    "driver": "modbus-tcp-server",
+    "bindAddress": "0.0.0.0",
+    "port": 5020,
+    "unitId": 1,
+    "timeoutMs": 1000
+  }
+}

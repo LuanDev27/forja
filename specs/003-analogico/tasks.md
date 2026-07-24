@@ -35,7 +35,7 @@ catálogo de dados em `catalog/devices/`.
 **Purpose**: preparar terreno; o projeto e as 4 camadas já existem.
 
 - [x] T001 Confirmar build/testes verdes na `main` antes de tocar camada 1: `dotnet build` + `dotnet test`
-- [ ] T002 [P] Criar cena de fixture v1 real em `tests/Forja.Core.Tests/fixtures/` copiando uma cena digital da biblioteca (base do teste de migração US4)
+- [x] T002 [P] Criar cena de fixture v1 real em `tests/Forja.Core.Tests/fixtures/` copiando uma cena digital da biblioteca (base do teste de migração US4)
 
 ---
 
@@ -139,9 +139,9 @@ TODAS as user stories. Só fecha com o teste de determinismo verde (Artigo I.4).
 
 **Independent Test**: carregar a fixture v1 (T002) → sucesso e comportamento idêntico à Fase 1; carregar cena v2 com campo desconhecido → erro com caminho+motivo.
 
-- [ ] T035 [P] [US4] Teste de carga aditiva em `tests/Forja.Core.Tests/`: fixture v1 → `Load` sucesso, `scale` = null, `PortType` = Bool por default (AS1)
-- [ ] T036 [P] [US4] Teste round-trip em `tests/Forja.Core.Tests/`: carregar v1, salvar, recarregar → válida com campos aditivos e defaults explícitos (AS2)
-- [ ] T037 [US4] Teste negativo em `tests/Forja.Core.Tests/`: cena v2 com campo analógico desconhecido → falha `UnmappedMemberHandling.Disallow` com caminho+motivo (AS3)
+- [x] T035 [P] [US4] Teste de carga aditiva em `tests/Forja.Core.Tests/SchemaMigrationV1V2Tests.cs`: fixture v1 → `Load` sucesso, `scale` = null, `PortType` = Bool por default, cena segue válida e roda com o mesmo hash de uma gêmea declarada v2 (AS1)
+- [x] T036 [P] [US4] Teste round-trip em `tests/Forja.Core.Tests/SchemaMigrationV1V2Tests.cs`: carregar v1, salvar, recarregar → válida com campos aditivos e defaults explícitos (`"scale": null`, `schemaVersion: 2`) (AS2)
+- [x] T037 [US4] Teste negativo em `tests/Forja.Core.Tests/SchemaMigrationV1V2Tests.cs`: cena v2 com campo analógico desconhecido → falha `UnmappedMemberHandling.Disallow` com caminho+motivo; tipo errado e bruto fora do `ushort` também estouram na carga (AS3)
 
 **Checkpoint**: migração aditiva provada; zero regressão digital (SC-005).
 
