@@ -124,10 +124,10 @@ TODAS as user stories. Só fecha com o teste de determinismo verde (Artigo I.4).
 
 **Independent Test**: rodar a malha; abaixo do setpoint corrige numa direção, acima na outra; hash idêntico em duas execuções.
 
-- [ ] T031 [US3] Montar a cena de controle de nível em `plc/` (sensor de nível + esteira/atuador VV + mapa de I/O `%IW0`/`%QW0`)
-- [ ] T032 [US3] Escrever o programa ST de controle de nível (ler `%IW0`, reescalar, comparar com setpoint, escrever `%QW0`) na biblioteca `plc/`
-- [ ] T033 [US3] Cenário headless da malha em `tests/Forja.Core.Tests/`: abaixo/acima do setpoint → direção correta; sem oscilar por quantização (AS1/AS2)
-- [ ] T034 [US3] Teste de determinismo da malha completa (2× mesmo seed/entradas → mesmo hash) e validação no OpenPLC v4 (quickstart US3)
+- [x] T031 [US3] Montar a cena de controle de nível em `plc/07-controle-de-nivel/controle-nivel.forja` (sensor de nível `%IW0` + esteira VV `%QW0` + emissor + caçamba)
+- [x] T032 [US3] Escrever o programa ST de controle de nível em `plc/07-controle-de-nivel/controle-nivel.st` (ler `%IW0` como `UINT`, reescalar por `DINT`, banda morta em torno do setpoint, escrever `%QW0`) + README do cenário e tabela de variáveis
+- [x] T033 [US3] Cenário headless da malha em `tests/Forja.Core.Tests/LevelControlLoopTests.cs`: acima/abaixo do setpoint → direção correta; banda morta com memória; ruído de 1 contagem na fronteira não chaveia (AS1/AS2)
+- [~] T034 [US3] Determinismo da malha completa **verde** (mesmo percurso de nível 2× → mesmo hash, com guarda contra hash constante). Falta só a validação no OpenPLC v4 (quickstart US3) — passo de GUI
 
 **Checkpoint**: malha analógica fechada — a fatia "vendável" da fase.
 

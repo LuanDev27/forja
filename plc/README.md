@@ -23,8 +23,10 @@ Cada pasta é um trio:
 | [04](04-alarme-rearme/) | Alarme com rearme e sinaleiro | as duas dimensões do alarme, reconhecer ≠ rearmar, pisca vs fixo, oscilador em ST |
 | [05](05-pulmao-semaforo/) | Pulmão com liberação por espaço | `CTUD`, `TP`, singularização, ocupação deduzida vs medida |
 | [06](06-pick-and-place/) | Pick-and-place sequencial | máquina de estado por passos, avanço só por confirmação física, intertravamento entre eixos |
+| [07](07-controle-de-nivel/) | Controle de nível | palavra em vez de bit, `%IW`/`%QW`, reescala bruto↔engenharia, `UINT` vs `INT`, banda morta |
 
-Os cenários são cumulativos: todos reusam o selo do 01.
+Os cenários 01–06 são cumulativos: todos reusam o selo do 01. O 07 abre a outra
+metade da automação — sinal analógico — e por isso não depende de nenhum deles.
 
 ## Como ligar o CLP
 

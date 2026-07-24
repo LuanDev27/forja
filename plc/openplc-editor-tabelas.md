@@ -151,6 +151,25 @@ Locations válidas no Simulator: `%IX0.0–0.7`, `%QX0.0–0.7`.
 | running | Local | BOOL | | FALSE |
 | passo | Local | INT | | 0 |
 
+## 07 — Controle de nível
+| Name | Class | Type | Location | Initial |
+|---|---|---|---|---|
+| SP_NIVEL | Local | UINT | | 60 |
+| BANDA | Local | UINT | | 5 |
+| VEL_LENTA | Local | UINT | | 16384 |
+| VEL_RAPIDA | Local | UINT | | 49151 |
+| nivel_raw | Input | UINT | %IW0 | |
+| vel_raw | Output | UINT | %QW0 | |
+| nivel_pct | Local | UINT | | |
+| drenando | Local | BOOL | | FALSE |
+
+> **Atenção — este é o primeiro cenário com palavra.** O board *OpenPLC
+> Simulator* expõe só `%IX0.0–0.7` e `%QX0.0–0.7`; ele não tem onde localizar
+> `%IW0`/`%QW0`. Para este cenário é preciso um board que declare áreas de
+> registrador (ou validar direto no Runtime, que é onde a malha roda de fato).
+> Se o Editor recusar a Location, o corpo do programa ainda compila com as duas
+> variáveis como **Local** — só não fica ligado ao Modbus.
+
 ## demo — Separador por altura
 | Name | Class | Type | Location | Initial |
 |---|---|---|---|---|

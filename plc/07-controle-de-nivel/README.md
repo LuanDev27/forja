@@ -1,0 +1,108 @@
+# 07 — Controle de nível
+
+O primeiro cenário da biblioteca em que o CLP **age sobre um número**. Os seis
+anteriores liam bits e escreviam bits — ligado/desligado, presente/ausente. Aqui
+entra a outra metade da automação: a medida contínua.
+
+| Arquivo | O que é |
+|---|---|
+| `controle-nivel.forja` | pulmão com sensor de nível, esteira de velocidade variável, emissor e caçamba |
+| `controle-nivel.st` | o programa |
+
+Pré-requisito: nenhum dos anteriores. Este cenário é deliberadamente a lógica
+mais simples possível — a novidade toda está no **tipo de sinal**, não na lógica.
+
+## O mapa de endereços
+
+| Forja | IEC | O quê |
+|---|---|---|
+| input register 0 | `%IW0` | nível do pulmão, bruto 0..65535 |
+| holding register 0 | `%QW0` | velocidade da esteira, bruto 0..65535 |
+
+A cena declara o que esses brutos significam: o sensor cobre 0–100 % e a esteira
+0–2 m/s. O CLP **não recebe** essa informação — ele recebe 16 bits e mais nada.
+
+## Bit e palavra são canais separados
+
+`%IX0.0` e `%IW0` não disputam espaço: discrete inputs e input registers são
+áreas Modbus diferentes. Um cenário pode ter os dois ao mesmo tempo sem que um
+endereço atropele o outro. É por isso que a Fase 2 pôde ser aditiva — nenhum dos
+cenários 01–06 precisou mudar de endereço.
+
+## O que muda quando o sinal é uma palavra
+
+### 1. O tipo importa, e erra feio
+
+`%IW` é uma palavra **sem sinal**: 0..65535. Declarada como `INT` (com sinal,
+−32768..32767), toda leitura acima da metade da escala vira número negativo — o
+tanque passa de 50 % e o programa acha que ele está vazio. Por isso o programa
+usa `UINT`.
+
+### 2. Reescalar é trabalho do programa
+
+```pascal
+nivel_pct := DINT_TO_UINT(UINT_TO_DINT(nivel_raw) * 100 / 65535);
+```
+
+Duas armadilhas na mesma linha:
+
+- **multiplicar antes de dividir**, ou a divisão inteira joga a precisão fora;
+- **alargar para `DINT` antes de multiplicar**, ou `65535 * 100` estoura os
+  16 bits.
+
+Uma das duas correções sozinha estraga a outra.
+
+### 3. Banda morta — o conceito central
+
+A versão ingênua funciona por alguns segundos:
+
+```pascal
+IF nivel_pct >= SP_NIVEL THEN vel := RAPIDA; ELSE vel := LENTA; END_IF;
+```
+
+Depois a esteira começa a chacoalhar entre 0,5 e 1,5 m/s várias vezes por
+segundo. Um sinal analógico real **nunca fica parado**: ruído elétrico, ondulação
+da superfície do material e a própria quantização do cartão fazem a leitura
+tremer em torno do setpoint. Comparação sem banda morta transforma esse tremor em
+chaveamento, e chaveamento a 20 Hz destrói contator, inversor e paciência.
+
+A banda morta separa o ponto de ligar do ponto de desligar:
+
+```
+   liga a drenagem rápida em 65 %   (SP + BANDA)
+   volta para devagar     em 55 %   (SP - BANDA)
+```
+
+Entre 55 e 65 **nada muda**: a saída fica onde estava. Isso obriga a saída a ter
+memória — `drenando` é uma variável, não uma expressão, porque a resposta depende
+de onde o processo *veio*, não só de onde ele está.
+
+O teste headless prova exatamente isso: alimentado com ruído de **uma contagem**
+em cima da fronteira do setpoint, o controlador ingênuo chaveia ~39 vezes em 40
+ticks; o com banda morta não chaveia nenhuma.
+
+### 4. Quantização não é detalhe
+
+O setpoint de 60 % cai em 39321 contagens (`65535 × 0,6`). Uma contagem para
+baixo — 39320 — já reescala para 59 %. Ou seja: a fronteira entre "abaixo" e
+"acima" do setpoint é uma linha de **uma contagem** de largura, e o sinal cruza
+essa linha o tempo todo. É o mesmo problema que o filtro de repique resolve no
+[cenário 03](../03-contagem-batelada/), na versão analógica.
+
+## Por que duas velocidades e não um PID
+
+O objetivo aqui é provar o **ciclo completo** — ler número, decidir sobre número,
+escrever número. Um PID acrescentaria sintonia, anti-windup e tempo de
+amostragem a um cenário que ainda está apresentando o tipo de dado. O caminho
+para ele fica aberto: o `%QW0` já aceita qualquer valor de 0 a 65535.
+
+## Validar
+
+O cenário roda headless em `tests/Forja.Core.Tests/LevelControlLoopTests.cs`,
+contra um CLP de mentira que espelha este `.st` linha por linha — inclusive o
+teste de determinismo (mesmo percurso de nível, mesmo hash).
+
+Para a validação no OpenPLC Editor, a tabela de variáveis está em
+[`../openplc-editor-tabelas.md`](../openplc-editor-tabelas.md). Atenção: o board
+**OpenPLC Simulator** expõe só `%IX0.0–0.7` e `%QX0.0–0.7`; para localizar
+`%IW0`/`%QW0` é preciso um board que declare áreas de registrador.

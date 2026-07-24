@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 2,
+  "name": "Controle de nível",
+  "seed": 7,
+  "devices": [
+    {
+      "id": 1,
+      "typeId": "sensor.level",
+      "transform": { "pos": [0, 1.0, 0], "rotY": 0 },
+      "params": { "range": 1.0, "euMin": 0.0, "euMax": 100.0, "euUnit": "%" }
+    },
+    {
+      "id": 2,
+      "typeId": "conveyor.belt.vspeed",
+      "transform": { "pos": [0, 0.2, 0], "rotY": 0 },
+      "params": { "length": 4.0, "width": 0.5, "euMin": 0.0, "euMax": 2.0, "euUnit": "m/s" }
+    },
+    {
+      "id": 3,
+      "typeId": "emitter",
+      "transform": { "pos": [-1.6, 0.9, 0], "rotY": 0 },
+      "params": { "interval": 1.5, "maxParts": 0, "sizes": "S", "material": "plastic" }
+    },
+    {
+      "id": 4,
+      "typeId": "sink",
+      "transform": { "pos": [3.2, -0.7, 0], "rotY": 0 },
+      "params": { "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 1.2 }
+    }
+  ],
+  "ioMap": [
+    {
+      "deviceId": 1,
+      "portName": "level",
+      "address": { "area": "InputRegister", "offset": 0 },
+      "scale": { "rawMin": 0, "rawMax": 65535 }
+    },
+    {
+      "deviceId": 2,
+      "portName": "speed",
+      "address": { "area": "HoldingRegister", "offset": 0 },
+      "scale": { "rawMin": 0, "rawMax": 65535 }
+    }
+  ],
+  "connection": {
+    "driver": "modbus-tcp-server",
+    "bindAddress": "0.0.0.0",
+    "port": 5020,
+    "unitId": 1,
+    "timeoutMs": 1000
+  }
+}
