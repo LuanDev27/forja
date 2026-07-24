@@ -29,7 +29,8 @@ depois que os primeiros ensinarem o que ainda não sei.
 
 ## Estado atual
 
-**Fases 0 e 1 fechadas.**
+**Fases 0 e 1 fechadas. Fase 2 em progresso** — todo o código escrito e verde;
+falta a validação no OpenPLC v4, que é passo de bancada.
 
 - **Fase 0** — repositório público no GitHub, release `v1.0.0` (ZIP portátil),
   CI verde em `windows-latest`.
@@ -44,11 +45,20 @@ de garra própria (`IPhysicsBody.SetKind`), geometria de gantry cartesiano e
 cobertura headless das transições críticas (voltar para Edit e falha de driver,
 ambas com peça presa na garra).
 
-Números atuais: **18 dispositivos** no catálogo, **122 testes xUnit** + **19
-cenários headless** com física, validada ponta a ponta contra OpenPLC v4.
+**Spec 003 (sinais analógicos)** — o cano de palavras está fiado ponta a ponta:
+`IoSnapshot` carrega bits **e** palavras, a conversão bruto↔unidade de
+engenharia mora só na fronteira `IoTable`, o schema subiu para v2 por migração
+aditiva e o hash de determinismo passou a incluir as palavras. Três dispositivos
+analógicos novos (sensor de nível, esteira de velocidade variável, balança) e o
+**cenário 07 da biblioteca de CLP** — controle de nível com banda morta, a
+primeira lógica da Forja que age sobre um número.
 
-**Próximo passo:** Fase 2 (sinais analógicos) — entra pelo fluxo normal do
-projeto com `/speckit-specify`, virando `specs/003-…`.
+Números atuais: **21 dispositivos** no catálogo, **203 testes xUnit**, 7
+cenários de CLP. Pendências da fase: validar `%IW`/`%QW` no OpenPLC v4 e ver a
+Tabela de I/O analógica na tela — os dois passos que exigem bancada.
+
+**Próximo passo:** fechar a Fase 2 na bancada (quickstart da spec 003) e então
+decidir entre Fase 3 (gateway) e o visual industrial.
 
 ---
 
@@ -124,14 +134,18 @@ qualquer SCADA ou dashboard adiante mostra só lâmpadas acesas e apagadas.
 contrato de **camada 1** e desce por Core, Bellows e mapa de tags — e é
 justamente por isso que é o melhor exercício de arquitetura do projeto.
 
-**Entrega**
-- `IoSnapshot` com palavras além de bits; holding/input registers de verdade.
-- Escalonamento de sinal (bruto ↔ unidade de engenharia), o equivalente a um
-  4–20 mA.
-- Dispositivos novos que só fazem sentido em analógico: sensor de distância,
-  balança, esteira com velocidade variável.
-- Migração de `schemaVersion` — cenas v1 carregam ou falham com erro explícito
-  (Artigo III), sem corromper em silêncio.
+**Entrega** (spec 003 — o que já está verde)
+- ✅ `IoSnapshot` com palavras além de bits; holding/input registers de verdade.
+- ✅ Escalonamento de sinal (bruto ↔ unidade de engenharia), o equivalente a um
+  4–20 mA, preso à fronteira `IoTable` por teste de arquitetura.
+- ✅ Três dispositivos que só fazem sentido em analógico: sensor de nível,
+  esteira de velocidade variável e balança.
+- ✅ Migração de `schemaVersion` v1→v2 — cena da Fase 1 carrega com defaults
+  explícitos e roda com o mesmo hash; campo analógico torto falha com caminho e
+  motivo (Artigo III), sem corromper em silêncio.
+- ✅ Cenário 07 da biblioteca: controle de nível ponta a ponta, com banda morta.
+- ⏳ Validação na bancada: `%IW`/`%QW` contra o OpenPLC v4 e a Tabela de I/O
+  analógica na tela.
 
 **Ensina:** evoluir contrato versionado sem quebrar o passado; disciplina de
 camada sob pressão real; migração de schema.
