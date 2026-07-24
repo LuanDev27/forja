@@ -28,6 +28,16 @@ Cada pasta é um trio:
 Os cenários 01–06 são cumulativos: todos reusam o selo do 01. O 07 abre a outra
 metade da automação — sinal analógico — e por isso não depende de nenhum deles.
 
+## Validar os programas
+
+```powershell
+.\tools\openplc-validate\validar.ps1
+```
+
+Compila os 8 `.st` (7 cenários + a demo) com o STruC++ do OpenPLC Editor
+instalado, sem abrir a GUI, e falha com linha, coluna e motivo. Como funciona e
+por que os controles negativos importam: [`tools/openplc-validate/`](../tools/openplc-validate/).
+
 ## Como ligar o CLP
 
 O passo a passo com o OpenPLC v4 — projeto ST, cadastro da Forja como

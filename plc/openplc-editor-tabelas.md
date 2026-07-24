@@ -1,9 +1,19 @@
 # Carregar os cenários no OpenPLC Editor (STruC++) — tabelas de variáveis
 
-Os `.st` desta pasta já estão validados no **MatIEC** (compilador IEC de
-referência, 7/7). Para validar também no **OpenPLC Editor** (STruC++, o toolchain
-do Runtime instalado), o caminho que funciona é **criar cada projeto ao vivo** —
-`File → New Project` — e preencher a tabela de variáveis à mão, porque o
+> **A compilação não precisa mais de GUI.** Um comando compila todos os `.st`
+> com o STruC++ de verdade, o mesmo do Editor instalado:
+>
+> ```powershell
+> .\tools\openplc-validate\validar.ps1
+> ```
+>
+> Estado atual: **8/8 compilam** (7 cenários + a demo do separador), incluindo o
+> 07 com `%IW0`/`%QW0`. Ver [`tools/openplc-validate/`](../tools/openplc-validate/).
+
+As tabelas abaixo continuam valendo para o que a linha de comando **não** faz:
+rodar o programa no Runtime e ver a planta se mexer. Para isso é preciso montar
+o projeto no Editor, e o caminho que funciona é **criar cada projeto ao vivo** —
+`File → New Project` — preenchendo a tabela de variáveis à mão, porque o
 `Open Project` do Editor 4.2.8 tem um bug que zera a tabela ao abrir do disco.
 
 ## Como montar cada cenário
@@ -164,12 +174,15 @@ Locations válidas no Simulator: `%IX0.0–0.7`, `%QX0.0–0.7`.
 | nivel_pct | Local | UINT | | |
 | drenando | Local | BOOL | | FALSE |
 
-> **Atenção — este é o primeiro cenário com palavra.** O board *OpenPLC
-> Simulator* expõe só `%IX0.0–0.7` e `%QX0.0–0.7`; ele não tem onde localizar
-> `%IW0`/`%QW0`. Para este cenário é preciso um board que declare áreas de
-> registrador (ou validar direto no Runtime, que é onde a malha roda de fato).
-> Se o Editor recusar a Location, o corpo do programa ainda compila com as duas
-> variáveis como **Local** — só não fica ligado ao Modbus.
+> **Este é o primeiro cenário com palavra, e ele compila.** O `validar.ps1`
+> confirma no STruC++ 0.5.13: `UINT` é aceito, `DINT_TO_UINT(UINT_TO_DINT(...))`
+> vira `TO_UINT(TO_DINT(NIVEL_RAW) * 100 / 65535)`, e os endereços entram como
+> `LocatedArea::Input, LocatedSize::Word` e `LocatedArea::Output` — ou seja, a
+> palavra foi ligada, não ignorada.
+>
+> O que ainda pode atrapalhar é o **board** no Editor: o *OpenPLC Simulator*
+> expõe só `%IX0.0–0.7` e `%QX0.0–0.7` no dropdown de Location. Se ele recusar,
+> escolha um board com áreas de registrador — o programa já está provado.
 
 ## demo — Separador por altura
 | Name | Class | Type | Location | Initial |

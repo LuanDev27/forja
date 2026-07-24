@@ -35,3 +35,7 @@ Thumbs.db
 
 # Godot gera .uid para todo .cs; os de tests/ nao sao usados pelo engine
 tests/**/*.cs.uid
+
+# Compilador STruC++ extraído do OpenPLC Editor instalado (regerável por
+# tools/openplc-validate/validar.ps1 — nunca versionar código de terceiros)
+tools/openplc-validate/.strucpp/
