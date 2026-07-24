@@ -33,9 +33,9 @@ PROGRAM controle_nivel
     (* As duas velocidades, em contagem bruta de 0..65535 sobre a faixa
        0..2 m/s declarada na cena:
          16384 / 65535 * 2 m/s ~ 0,50 m/s
-         49151 / 65535 * 2 m/s ~ 1,50 m/s *)
+         32768 / 65535 * 2 m/s ~ 1,00 m/s *)
     VEL_LENTA  : UINT := 16384;
-    VEL_RAPIDA : UINT := 49151;
+    VEL_RAPIDA : UINT := 32768;
   END_VAR
 
   VAR
@@ -87,7 +87,7 @@ PROGRAM controle_nivel
          ELSE                         vel_raw := VEL_LENTA;  END_IF;
 
      e isso funciona por uns segundos. Depois a esteira começa a
-     chacoalhar entre 0,5 e 1,5 m/s várias vezes por segundo.
+     chacoalhar entre 0,5 e 1,0 m/s várias vezes por segundo.
 
      O motivo: um sinal analógico REAL nunca fica parado. Ruído
      elétrico, ondulação da superfície do material e a própria

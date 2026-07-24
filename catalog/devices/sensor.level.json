@@ -9,6 +9,7 @@
   ],
   "paramDefs": [
     { "name": "range", "type": "float", "default": 1.0, "min": 0.1, "max": 10 },
+    { "name": "damping", "type": "int", "default": 1, "min": 1, "max": 600 },
     { "name": "euMin", "type": "float", "default": 0.0, "min": -1000, "max": 1000 },
     { "name": "euMax", "type": "float", "default": 100.0, "min": -1000, "max": 1000 },
     { "name": "euUnit", "type": "string", "default": "%" }

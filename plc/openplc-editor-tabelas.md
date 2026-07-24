@@ -168,7 +168,7 @@ Locations válidas no Simulator: `%IX0.0–0.7`, `%QX0.0–0.7`.
 | SP_NIVEL | Local | UINT | | 60 |
 | BANDA | Local | UINT | | 5 |
 | VEL_LENTA | Local | UINT | | 16384 |
-| VEL_RAPIDA | Local | UINT | | 49151 |
+| VEL_RAPIDA | Local | UINT | | 32768 |
 | nivel_raw | Input | UINT | %IW0 | |
 | vel_raw | Output | UINT | %QW0 | |
 | nivel_pct | Local | UINT | | |

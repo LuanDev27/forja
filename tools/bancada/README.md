@@ -56,14 +56,17 @@ custou meia hora fingindo ser um defeito da Forja. O `master-nivel.ps1` confere
 o *transaction id* de cada resposta justamente para que dessincronização de
 frame apareça como erro em vez de valor errado.
 
-## Limite conhecido da cena 07
+## Foi esta bancada que achou o ruído do sensor
 
-O `sensor.level` lança **um raio**. Quando ele cai numa fresta entre duas peças,
-atravessa até a correia e o nível lê **0** mesmo com o vaso meio cheio — daí as
-quedas bruscas a zero no meio de uma sequência saudável. É o comportamento real
-de sensor pontual sobre material granular, não defeito de simulação; o conserto
-industrial é amortecimento ou medição por área. Ver o
+O teste headless não pegava: ele injeta níveis limpos. Foi rodando contra a
+física de verdade que apareceu **~30 trocas de velocidade em 60 s**, cada estado
+durando 0,1–0,5 s — a esteira chacoalhando em cima de leitura espúria de fresta,
+não controlando. O conserto (parâmetro `damping` no sensor, mediana móvel) e a
+recalibração da marcha rápida saíram daí. Ver o
 [README do cenário 07](../../plc/07-controle-de-nivel/).
+
+Vale como lembrete do porquê desta ferramenta existir: cenário headless prova a
+lógica, bancada prova a **planta**.
 
 ## Parâmetros
 

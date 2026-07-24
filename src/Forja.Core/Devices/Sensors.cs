@@ -78,9 +78,31 @@ public sealed class HeightSensor : DeviceBehavior
 public sealed class LevelSensor : DeviceBehavior
 {
     private float _level;
+    private float[] _janela = Array.Empty<float>();
+    private float[] _ordenar = Array.Empty<float>();
+    private int _preenchidos;
+    private int _proximo;
 
-    /// <summary>Nível medido em % (0–100), só leitura.</summary>
+    /// <summary>Nível publicado em % (0–100), já amortecido. Só leitura.</summary>
     public float Level => _level;
+
+    /// <summary>Leitura crua do último tick, antes do amortecimento — a camada
+    /// visual e os testes usam para mostrar o que o feixe realmente viu.</summary>
+    public float LevelCru { get; private set; }
+
+    public override void Build(SimContext ctx)
+    {
+        // damping = quantos ticks entram na mediana. 1 = sem amortecimento
+        // (comportamento da Fase 2 original, e o default para não mudar cena
+        // nenhuma que já existe).
+        int n = Math.Clamp(GetInt("damping", 1), 1, 600);
+        _janela = new float[n];
+        _ordenar = new float[n];
+        _preenchidos = 0;
+        _proximo = 0;
+        _level = 0f;
+        LevelCru = 0f;
+    }
 
     public override void Tick(SimContext ctx)
     {
@@ -92,14 +114,53 @@ public sealed class LevelSensor : DeviceBehavior
         float fill = hit is { } h && ctx.Parts.IsPart(h.EntityId) && range > 0f
             ? Math.Clamp((range - (from.Y - h.Point.Y)) / range, 0f, 1f)
             : 0f;
-        _level = fill * 100f;
+        LevelCru = fill * 100f;
 
+        if (_janela.Length == 0)
+            _janela = _ordenar = new float[1];   // Tick sem Build (testes de unidade)
+
+        _janela[_proximo] = LevelCru;
+        _proximo = (_proximo + 1) % _janela.Length;
+        if (_preenchidos < _janela.Length)
+            _preenchidos++;
+
+        _level = Mediana();
         ctx.Io.SetInputWord(Id, "level", _level);
     }
 
+    /// <summary>
+    /// MEDIANA, não média. O ruído deste sensor é de IMPULSO: o feixe cai numa
+    /// fresta entre duas peças, atravessa até o fundo e a leitura despenca a 0
+    /// por alguns ticks. Média espalharia esse zero por toda a janela; mediana
+    /// simplesmente o descarta enquanto ele for minoria. É o mesmo motivo pelo
+    /// qual transmissor de nível de verdade tem amortecimento, e por que
+    /// rejeição de spike não se faz com filtro de primeira ordem.
+    /// </summary>
+    private float Mediana()
+    {
+        if (_preenchidos == 1)
+            return _janela[(_proximo - 1 + _janela.Length) % _janela.Length];
+
+        Array.Copy(_janela, _ordenar, _preenchidos);
+        Array.Sort(_ordenar, 0, _preenchidos);
+        int meio = _preenchidos / 2;
+        return (_preenchidos & 1) == 1
+            ? _ordenar[meio]
+            : (_ordenar[meio - 1] + _ordenar[meio]) * 0.5f;
+    }
+
     // Grandeza contínua entra no hash quantizada (mm), como as poses (research
-    // R5); o bruto do registrador também entra pelo hash da IoTable.
-    public override void WriteState(ref StateHasher hasher) => hasher.AddQuantized(_level);
+    // R5); o bruto do registrador também entra pelo hash da IoTable. A JANELA
+    // também entra: ela decide as saídas dos próximos ticks, então duas
+    // execuções com janelas diferentes não são o mesmo estado (Artigo I.4).
+    public override void WriteState(ref StateHasher hasher)
+    {
+        hasher.AddQuantized(_level);
+        hasher.Add(_preenchidos);
+        hasher.Add(_proximo);
+        for (int i = 0; i < _janela.Length; i++)
+            hasher.AddQuantized(_janela[i]);
+    }
 }
 
 /// <summary>

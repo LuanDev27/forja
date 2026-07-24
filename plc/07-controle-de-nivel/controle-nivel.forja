@@ -6,8 +6,8 @@
     {
       "id": 1,
       "typeId": "sensor.level",
-      "transform": { "pos": [-0.95, 1.25, 0], "rotY": 0 },
-      "params": { "range": 1.0, "euMin": 0.0, "euMax": 100.0, "euUnit": "%" }
+      "transform": { "pos": [-1.2, 1.25, 0], "rotY": 0 },
+      "params": { "range": 1.0, "damping": 45, "euMin": 0.0, "euMax": 100.0, "euUnit": "%" }
     },
     {
       "id": 2,
@@ -18,7 +18,7 @@
     {
       "id": 3,
       "typeId": "emitter",
-      "transform": { "pos": [-1.28, 1.35, 0], "rotY": 0 },
+      "transform": { "pos": [-1.65, 1.35, 0], "rotY": 0 },
       "params": { "interval": 0.22, "maxParts": 0, "sizes": "S", "material": "plastic" }
     },
     {
@@ -30,19 +30,19 @@
     {
       "id": 5,
       "typeId": "guide.side",
-      "transform": { "pos": [-0.9, 0.65, 0.3], "rotY": 0 },
-      "params": { "sizeX": 1.0, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
+      "transform": { "pos": [-1.2, 0.65, 0.3], "rotY": 0 },
+      "params": { "sizeX": 1.6, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
     },
     {
       "id": 6,
       "typeId": "guide.side",
-      "transform": { "pos": [-0.9, 0.65, -0.3], "rotY": 0 },
-      "params": { "sizeX": 1.0, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
+      "transform": { "pos": [-1.2, 0.65, -0.3], "rotY": 0 },
+      "params": { "sizeX": 1.6, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
     },
     {
       "id": 7,
       "typeId": "guide.side",
-      "transform": { "pos": [-1.4, 0.65, 0], "rotY": 90 },
+      "transform": { "pos": [-2.0, 0.65, 0], "rotY": 90 },
       "params": { "sizeX": 0.6, "sizeY": 0.8, "sizeZ": 0.05, "friction": 0.1 }
     },
     {

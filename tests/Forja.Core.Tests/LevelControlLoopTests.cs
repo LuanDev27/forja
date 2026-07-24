@@ -25,7 +25,7 @@ public class LevelControlLoopTests
     private const int SpNivel = 60;
     private const int Banda = 5;
     private const ushort VelLenta = 16384;
-    private const ushort VelRapida = 49151;
+    private const ushort VelRapida = 32768;
 
     private static string RepoRoot()
     {
@@ -97,6 +97,11 @@ public class LevelControlLoopTests
 
         public required float Alcance { get; init; }
 
+        /// <summary>Ticks na janela da mediana do sensor (param `damping` da
+        /// cena). Mudança de nível só chega ao CLP depois de virar MAIORIA
+        /// dessa janela — quem tickar menos que isso está testando o passado.</summary>
+        public required int Amortecimento { get; init; }
+
         /// <summary>Velocidade em m/s que a esteira aplicou de fato.</summary>
         public float VelocidadeDaEsteira =>
             Loop.Devices.OfType<VariableSpeedConveyor>().Single().Setpoint;
@@ -115,6 +120,14 @@ public class LevelControlLoopTests
         {
             for (int i = 0; i < n; i++)
                 Loop.Tick();
+        }
+
+        /// <summary>Põe o nível e roda o bastante para ele atravessar o
+        /// amortecimento e chegar ao CLP.</summary>
+        public void EstabilizarEm(int pct)
+        {
+            Nivel(pct);
+            Ticks(Amortecimento + 2);
         }
 
         public void Dispose() => Loop.Dispose();
@@ -144,6 +157,7 @@ public class LevelControlLoopTests
             PartId = part.Id,
             SensorY = sensor.Transform.Pos.Y,
             Alcance = ParamFloat(sensor, "range", 1f),
+            Amortecimento = (int)ParamFloat(sensor, "damping", 1f),
         };
     }
 
@@ -179,11 +193,10 @@ public class LevelControlLoopTests
     {
         using var malha = Subir();
 
-        malha.Nivel(90);
-        malha.Ticks(5);
+        malha.EstabilizarEm(90);
 
         Assert.Equal(VelRapida, malha.Plc.ComandoEscrito);
-        Assert.Equal(1.5f, malha.VelocidadeDaEsteira, 2);
+        Assert.Equal(1.0f, malha.VelocidadeDaEsteira, 2);
     }
 
     [Fact]
@@ -191,10 +204,8 @@ public class LevelControlLoopTests
     {
         using var malha = Subir();
 
-        malha.Nivel(90);
-        malha.Ticks(5);
-        malha.Nivel(20);
-        malha.Ticks(5);
+        malha.EstabilizarEm(90);
+        malha.EstabilizarEm(20);
 
         Assert.Equal(VelLenta, malha.Plc.ComandoEscrito);
         Assert.Equal(0.5f, malha.VelocidadeDaEsteira, 2);
@@ -203,15 +214,31 @@ public class LevelControlLoopTests
     [Fact]
     public void ComandoDoPlcChegaNaEsteiraEmNoMaximoUmTick()
     {
+        // Mede o atraso REAL entre o CLP mudar o setpoint e a esteira obedecer,
+        // em vez de chutar um número de ticks. A versão anterior chutava 2 e
+        // quebrou no dia em que o sensor ganhou amortecimento — o atraso do
+        // instrumento não é o atraso do barramento, e o teste confundia os dois.
         using var malha = Subir();
-        malha.Nivel(90);
-        malha.Ticks(5);
-        Assert.Equal(1.5f, malha.VelocidadeDaEsteira, 2);
+        malha.EstabilizarEm(90);
+        Assert.Equal(1.0f, malha.VelocidadeDaEsteira, 2);
 
         malha.Nivel(20);
-        malha.Ticks(2); // 1 tick para o CLP ver o novo nível, 1 para a esteira aplicar
+        ushort anterior = malha.Plc.ComandoEscrito;
 
-        Assert.Equal(0.5f, malha.VelocidadeDaEsteira, 2);
+        for (int i = 0; i < malha.Amortecimento * 3; i++)
+        {
+            malha.Ticks(1);
+            if (malha.Plc.ComandoEscrito == anterior)
+                continue;
+
+            // O CLP acabou de escrever o setpoint novo: no MÁXIMO um tick
+            // depois a esteira tem de estar aplicando (contrato W5).
+            malha.Ticks(1);
+            Assert.Equal(0.5f, malha.VelocidadeDaEsteira, 2);
+            return;
+        }
+
+        Assert.Fail("o CLP nunca mudou o setpoint — o nível não atravessou o amortecimento");
     }
 
     // ---- T033: banda morta — não oscila por quantização (AS2) ----
@@ -220,15 +247,13 @@ public class LevelControlLoopTests
     public void DentroDaBandaMorta_SaidaNaoMuda()
     {
         using var malha = Subir();
-        malha.Nivel(20);
-        malha.Ticks(5);
+        malha.EstabilizarEm(20);
         Assert.Equal(VelLenta, malha.Plc.ComandoEscrito);
 
         // Sobe até DENTRO da banda (55..65): ainda não é motivo para chavear.
         foreach (int pct in new[] { 56, 60, 62, 64, 58, 61 })
         {
-            malha.Nivel(pct);
-            malha.Ticks(3);
+            malha.EstabilizarEm(pct);
             Assert.Equal(VelLenta, malha.Plc.ComandoEscrito);
         }
     }
@@ -239,21 +264,17 @@ public class LevelControlLoopTests
         using var malha = Subir();
 
         // Ida: só chaveia ao ultrapassar 65.
-        malha.Nivel(64);
-        malha.Ticks(3);
+        malha.EstabilizarEm(64);
         Assert.Equal(VelLenta, malha.Plc.ComandoEscrito);
-        malha.Nivel(70);
-        malha.Ticks(3);
+        malha.EstabilizarEm(70);
         Assert.Equal(VelRapida, malha.Plc.ComandoEscrito);
 
         // Volta: no MESMO 64 de antes a saída agora é a outra — a resposta
         // depende de onde o processo veio (é isso que a banda morta compra).
-        malha.Nivel(64);
-        malha.Ticks(3);
+        malha.EstabilizarEm(64);
         Assert.Equal(VelRapida, malha.Plc.ComandoEscrito);
 
-        malha.Nivel(50);
-        malha.Ticks(3);
+        malha.EstabilizarEm(50);
         Assert.Equal(VelLenta, malha.Plc.ComandoEscrito);
     }
 

@@ -88,7 +88,7 @@ A versão ingênua funciona por alguns segundos:
 IF nivel_pct >= SP_NIVEL THEN vel := RAPIDA; ELSE vel := LENTA; END_IF;
 ```
 
-Depois a esteira começa a chacoalhar entre 0,5 e 1,5 m/s várias vezes por
+Depois a esteira começa a chacoalhar entre 0,5 e 1,0 m/s várias vezes por
 segundo. Um sinal analógico real **nunca fica parado**: ruído elétrico, ondulação
 da superfície do material e a própria quantização do cartão fazem a leitura
 tremer em torno do setpoint. Comparação sem banda morta transforma esse tremor em
@@ -133,16 +133,39 @@ de escoar: a correia corria vazia por baixo enquanto o nível ficava travado em
 exatamente a patologia de silo real, e ela apareceu sozinha na física. Abrir a
 comporta para 50 cm resolveu.
 
-**2. Sensor pontual sobre material granular é ruidoso.** O `sensor.level` lança
-**um raio**. Quando esse raio cai numa fresta entre duas peças, ele atravessa
-até a correia e o nível lê **0** — mesmo com o vaso meio cheio. Nas capturas
-isso aparece como quedas bruscas a zero no meio de uma sequência saudável.
+**2. Sensor pontual sobre material granular é ruidoso — e isso derrubou a
+malha.** O `sensor.level` lança **um raio**. Quando esse raio cai numa fresta
+entre duas peças, ele atravessa até a correia e o nível lê **0** mesmo com o
+vaso meio cheio.
 
-Não é defeito de simulação: é o que um sensor pontual faz sobre material
-granular, e o motivo pelo qual instalação de verdade usa amortecimento, média
-móvel ou medição por área. A banda morta do programa filtra chaveamento por
-tremor de quantização, mas **não** filtra leitura espúria de fresta — são
-problemas diferentes, e vale saber qual é qual.
+Medido na bancada, o estrago foi este: **~30 trocas de velocidade em 60 s**,
+cada estado durando 0,1 a 0,5 s. A esteira chacoalhando, não controlando.
+
+```
+17,0s  nivel=95% -> RAPIDA
+17,2s  nivel=48% -> lenta      <- 0,2 s depois
+17,5s  nivel=92% -> RAPIDA
+17,7s  nivel=40% -> lenta
+```
+
+A banda morta **não** conserta isso. Ela filtra tremor de *quantização* em
+torno do setpoint; aqui o problema é *impulso* — a leitura despenca a zero e
+volta. São dois ruídos diferentes, e confundir os dois leva a aumentar a banda
+morta até o controle ficar surdo.
+
+O conserto certo mora no **instrumento**, não no programa: o parâmetro
+`damping` do sensor, que publica a **mediana** das últimas N leituras. Mediana
+e não média, de propósito — média espalharia o zero por toda a janela, mediana
+simplesmente o descarta enquanto ele for minoria. É o mesmo motivo pelo qual
+transmissor de nível de verdade tem amortecimento na folha de dados.
+
+Com `damping: 45` (0,75 s a 60 Hz) e a marcha rápida recalibrada para 1,0 m/s,
+a malha passou a fazer ciclos de **10 a 17 segundos**:
+
+```
+ 7,4s  nivel=77% -> RAPIDA 1,0 m/s
+21,8s  nivel=41% -> lenta 0,5 m/s     <- 14,4 s de drenagem
+```
 
 ## Validar
 

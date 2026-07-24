@@ -15,7 +15,7 @@ param(
   [switch]$Hex            # loga cada frame
 )
 
-$SP_NIVEL = 60; $BANDA = 5; $VEL_LENTA = 16384; $VEL_RAPIDA = 49151
+$SP_NIVEL = 60; $BANDA = 5; $VEL_LENTA = 16384; $VEL_RAPIDA = 32768
 
 $cli = New-Object System.Net.Sockets.TcpClient
 $cli.Connect($Alvo, $Porta)
