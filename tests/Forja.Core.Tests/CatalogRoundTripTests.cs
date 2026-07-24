@@ -50,6 +50,7 @@ public class CatalogRoundTripTests
         "sensor.level",
         "sensor.photo",
         "sensor.proximity",
+        "sensor.scale",
         "sink",
     };
 

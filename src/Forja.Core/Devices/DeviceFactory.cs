@@ -43,6 +43,7 @@ public sealed class DeviceFactory
         factory.Register("proximity-sensor", () => new ProximitySensor());
         factory.Register("height-sensor", () => new HeightSensor());
         factory.Register("level-sensor", () => new LevelSensor());
+        factory.Register("weigh-scale", () => new WeighScale());
         factory.Register("piston", () => new Piston());
         factory.Register("stopper", () => new Stopper());
         factory.Register("pick-place", () => new PickPlace());

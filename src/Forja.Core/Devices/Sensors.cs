@@ -139,3 +139,47 @@ public sealed class ProximitySensor : DeviceBehavior
 
     public override void WriteState(ref StateHasher hasher) => hasher.Add(_detected);
 }
+
+/// <summary>
+/// Balança (spec 003 / T038): soma a massa das peças apoiadas na plataforma e
+/// publica o total numa palavra de entrada. É o terceiro dispositivo analógico
+/// da Fase 2 e existe para provar que o canal de palavras é GENÉRICO — não foi
+/// feito sob medida para o sensor de nível (research R8).
+///
+/// O nome evita `Scale` de propósito: `AnalogScale` já é a faixa do cartão, e
+/// dois "Scale" no mesmo domínio confundem quem lê depois.
+/// </summary>
+public sealed class WeighScale : DeviceBehavior
+{
+    private float _weight;
+
+    /// <summary>Peso medido em kg (só leitura).</summary>
+    public float Weight => _weight;
+
+    public override void Tick(SimContext ctx)
+    {
+        float sizeX = GetFloat("sizeX", 0.6f);
+        float sizeZ = GetFloat("sizeZ", 0.6f);
+        float height = GetFloat("height", 0.3f);
+
+        var center = Instance.Transform.Pos + new Vec3(0f, height / 2f, 0f);
+        var ids = ctx.Physics.QueryBox(center, new Vec3(sizeX / 2f, height / 2f, sizeZ / 2f));
+
+        // Ordem canônica ANTES de somar (Artigo I.3). Soma de float não é
+        // associativa: (a+b)+c pode diferir de a+(b+c) no último bit. Somar na
+        // ordem que a física devolveu faria o hash depender da ordem de
+        // varredura do motor — determinismo quebrado sem nenhum sintoma
+        // visível. É por isso que a QueryBox dos testes devolve invertido.
+        float total = 0f;
+        foreach (uint id in ids.OrderBy(i => i))
+        {
+            if (ctx.Parts.TryGet(id, out var part))
+                total += part.Kind.Mass;
+        }
+
+        _weight = total;
+        ctx.Io.SetInputWord(Id, "weight", _weight);
+    }
+
+    public override void WriteState(ref StateHasher hasher) => hasher.AddQuantized(_weight);
+}
